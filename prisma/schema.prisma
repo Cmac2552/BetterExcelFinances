@@ -1,0 +1,60 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Section {
+  id     Int           @id @default(autoincrement())
+  month  DateTime
+  title  String
+  values SectionItem[]
+  userId Int
+  user   User          @relation(fields: [userId], references: [id])
+}
+
+model User {
+  id       Int       @id @default(autoincrement())
+  userName String
+  Section  Section[]
+}
+
+model SectionItem {
+  id        Int     @id @default(autoincrement())
+  label     String
+  value     Int
+  Section   Section @relation(fields: [sectionId], references: [id])
+  sectionId Int
+}
+
+model TableData {
+  id           Int      @id @default(autoincrement())
+  month        DateTime
+  sectionValue Int
+}
+
+// const sectionData = await prisma.section.create({
+//   data: {
+//     month: new Date('2024-12-01'), // Example month
+//     title: 'December Budget',      // Example title
+//     userId: 1,                     // Reference to the user ID
+//     values: {                       // Nested SectionItems
+//       create: [
+//         { label: 'Item 1', value: 100 },
+//         { label: 'Item 2', value: 200 },
+//         { label: 'Item 3', value: 300 },
+//       ],
+//     },
+//   },
+//   include: {
+//     values: true,  // Include SectionItems in the response
+//   },
+// });
+
+// console.log(sectionData);
