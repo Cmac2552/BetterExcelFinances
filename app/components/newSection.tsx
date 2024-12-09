@@ -4,19 +4,40 @@ import CurrencyInput from "react-currency-input-field";
 
 export default function AddButton() {
   const [isOpen, setIsOpen] = useState(false);
-  const [inputs, setInputs] = useState<number[]>([0]);
-  const handleInputChange = (index: number, event: number) => {
-    const currentInputs = [...inputs];
-
-    if (!isNaN(event)) {
-      currentInputs[index] = event;
-      setInputs(currentInputs);
+  const [moneyInputs, setMoneyInputs] = useState<number[]>([0]);
+  const [nameInputs, setNameInputs] = useState<string[]>([""]);
+  const handleInputChange = (index: number, event: string | undefined) => {
+    if (event) {
+      const currentMoneyInputs = [...moneyInputs];
+      currentMoneyInputs[index] = parseInt(event);
+      console.log(currentMoneyInputs);
+      setMoneyInputs(currentMoneyInputs);
     }
   };
+  const handleAddItem = () => {
+    setMoneyInputs([...moneyInputs, 0]);
+  };
 
-  const handleAddInput = (index: number) => {
-    if (!isNaN(inputs[index])) {
-      setInputs([...inputs, 0]);
+  const handleNameChange = (index: number, event: any) => {
+    const currentNameInputs = [...nameInputs];
+    currentNameInputs[index] = event.target.value;
+    setNameInputs(currentNameInputs);
+  };
+
+  const handleSubmit = async () => {
+    try {
+      const response = await fetch("/api/section", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          fieldNames: nameInputs,
+          fieldValues: moneyInputs,
+        }),
+      });
+    } catch (error) {
+      console.log("ERROR", error);
     }
   };
 
@@ -29,19 +50,34 @@ export default function AddButton() {
         +
       </button>
       <div hidden={!isOpen}>
-        <input placeholder="Title" />
-        {inputs.map((input, index) => (
-          <CurrencyInput
-            key={index}
-            placeholder="Please enter a number"
-            defaultValue={input}
-            decimalsLimit={2}
-            prefix="$"
-            onValueChange={(event) => handleInputChange(index, event)}
-            onBlur={() => handleAddInput(index)}
-            className="w-full px-4 py-2 bg-gray-800 text-white border border-gray-600 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 placeholder-gray-400 my-1"
-          />
+        <input
+          placeholder="Title"
+          className=" px-4 py-2 bg-gray-800 text-white border border-gray-600 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 w-[12rem]"
+        />
+        {moneyInputs.map((input, index) => (
+          <div className="flex" key={index + "div"}>
+            <input
+              key={index + "input"}
+              onBlur={(event) => handleNameChange(index, event)}
+              className=" px-4 py-2 bg-gray-800 text-white border border-gray-600 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 w-[12rem]"
+            />
+            <CurrencyInput
+              key={index}
+              placeholder="$0"
+              defaultValue={0}
+              decimalsLimit={2}
+              prefix="$"
+              onValueChange={(event) => handleInputChange(index, event)}
+              className="w-1/4 px-4 py-2 bg-gray-800 text-white border border-gray-600 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 placeholder-gray-400 my-1"
+            />
+          </div>
         ))}
+        <button className="h-11 bg-white m-4" onClick={handleAddItem}>
+          Add Additional Item
+        </button>
+        <button className="h-11 bg-white m-4" onClick={handleSubmit}>
+          Submit
+        </button>
       </div>
     </>
   );
