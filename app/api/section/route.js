@@ -5,15 +5,21 @@ const primsa = new PrismaClient();
 export async function POST(request) {
     
     try{
-        const {month, title, userId} = {month:new Date("October 2024"), title:"test1", userId:1};
+        //#TODO make this way nicer
+        //start with data and title
+        const data = await request.json();
+        const submissionData = {}
+        submissionData.month = new Date("October 2024");
+        submissionData.userId = 1;
+        submissionData.title = "test2"
+        submissionData.values = {create:[]}
+        data.fieldNames.forEach((name, index)=>{
+            submissionData.values.create.push({label:name, value:data.fieldValues[index]})
+        })
         const newSection = await primsa.section.create({
-            data:{
-                month, 
-                title, 
-                userId
-            }
+            data:submissionData
         });
-        console.log("done");
+
         return new Response(JSON.stringify(newSection), { status:200})
     }
     catch(error){
