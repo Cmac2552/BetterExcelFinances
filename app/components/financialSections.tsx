@@ -2,7 +2,6 @@ import Input from "./input";
 
 export default function FinancialSection() {
   async function handleData(data: number) {
-    "use server";
     console.log(data);
   }
   return (

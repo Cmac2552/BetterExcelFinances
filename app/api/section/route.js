@@ -6,12 +6,12 @@ export async function POST(request) {
     
     try{
         //#TODO make this way nicer
-        //start with data and title
+       //map the object together, gotta go to bed tn tho
         const data = await request.json();
         const submissionData = {}
-        submissionData.month = new Date("October 2024");
+        submissionData.month = data.month;
         submissionData.userId = 1;
-        submissionData.title = "test2"
+        submissionData.title = data.title;
         submissionData.values = {create:[]}
         data.fieldNames.forEach((name, index)=>{
             submissionData.values.create.push({label:name, value:data.fieldValues[index]})
