@@ -2,10 +2,15 @@
 import { useState } from "react";
 import CurrencyInput from "react-currency-input-field";
 
-export default function AddButton() {
+interface NewSectionProps {
+  data: Date;
+}
+
+export default function AddButton({ data }: NewSectionProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [moneyInputs, setMoneyInputs] = useState<number[]>([0]);
   const [nameInputs, setNameInputs] = useState<string[]>([""]);
+  const [title, setTitle] = useState("");
   const handleInputChange = (index: number, event: string | undefined) => {
     if (event) {
       const currentMoneyInputs = [...moneyInputs];
@@ -32,8 +37,10 @@ export default function AddButton() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
+          title: title,
           fieldNames: nameInputs,
           fieldValues: moneyInputs,
+          month: data,
         }),
       });
     } catch (error) {
@@ -53,6 +60,7 @@ export default function AddButton() {
         <input
           placeholder="Title"
           className=" px-4 py-2 bg-gray-800 text-white border border-gray-600 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 w-[12rem]"
+          onChange={(event) => setTitle(event.target.value)}
         />
         {moneyInputs.map((input, index) => (
           <div className="flex" key={index + "div"}>
