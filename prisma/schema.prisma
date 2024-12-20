@@ -38,23 +38,3 @@ model TableData {
   month        DateTime
   sectionValue Int
 }
-
-// const sectionData = await prisma.section.create({
-//   data: {
-//     month: new Date('2024-12-01'), // Example month
-//     title: 'December Budget',      // Example title
-//     userId: 1,                     // Reference to the user ID
-//     values: {                       // Nested SectionItems
-//       create: [
-//         { label: 'Item 1', value: 100 },
-//         { label: 'Item 2', value: 200 },
-//         { label: 'Item 3', value: 300 },
-//       ],
-//     },
-//   },
-//   include: {
-//     values: true,  // Include SectionItems in the response
-//   },
-// });
-
-// console.log(sectionData);
