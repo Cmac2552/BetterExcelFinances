@@ -1,22 +1,25 @@
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "../../lib/prisma";
 
-const primsa = new PrismaClient();
+
 
 export async function POST(request) {
     
     try{
         //#TODO make this way nicer
-       //map the object together, gotta go to bed tn tho
+    
         const data = await request.json();
-        const submissionData = {}
-        submissionData.month = data.month;
+
+        const submissionData = JSON.parse(JSON.stringify(data))
         submissionData.userId = 1;
-        submissionData.title = data.title;
+        
         submissionData.values = {create:[]}
-        data.fieldNames.forEach((name, index)=>{
+        submissionData.fieldNames.forEach((name, index)=>{
             submissionData.values.create.push({label:name, value:data.fieldValues[index]})
         })
-        const newSection = await primsa.section.create({
+        delete submissionData.fieldNames;
+        delete submissionData.fieldValues;
+        
+        const newSection = await prisma.section.create({
             data:submissionData
         });
 

@@ -5,7 +5,7 @@ import { Line } from "react-chartjs-2";
 export default function LineChart() {
   return (
     // make this a grid
-    <div className="flex flex-col justify-around">
+    <div>
       <Line
         data={{
           labels: ["Red", "Orange", "Blue"],

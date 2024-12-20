@@ -15,7 +15,6 @@ export default function AddButton({ data }: NewSectionProps) {
     if (event) {
       const currentMoneyInputs = [...moneyInputs];
       currentMoneyInputs[index] = parseInt(event);
-      console.log(currentMoneyInputs);
       setMoneyInputs(currentMoneyInputs);
     }
   };
@@ -23,7 +22,11 @@ export default function AddButton({ data }: NewSectionProps) {
     setMoneyInputs([...moneyInputs, 0]);
   };
 
-  const handleNameChange = (index: number, event: any) => {
+  const handleNameChange = (
+    index: number,
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    console.log(typeof event);
     const currentNameInputs = [...nameInputs];
     currentNameInputs[index] = event.target.value;
     setNameInputs(currentNameInputs);
@@ -43,6 +46,9 @@ export default function AddButton({ data }: NewSectionProps) {
           month: data,
         }),
       });
+      if (response.ok) {
+        setIsOpen(false);
+      }
     } catch (error) {
       console.log("ERROR", error);
     }
