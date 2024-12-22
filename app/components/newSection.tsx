@@ -26,7 +26,6 @@ export default function AddButton({ data }: NewSectionProps) {
     index: number,
     event: React.ChangeEvent<HTMLInputElement>
   ) => {
-    console.log(typeof event);
     const currentNameInputs = [...nameInputs];
     currentNameInputs[index] = event.target.value;
     setNameInputs(currentNameInputs);

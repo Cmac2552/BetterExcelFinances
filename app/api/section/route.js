@@ -3,10 +3,7 @@ import { prisma } from "../../lib/prisma";
 
 
 export async function POST(request) {
-    
-    try{
-        //#TODO make this way nicer
-    
+    try {
         const data = await request.json();
 
         const submissionData = JSON.parse(JSON.stringify(data))
@@ -23,10 +20,28 @@ export async function POST(request) {
             data:submissionData
         });
 
-        return new Response(JSON.stringify(newSection), { status:200})
+        return new Response(JSON.stringify(newSection), { status:200});
     }
     catch(error){
         console.log(error);
         return new Response(JSON.stringify({error:"Error creating section"}, {status:500}));
+    }
+}
+//This should be in a diff file
+export async function PATCH(request) {
+    try{
+        const data = await request.json();
+
+        const updatedSection = await prisma.sectionItem.update({
+            where: {id: data.id},
+            data:{
+                value: data.value
+            }
+        })
+
+        return new Response(JSON.stringify(updatedSection), { status:200});
+    } 
+    catch (error) {
+        return new Response(JSON.stringify({error:"Error patching section"}, {status:500}));
     }
 }
