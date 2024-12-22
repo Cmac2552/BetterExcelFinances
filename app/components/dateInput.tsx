@@ -16,7 +16,6 @@ export default function dateInput({ onMonthChange }: ChildComponentProps) {
   }, []);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    console.log(e.target.value);
     const value = e.target.value;
     setCurrentMonth(value);
     onMonthChange(value);

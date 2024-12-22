@@ -13,7 +13,6 @@ async function fetchData() {
 
 export default async function Home() {
   const data = await fetchData();
-  // console.log(data, 0);
   return (
     <main className=" min-h-screen">
       <div className="z-10 w-full h-[40rem]">

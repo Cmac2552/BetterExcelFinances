@@ -18,7 +18,7 @@ export default function FinancialInputs({ sections }: FinancialInputProps) {
         <DateInput onMonthChange={handleDataChange} />
         <NewSection data={date} />
       </div>
-      <div className="flex">
+      <div className="flex flex-wrap">
         {sections?.map((dataEntry: FinancialSectionData, index: number) => (
           <FinancialSection
             section={dataEntry}
