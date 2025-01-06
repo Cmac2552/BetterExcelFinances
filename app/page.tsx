@@ -1,22 +1,45 @@
+"use client";
+import { useEffect, useRef, useState } from "react";
 import FinancialInputs from "./components/financialInputs.tsx";
 import LineChart from "./components/Line.tsx";
+import { FinancialSectionData } from "./components/financialSections.jsx";
 
-async function fetchData() {
-  const res = await fetch("http://localhost:3000/api/sections", {
-    cache: "no-store", // Ensure fresh data on each request
-  });
-  if (!res.ok) {
-    throw new Error("Failed to fetch data");
-  }
-  return await res.json();
-}
+export default function Home() {
+  const [data, setData] = useState<FinancialSectionData[]>([]);
+  const [date, setDate] = useState(new Date());
+  const previousDateRef = useRef<Date>(null);
+  const handleDataChange = (data: string) => {
+    setDate(new Date(data));
+  };
 
-export default async function Home() {
-  const data = await fetchData();
+  useEffect(() => {
+    const fetchData = async () => {
+      if (date !== null && previousDateRef.current !== date) {
+        try {
+          const res = await fetch(`/api/sections?date=${date}`, {
+            cache: "no-store", // Ensure fresh data on each request
+          });
+          if (!res.ok) {
+            throw new Error("Failed to fetch data");
+          }
+          previousDateRef.current = date;
+          const result = await res.json();
+          setData(result);
+        } catch (err) {
+          console.log(err);
+        }
+      }
+    };
+    fetchData();
+  }, [date]);
   return (
-    <main className=" min-h-screen">
+    <main className="min-h-screen">
       <div className="z-10 w-full h-[40rem]">
-        <FinancialInputs sections={data} />
+        <FinancialInputs
+          sections={data}
+          onMonthChange={handleDataChange}
+          date={date}
+        />
         <LineChart />
       </div>
     </main>

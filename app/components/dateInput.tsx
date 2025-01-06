@@ -12,13 +12,13 @@ export default function dateInput({ onMonthChange }: ChildComponentProps) {
       now.getMonth() + 1
     ).padStart(2, "0")}`;
     setCurrentMonth(formattedMonth);
-    onMonthChange(formattedMonth);
+    onMonthChange(formattedMonth + "-15");
   }, []);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     setCurrentMonth(value);
-    onMonthChange(value);
+    onMonthChange(value + "-15");
   };
   return (
     <input
