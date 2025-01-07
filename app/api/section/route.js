@@ -20,7 +20,10 @@ export async function POST(request) {
         delete submissionData.fieldValues;
         
         const newSection = await prisma.section.create({
-            data:submissionData
+            data:submissionData, 
+            include: {
+                values: true,
+              },
         });
 
         return new Response(JSON.stringify(newSection), { status:200});
@@ -41,6 +44,7 @@ export async function PATCH(request) {
                 value: data.value
             }
         })
+        
 
         return new Response(JSON.stringify(updatedSection), { status:200});
     } 

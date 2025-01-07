@@ -1,13 +1,18 @@
 "use client";
-import { getSession, useSession } from "next-auth/react";
+import { useSession } from "next-auth/react";
 import { useState } from "react";
 import CurrencyInput from "react-currency-input-field";
+import { FinancialSectionData } from "./financialSections";
 
 interface NewSectionProps {
   data: Date;
+  onSectionAddition: (data: FinancialSectionData) => void;
 }
 
-export default function AddButton({ data }: NewSectionProps) {
+export default function AddButton({
+  data,
+  onSectionAddition,
+}: NewSectionProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [moneyInputs, setMoneyInputs] = useState<number[]>([0]);
   const [nameInputs, setNameInputs] = useState<string[]>([""]);
@@ -53,6 +58,15 @@ export default function AddButton({ data }: NewSectionProps) {
       });
       if (response.ok) {
         setIsOpen(false);
+        const responseBody = await response.json();
+        console.log(responseBody);
+        onSectionAddition({
+          id: responseBody.id,
+          month: data,
+          title: title,
+          values: responseBody.values,
+          userId: session.user.id,
+        });
       }
     } catch (error) {
       console.log("ERROR", error);

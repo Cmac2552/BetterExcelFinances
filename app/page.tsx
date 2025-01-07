@@ -12,6 +12,9 @@ export default function Home() {
   const handleDataChange = (data: string) => {
     setDate(new Date(data));
   };
+  const addSection = (newSection: any) => {
+    setData((data) => [...data, newSection]);
+  };
 
   useEffect(() => {
     const fetchData = async () => {
@@ -39,6 +42,7 @@ export default function Home() {
         <FinancialInputs
           sections={data}
           onMonthChange={handleDataChange}
+          onSectionAddition={addSection}
           date={date}
         />
         <LineChart />
