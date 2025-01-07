@@ -1,6 +1,9 @@
+import { getServerSession } from "next-auth";
 import { prisma } from "../../lib/prisma";
+import { authOptions } from "../auth/[...nextauth]/route";
 
 export async function GET(req){
+    const session = getServerSession(authOptions);
     const { searchParams }= new URL(req.url);
     const date= new Date(searchParams.get('date'));
     
@@ -12,7 +15,7 @@ export async function GET(req){
     console.log(lastDay);
     const sections = await prisma.section.findMany({
         where:{
-            userId:1,
+            userId:session.user.id,
             month:{
                 gte: new Date(firstDay),
                 lte: new Date(lastDay)
@@ -22,8 +25,6 @@ export async function GET(req){
             values: true, // Include the related SectionItem values
           },
     });
-
-    console.log(sections);
 
     return new Response(JSON.stringify(sections), { status:200});
 

@@ -5,7 +5,7 @@ export type FinancialSectionData = {
   month: Date;
   title: String;
   values: FinancialSectionItemData[];
-  userId: number;
+  userId: string;
 };
 
 type FinancialSectionItemData = {

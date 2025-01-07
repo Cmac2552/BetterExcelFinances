@@ -35,10 +35,10 @@ export default function AddButton({ data }: NewSectionProps) {
 
   const handleSubmit = async () => {
     try {
-      // if (!session) {
-      //   console.log("Not Logged In");
-      //   return;
-      // }
+      if (!session) {
+        console.log("Not Logged In");
+        return;
+      }
       const response = await fetch("/api/section", {
         method: "POST",
         headers: {
