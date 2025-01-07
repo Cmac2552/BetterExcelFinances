@@ -8,6 +8,8 @@ export async function GET(req){
 
     const lastDay = new Date(date.getFullYear(), date.getMonth() + 1, 0);
 
+    console.log(firstDay);
+    console.log(lastDay);
     const sections = await prisma.section.findMany({
         where:{
             userId:1,
@@ -20,6 +22,8 @@ export async function GET(req){
             values: true, // Include the related SectionItem values
           },
     });
+
+    console.log(sections);
 
     return new Response(JSON.stringify(sections), { status:200});
 
