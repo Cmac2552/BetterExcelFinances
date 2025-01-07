@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import CurrencyInput from "react-currency-input-field";
 
 export type FinancialSectionData = {
+  id: number;
   month: Date;
   title: String;
   values: FinancialSectionItemData[];
@@ -9,10 +10,10 @@ export type FinancialSectionData = {
 };
 
 type FinancialSectionItemData = {
-  id: number;
+  id?: number;
   label: string;
   value: number;
-  sectionId: number;
+  sectionId?: number;
 };
 
 interface FinancialSectionProps {
@@ -47,6 +48,8 @@ export default function FinancialSection({ section }: FinancialSectionProps) {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
+          parentId: section.id,
+          sectionLabel: value.label,
           id: value.id,
           value: newValue,
         }),
