@@ -3,6 +3,11 @@ import { useEffect, useRef, useState } from "react";
 import FinancialInputs from "./components/financialInputs.tsx";
 import LineChart from "./components/Line.tsx";
 import { FinancialSectionData } from "./components/financialSections.jsx";
+import { signIn, signOut } from "next-auth/react";
+
+// export default function Home() {
+//   <p className="text-white">Hi.</p>;
+// }
 
 export default function Home() {
   const [data, setData] = useState<FinancialSectionData[]>([]);
@@ -41,6 +46,12 @@ export default function Home() {
           date={date}
         />
         <LineChart />
+        {/* <button className="bg-white" onClick={() => signIn("google")}>
+          Log In
+        </button>
+        <button className="bg-white" onClick={() => signOut()}>
+          Log Out
+        </button> */}
       </div>
     </main>
   );

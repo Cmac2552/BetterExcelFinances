@@ -1,4 +1,5 @@
 "use client";
+import { getSession, useSession } from "next-auth/react";
 import { useState } from "react";
 import CurrencyInput from "react-currency-input-field";
 
@@ -11,6 +12,7 @@ export default function AddButton({ data }: NewSectionProps) {
   const [moneyInputs, setMoneyInputs] = useState<number[]>([0]);
   const [nameInputs, setNameInputs] = useState<string[]>([""]);
   const [title, setTitle] = useState("");
+  const { data: session } = useSession();
   const handleInputChange = (index: number, event: string | undefined) => {
     if (event) {
       const currentMoneyInputs = [...moneyInputs];
@@ -33,6 +35,10 @@ export default function AddButton({ data }: NewSectionProps) {
 
   const handleSubmit = async () => {
     try {
+      // if (!session) {
+      //   console.log("Not Logged In");
+      //   return;
+      // }
       const response = await fetch("/api/section", {
         method: "POST",
         headers: {
