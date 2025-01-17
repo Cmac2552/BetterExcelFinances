@@ -9,7 +9,7 @@ export type FinancialSectionData = {
   userId: string;
 };
 
-type FinancialSectionItemData = {
+export type FinancialSectionItemData = {
   id?: number;
   label: string;
   value: number;
