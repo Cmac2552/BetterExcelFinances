@@ -1,25 +1,46 @@
 "use client";
 import "chart.js/auto";
+import { useEffect, useState } from "react";
 import { Line } from "react-chartjs-2";
 
+type TableData = {
+  data: any[];
+  labels: string[];
+};
 export default function LineChart() {
+  const [tableData, setTableData] = useState({
+    data: [],
+    labels: [],
+  } as TableData);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const result = await fetch("/api/table-data", {
+          cache: "no-store",
+        });
+        if (!result.ok) {
+          throw new Error("Failed to fetch Table Data");
+        }
+        const tableData = await result.json();
+        setTableData(tableData);
+      } catch (err) {
+        console.log(err);
+      }
+    };
+    fetchData();
+  }, []);
   return (
-    // make this a grid
     <div>
+      {/* <button onClick={()=>}>Refresh Table</button> */}
       <Line
         data={{
-          labels: ["Red", "Orange", "Blue"],
-          // datasets is an array of objects where each object represents a set of data to display corresponding to the labels above. for brevity, we'll keep it at one object
+          labels: tableData.labels,
           datasets: [
             {
-              label: "Popularity of colours",
-              data: [55, 23, 96],
-              // you can set indiviual colors for each bar
-              backgroundColor: [
-                "rgba(255, 255, 255, 0.6)",
-                "rgba(255, 255, 255, 0.6)",
-                "rgba(255, 255, 255, 0.6)",
-              ],
+              label: "Net Worth",
+              data: tableData.data.map((data: any) => data.sectionValue),
+
               borderWidth: 1,
             },
           ],

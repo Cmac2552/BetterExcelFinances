@@ -5,6 +5,7 @@ import FinancialSection, {
   FinancialSectionData,
   FinancialSectionItemData,
 } from "./financialSections";
+import { useState } from "react";
 interface FinancialInputProps {
   sections: FinancialSectionData[];
   onMonthChange: (data: string) => void;
@@ -18,6 +19,7 @@ export default function FinancialInputs({
   onSectionAddition,
   date,
 }: FinancialInputProps) {
+  const [sectionsOpen, setSectionsOpen] = useState(false);
   const handleRefresh = async () => {
     const response = await fetch("/api/table-data", {
       method: "POST",
@@ -51,7 +53,13 @@ export default function FinancialInputs({
         <DateInput onMonthChange={onMonthChange} />
         <NewSection data={date} onSectionAddition={onSectionAddition} />
         <button className="text-white" onClick={handleRefresh}>
-          Refresh Table
+          Add To Table
+        </button>
+        <button
+          onClick={() => setSectionsOpen(!sectionsOpen)}
+          className="text-white"
+        >
+          Open Sections
         </button>
       </div>
       <div className="flex flex-wrap w-full">
@@ -59,6 +67,7 @@ export default function FinancialInputs({
           <FinancialSection
             section={dataEntry}
             key={index + "Financial Input"}
+            open={sectionsOpen}
           />
         ))}
       </div>
