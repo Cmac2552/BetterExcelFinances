@@ -40,7 +40,10 @@ export default function Home() {
     <main className="min-h-screen">
       <div className="z-10 w-full h-[40rem]">
         <FinancialInputs
-          sections={data}
+          sections={data.sort(
+            (section1, section2) =>
+              section1.values.length - section2.values.length
+          )}
           onMonthChange={handleDataChange}
           onSectionAddition={addSection}
           date={date}

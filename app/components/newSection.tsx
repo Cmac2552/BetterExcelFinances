@@ -59,7 +59,6 @@ export default function AddButton({
       if (response.ok) {
         setIsOpen(false);
         const responseBody = await response.json();
-        console.log(responseBody);
         onSectionAddition({
           id: responseBody.id,
           month: data,
@@ -67,6 +66,9 @@ export default function AddButton({
           values: responseBody.values,
           userId: session.user.id,
         });
+        setTitle("");
+        setNameInputs([""]);
+        setMoneyInputs([0]);
       }
     } catch (error) {
       console.log("ERROR", error);
@@ -84,6 +86,7 @@ export default function AddButton({
       <div hidden={!isOpen}>
         <input
           placeholder="Title"
+          value={title}
           className=" px-4 py-2 bg-gray-800 text-white border border-gray-600 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 w-[12rem]"
           onChange={(event) => setTitle(event.target.value)}
         />
@@ -91,13 +94,15 @@ export default function AddButton({
           <div className="flex" key={index + "div"}>
             <input
               key={index + "input"}
-              onBlur={(event) => handleNameChange(index, event)}
+              value={nameInputs[index]}
+              onChange={(event) => handleNameChange(index, event)}
               className=" px-4 py-2 bg-gray-800 text-white border border-gray-600 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 w-[12rem]"
             />
             <CurrencyInput
               key={index}
               placeholder="$0"
-              defaultValue={0}
+              value={moneyInputs[index]}
+              defaultValue={moneyInputs[index]}
               decimalsLimit={2}
               prefix="$"
               onValueChange={(event) => handleInputChange(index, event)}
