@@ -13,8 +13,8 @@ export async function GET(req){
         where:{
             userId:session.user.id,
             month:{
-                gte: new Date(firstDay),
-                lte: new Date(lastDay)
+                gte: firstDay,
+                lte: lastDay
             }
         },
         include: {
