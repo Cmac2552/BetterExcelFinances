@@ -76,9 +76,14 @@ export default function FinancialSection({
 
   return (
     <div className="my-4 w-1/3">
-      <h2 className="text-white text-2xl ">
-        {section.title} - ${sectionValue.toLocaleString()}
-      </h2>
+      <div className="w-full flex">
+        <span className="text-white text-2xl max-w-[85%] whitespace-nowrap overflow-hidden text-ellipsis">
+          {section.title}
+        </span>
+        <span className="text-white text-2xl">
+          - ${sectionValue.toLocaleString()}
+        </span>
+      </div>
       <div className="w-full grid grid-cols-1">
         <div className="flex flex-col justify-center w-full">
           {open &&

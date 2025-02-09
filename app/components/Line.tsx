@@ -1,17 +1,28 @@
 "use client";
-import "chart.js/auto";
 import { useEffect, useState } from "react";
-import { Line } from "react-chartjs-2";
+import { XAxis, YAxis, LineChart, Line, AreaChart, Area } from "recharts";
+import { type ChartConfig, ChartContainer } from "@/components/ui/chart";
 
 type TableData = {
-  data: any[];
-  labels: string[];
+  month: string;
+  value: number;
 };
-export default function LineChart() {
-  const [tableData, setTableData] = useState({
-    data: [],
-    labels: [],
-  } as TableData);
+const chartConfig = {
+  desktop: {
+    label: "Desktop",
+    color: "hsl(var(--chart-1))",
+  },
+} satisfies ChartConfig;
+const chartData = [
+  { month: "January", value: 0 },
+  { month: "February", value: -20 },
+  { month: "March", value: 237 },
+  { month: "April", value: 0 },
+  { month: "May", value: 0 },
+  { month: "June", value: 214 },
+];
+export default function Chart() {
+  const [tableData, setTableData] = useState([] as TableData[]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -30,22 +41,26 @@ export default function LineChart() {
     };
     fetchData();
   }, []);
-  return (
-    <div>
-      {/* <button onClick={()=>}>Refresh Table</button> */}
-      <Line
-        data={{
-          labels: tableData.labels,
-          datasets: [
-            {
-              label: "Net Worth",
-              data: tableData.data.map((data: any) => data.sectionValue),
 
-              borderWidth: 1,
-            },
-          ],
-        }}
-      />
-    </div>
+  return (
+    <ChartContainer
+      config={chartConfig}
+      className="min-h-[200px] max-h-[500px] w-full"
+    >
+      <AreaChart
+        data={tableData}
+        margin={{ left: 0, right: 65, bottom: 0 }}
+        className="w-full max-w-[400px] mx-auto"
+      >
+        <XAxis
+          dataKey="month"
+          tickLine={false}
+          axisLine={false}
+          interval={0}
+        ></XAxis>
+        <YAxis />
+        <Area dataKey="value" type="monotone" />
+      </AreaChart>
+    </ChartContainer>
   );
 }

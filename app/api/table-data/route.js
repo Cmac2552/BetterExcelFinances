@@ -2,7 +2,11 @@ import { prisma } from "../../lib/prisma";
 import { authOptions } from "../auth/[...nextauth]/route";
 import { getServerSession } from "next-auth";
 
-
+const monthNames = [
+   "January", "February", "March", "April", "May", "June", 
+   "July", "August", "September", "October", "November", "December"
+ ];
+ 
 export async function POST(request) {
  try {
     const data = await request.json();
@@ -29,12 +33,21 @@ export async function POST(request) {
 export async function GET() {
    try{
       const session = await getServerSession(authOptions);
+      const date = new Date();
+      const startDate = new Date(date.getFullYear(), date.getMonth()-11, 1);
+      const endDate = new Date(date.getFullYear(), date.getMonth());
       const tableData = await prisma.tableData.findMany({
          where:{
-            userId:session.user.id
+            userId:session.user.id,
+            date:{
+               gte: startDate,
+               lte: endDate
+            }
          }
       })
-      return new Response(JSON.stringify({data:tableData, labels:getNext12MonthsWithYears()}), {status:200});
+      
+      const formattedData = mapDatesAndDbDate(getNext12MonthsWithYears(startDate), tableData);
+      return new Response(JSON.stringify(formattedData), {status:200});
    }
    catch(error){
       console.log(error);
@@ -42,20 +55,33 @@ export async function GET() {
    }
 }
 
-function getNext12MonthsWithYears() {
-   const monthNames = [
-     "January", "February", "March", "April", "May", "June", 
-     "July", "August", "September", "October", "November", "December"
-   ];
+function mapDatesAndDbDate(dates, dbDate) {
+   const dbMap = new Map();
+   dbDate.forEach(({ date, sectionValue }) => {
+      const monthYear = `${monthNames[date.getMonth()]} ${date.getFullYear()}`;
+      dbMap.set(monthYear, sectionValue);
+   });
+
+const formattedData = dates.map((monthYear, index) => {
+  return {
+    month: monthYear,
+    value: dbMap.get(monthYear) || 0 
+  };
+});
+console.log(formattedData);
+return formattedData;
+}
+
+function getNext12MonthsWithYears(startDate = new Date()) {
+  
  
-   const currentDate = new Date();
-   const currentMonthIndex = currentDate.getMonth();
-   const currentYear = currentDate.getFullYear();
- 
+   const startMonthIndex = startDate.getMonth();
+   const startYear = startDate.getFullYear();
+   
    const next12Months = [];
    for (let i = 0; i < 12; i++) {
-     const monthIndex = (currentMonthIndex + i) % 12; // Wrap around to January after December
-     const year = currentYear + Math.floor((currentMonthIndex + i) / 12); // Increment year when needed
+     const monthIndex = (startMonthIndex + i) % 12;
+     const year = startYear + Math.floor((startMonthIndex + i) / 12);
      next12Months.push(`${monthNames[monthIndex]} ${year}`);
    }
  
