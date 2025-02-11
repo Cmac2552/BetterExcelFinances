@@ -3,7 +3,15 @@ import { useSession } from "next-auth/react";
 import { useState } from "react";
 import CurrencyInput from "react-currency-input-field";
 import { FinancialSectionData } from "./financialSections";
-
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 interface NewSectionProps {
   data: Date;
   onSectionAddition: (data: FinancialSectionData) => void;
@@ -38,6 +46,12 @@ export default function AddButton({
     setNameInputs(currentNameInputs);
   };
 
+  const handleDataClear = () => {
+    setTitle("");
+    setNameInputs([""]);
+    setMoneyInputs([0]);
+  };
+
   const handleSubmit = async () => {
     try {
       if (!session) {
@@ -66,9 +80,7 @@ export default function AddButton({
           values: responseBody.values,
           userId: session.user.id,
         });
-        setTitle("");
-        setNameInputs([""]);
-        setMoneyInputs([0]);
+        handleDataClear();
       }
     } catch (error) {
       console.log("ERROR", error);
@@ -76,47 +88,72 @@ export default function AddButton({
   };
 
   return (
-    <>
-      <button
-        className="w-11 h-11 bg-white m-4"
-        onClick={() => setIsOpen(!isOpen)}
-      >
-        +
-      </button>
-      <div hidden={!isOpen}>
-        <input
-          placeholder="Title"
-          value={title}
-          className=" px-4 py-2 bg-gray-800 text-white border border-gray-600 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 w-[12rem]"
-          onChange={(event) => setTitle(event.target.value)}
-        />
-        {moneyInputs.map((input, index) => (
-          <div className="flex" key={index + "div"}>
+    <Dialog onOpenChange={handleDataClear}>
+      <DialogTrigger asChild>
+        <button className="rounded-full w-10 h-10 inline-flex items-center justify-center text-sm font-medium bg-white text-black hover:bg-gray-200 m-4">
+          +
+        </button>
+      </DialogTrigger>
+      <DialogContent className="sm:max-w-md bg-gray-900 border border-gray-800">
+        <DialogHeader>
+          <DialogTitle className="text-white">Add Account</DialogTitle>
+        </DialogHeader>
+        <div className="flex items-center space-x-2">
+          <div className="grid flex-1 gap-2">
             <input
-              key={index + "input"}
-              value={nameInputs[index]}
-              onChange={(event) => handleNameChange(index, event)}
-              className=" px-4 py-2 bg-gray-800 text-white border border-gray-600 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 w-[12rem]"
+              placeholder="Title"
+              value={title}
+              className="flex h-10 w-full rounded-md border border-gray-700 bg-gray-800 px-3 py-2 text-sm text-white ring-offset-gray-900 file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-gray-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+              onChange={(event) => setTitle(event.target.value)}
             />
-            <CurrencyInput
-              key={index}
-              placeholder="$0"
-              value={moneyInputs[index]}
-              defaultValue={moneyInputs[index]}
-              decimalsLimit={2}
-              prefix="$"
-              onValueChange={(event) => handleInputChange(index, event)}
-              className="w-1/4 px-4 py-2 bg-gray-800 text-white border border-gray-600 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 placeholder-gray-400 my-1"
-            />
+            {moneyInputs.map((input, index) => (
+              <div className="flex gap-2" key={index + "div"}>
+                <input
+                  key={index + "input"}
+                  value={nameInputs[index]}
+                  onChange={(event) => handleNameChange(index, event)}
+                  className="flex h-10 w-full rounded-md border border-gray-700 bg-gray-800 px-3 py-2 text-sm text-white ring-offset-gray-900 file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-gray-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                />
+                <CurrencyInput
+                  key={index}
+                  placeholder="$0"
+                  value={moneyInputs[index]}
+                  defaultValue={moneyInputs[index]}
+                  decimalsLimit={2}
+                  prefix="$"
+                  onValueChange={(event) => handleInputChange(index, event)}
+                  className="flex h-10 rounded-md border border-gray-700 bg-gray-800 px-3 py-2 text-sm text-white ring-offset-gray-900 file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-gray-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 w-1/2"
+                />
+              </div>
+            ))}
+            <button
+              type="button"
+              onClick={handleAddItem}
+              className="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-gray-900 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-gray-700 bg-gray-800 text-white hover:bg-gray-700 h-10 px-4 py-2"
+            >
+              Add Additional Item
+            </button>
+            <DialogFooter className="sm:justify-end">
+              <DialogClose asChild>
+                <button
+                  className="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-gray-900 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-gray-700 bg-gray-800 text-white hover:bg-gray-700 h-10 px-4 py-2"
+                  onClick={handleDataClear}
+                >
+                  Cancel
+                </button>
+              </DialogClose>
+              <DialogClose asChild>
+                <button
+                  className="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-gray-900 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-white text-black hover:bg-gray-200 h-10 px-4 py-2 ml-2"
+                  onClick={handleSubmit}
+                >
+                  Submit
+                </button>
+              </DialogClose>
+            </DialogFooter>
           </div>
-        ))}
-        <button className="h-11 bg-white m-4" onClick={handleAddItem}>
-          Add Additional Item
-        </button>
-        <button className="h-11 bg-white m-4" onClick={handleSubmit}>
-          Submit
-        </button>
-      </div>
-    </>
+        </div>
+      </DialogContent>
+    </Dialog>
   );
 }

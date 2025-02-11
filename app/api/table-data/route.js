@@ -68,7 +68,6 @@ const formattedData = dates.map((monthYear, index) => {
     value: dbMap.get(monthYear) || 0 
   };
 });
-console.log(formattedData);
 return formattedData;
 }
 

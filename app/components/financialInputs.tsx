@@ -11,6 +11,7 @@ interface FinancialInputProps {
   onMonthChange: (data: string) => void;
   onSectionAddition: (data: FinancialSectionData) => void;
   date: Date;
+  loading: boolean;
 }
 
 export default function FinancialInputs({
@@ -18,6 +19,7 @@ export default function FinancialInputs({
   onMonthChange,
   onSectionAddition,
   date,
+  loading,
 }: FinancialInputProps) {
   const [sectionsOpen, setSectionsOpen] = useState(false);
   const handleRefresh = async () => {
@@ -53,7 +55,7 @@ export default function FinancialInputs({
         <DateInput onMonthChange={onMonthChange} />
         <NewSection data={date} onSectionAddition={onSectionAddition} />
         <button className="text-white" onClick={handleRefresh}>
-          Add To Table
+          Add To Chart
         </button>
         <button
           onClick={() => setSectionsOpen(!sectionsOpen)}
@@ -62,15 +64,21 @@ export default function FinancialInputs({
           Open Sections
         </button>
       </div>
-      <div className="flex flex-wrap w-full">
-        {sections?.map((dataEntry: FinancialSectionData, index: number) => (
-          <FinancialSection
-            section={dataEntry}
-            key={index + "Financial Input"}
-            open={sectionsOpen}
-          />
-        ))}
-      </div>
+      {loading ? (
+        <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-blue-500"></div>
+      ) : (
+        <div>
+          <div className="flex flex-wrap w-full">
+            {sections?.map((dataEntry: FinancialSectionData, index: number) => (
+              <FinancialSection
+                section={dataEntry}
+                key={index + "Financial Input"}
+                open={sectionsOpen}
+              />
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

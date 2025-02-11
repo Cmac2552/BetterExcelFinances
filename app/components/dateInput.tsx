@@ -7,12 +7,13 @@ export default function dateInput({ onMonthChange }: ChildComponentProps) {
   const [currentMonth, setCurrentMonth] = useState<string>("");
 
   useEffect(() => {
-    const now = new Date();
-    const formattedMonth = `${now.getFullYear()}-${String(
-      now.getMonth() + 1
-    ).padStart(2, "0")}`;
-    setCurrentMonth(formattedMonth);
-    onMonthChange(formattedMonth + "-15");
+    if (currentMonth === "") {
+      const now = new Date();
+      const formattedMonth = `${now.getFullYear()}-${String(
+        now.getMonth() + 1
+      ).padStart(2, "0")}`;
+      setCurrentMonth(formattedMonth);
+    }
   }, []);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
