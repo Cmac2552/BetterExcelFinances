@@ -23,9 +23,11 @@ const chartData = [
 ];
 export default function Chart() {
   const [tableData, setTableData] = useState([] as TableData[]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchData = async () => {
+      setLoading(true);
       try {
         const result = await fetch("/api/table-data", {
           cache: "no-store",
@@ -37,30 +39,35 @@ export default function Chart() {
         setTableData(tableData);
       } catch (err) {
         console.log(err);
+      } finally {
+        setLoading(false);
       }
     };
     fetchData();
   }, []);
 
   return (
-    <ChartContainer
-      config={chartConfig}
-      className="min-h-[200px] max-h-[500px] w-full"
-    >
-      <AreaChart
-        data={tableData}
-        margin={{ left: 0, right: 65, bottom: 0 }}
-        className="w-full max-w-[400px] mx-auto"
-      >
-        <XAxis
-          dataKey="month"
-          tickLine={false}
-          axisLine={false}
-          interval={0}
-        ></XAxis>
-        <YAxis />
-        <Area dataKey="value" type="monotone" />
-      </AreaChart>
-    </ChartContainer>
+    <div className="min-h-[500px] max-h-[500px] w-full">
+      {loading ? (
+        <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-blue-500"></div>
+      ) : (
+        <ChartContainer config={chartConfig} className="max-h-[500px] w-full">
+          <AreaChart
+            data={tableData}
+            margin={{ left: 0, right: 65, bottom: 0 }}
+            className="w-full max-w-[400px] mx-auto"
+          >
+            <XAxis
+              dataKey="month"
+              tickLine={false}
+              axisLine={false}
+              interval={0}
+            ></XAxis>
+            <YAxis />
+            <Area dataKey="value" type="monotone" />
+          </AreaChart>
+        </ChartContainer>
+      )}
+    </div>
   );
 }

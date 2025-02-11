@@ -8,30 +8,36 @@ import { signIn, signOut } from "next-auth/react";
 export default function Home() {
   const [data, setData] = useState<FinancialSectionData[]>([]);
   const [date, setDate] = useState(new Date());
+  const [loading, setLoading] = useState(true);
   const previousDateRef = useRef<Date>(null);
   const handleDataChange = (data: string) => {
-    setDate(new Date(data));
+    const newDate = new Date(data);
+    if (newDate.getTime() !== date.getTime()) {
+      setDate(newDate);
+      previousDateRef.current = date;
+    }
   };
   const addSection = (newSection: any) => {
     setData((data) => [...data, newSection]);
   };
 
   useEffect(() => {
+    if (!date || previousDateRef.current?.getTime() === date.getTime()) return;
     const fetchData = async () => {
-      if (date !== null && previousDateRef.current !== date) {
-        try {
-          const res = await fetch(`/api/sections?date=${date}`, {
-            cache: "no-store", // Ensure fresh data on each request
-          });
-          if (!res.ok) {
-            throw new Error("Failed to fetch data");
-          }
-          previousDateRef.current = date;
-          const result = await res.json();
-          setData(result);
-        } catch (err) {
-          console.log(err);
+      setLoading(true);
+      try {
+        const res = await fetch(`/api/sections?date=${date}`, {
+          cache: "no-store", // Ensure fresh data on each request
+        });
+        if (!res.ok) {
+          throw new Error("Failed to fetch data");
         }
+        const result = await res.json();
+        setData(result);
+      } catch (err) {
+        console.log(err);
+      } finally {
+        setLoading(false);
       }
     };
     fetchData();
@@ -39,6 +45,7 @@ export default function Home() {
   return (
     <main className="min-h-screen">
       <div className="z-10 w-full h-[40rem]">
+        <LineChart />
         <FinancialInputs
           sections={data.sort(
             (section1, section2) =>
@@ -47,8 +54,8 @@ export default function Home() {
           onMonthChange={handleDataChange}
           onSectionAddition={addSection}
           date={date}
+          loading={loading}
         />
-        <LineChart />
         <button className="bg-white" onClick={() => signIn("google")}>
           Log In
         </button>
