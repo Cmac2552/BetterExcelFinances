@@ -44,6 +44,9 @@ export default function Home() {
   }, [date]);
   return (
     <main className="min-h-screen">
+      <div className="w-full h-[4rem] bg-gray-950 mb-4 flex items-center">
+        <h1 className="text-3xl text-white ml-4">BetterExcel</h1>
+      </div>
       <div className="z-10 w-full h-[40rem]">
         <LineChart />
         <FinancialInputs

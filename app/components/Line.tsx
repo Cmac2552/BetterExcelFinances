@@ -13,14 +13,6 @@ const chartConfig = {
     color: "hsl(var(--chart-1))",
   },
 } satisfies ChartConfig;
-const chartData = [
-  { month: "January", value: 0 },
-  { month: "February", value: -20 },
-  { month: "March", value: 237 },
-  { month: "April", value: 0 },
-  { month: "May", value: 0 },
-  { month: "June", value: 214 },
-];
 export default function Chart() {
   const [tableData, setTableData] = useState([] as TableData[]);
   const [loading, setLoading] = useState(true);
