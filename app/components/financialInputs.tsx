@@ -51,17 +51,19 @@ export default function FinancialInputs({
   };
   return (
     <div className="flex flex-col justify-around ml-4">
-      <div className="grid-cols-2">
-        <DateInput onMonthChange={onMonthChange} />
-        <NewSection data={date} onSectionAddition={onSectionAddition} />
-        <button className="text-white" onClick={handleRefresh}>
+      <div className="flex items-center gap-x-4">
+        <div className="grid-cols-2">
+          <DateInput onMonthChange={onMonthChange} />
+          <NewSection data={date} onSectionAddition={onSectionAddition} />
+        </div>
+        <button className="text-white ml-auto" onClick={handleRefresh}>
           Add To Chart
         </button>
         <button
+          className="bg-white text-black px-6 py-2 rounded-lg font-medium border border-transparent hover:border-white/20 shadow-[0_0_15px_rgba(255,255,255,0.25)] hover:shadow-[0_0_20px_rgba(255,255,255,0.4)] transition-all duration-300 mr-4"
           onClick={() => setSectionsOpen(!sectionsOpen)}
-          className="text-white"
         >
-          Open Sections
+          Toggle All Sections
         </button>
       </div>
       {loading ? (
