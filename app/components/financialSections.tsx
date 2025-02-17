@@ -81,7 +81,7 @@ export default function FinancialSection({
           {section.title}
         </span>
         <span className="text-white text-2xl">
-          - ${sectionValue.toLocaleString()}
+          ${sectionValue.toLocaleString()}
         </span>
       </div>
       <div className="w-full grid grid-cols-1">
