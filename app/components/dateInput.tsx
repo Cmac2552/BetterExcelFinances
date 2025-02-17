@@ -21,6 +21,7 @@ export default function dateInput({ onMonthChange }: ChildComponentProps) {
     setCurrentMonth(value);
     onMonthChange(value + "-15");
   };
+
   return (
     <input
       type="month"

@@ -35,7 +35,8 @@ export async function GET() {
       const session = await getServerSession(authOptions);
       const date = new Date();
       const startDate = new Date(date.getFullYear(), date.getMonth()-11, 1);
-      const endDate = new Date(date.getFullYear(), date.getMonth());
+      const endDate = new Date(date.getFullYear(), date.getMonth()+1);
+      console.log(endDate);
       const tableData = await prisma.tableData.findMany({
          where:{
             userId:session.user.id,
@@ -45,7 +46,7 @@ export async function GET() {
             }
          }
       })
-      
+
       const formattedData = mapDatesAndDbDate(getNext12MonthsWithYears(startDate), tableData);
       return new Response(JSON.stringify(formattedData), {status:200});
    }
