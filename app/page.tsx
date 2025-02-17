@@ -20,6 +20,9 @@ export default function Home() {
   const addSection = (newSection: any) => {
     setData((data) => [...data, newSection]);
   };
+  const setSections = (sections: any[]) => {
+    setData(sections);
+  };
 
   useEffect(() => {
     if (!date || previousDateRef.current?.getTime() === date.getTime()) return;
@@ -58,6 +61,7 @@ export default function Home() {
           onSectionAddition={addSection}
           date={date}
           loading={loading}
+          setSections={setSections}
         />
         <button className="bg-white" onClick={() => signIn("google")}>
           Log In

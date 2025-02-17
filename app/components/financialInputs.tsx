@@ -12,6 +12,7 @@ interface FinancialInputProps {
   onSectionAddition: (data: FinancialSectionData) => void;
   date: Date;
   loading: boolean;
+  setSections: (data: any[]) => void;
 }
 
 export default function FinancialInputs({
@@ -20,6 +21,7 @@ export default function FinancialInputs({
   onSectionAddition,
   date,
   loading,
+  setSections,
 }: FinancialInputProps) {
   const [sectionsOpen, setSectionsOpen] = useState(false);
   const handleRefresh = async () => {
@@ -35,6 +37,18 @@ export default function FinancialInputs({
     });
     if (response.ok) {
       console.log("ok");
+    }
+  };
+
+  const importMonth = async () => {
+    const response = await fetch(`api/new-month?date=${date}`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    if (response.ok) {
+      setSections(await response.json());
     }
   };
   const gatherDataForMonth = () => {
@@ -57,7 +71,10 @@ export default function FinancialInputs({
           <NewSection data={date} onSectionAddition={onSectionAddition} />
         </div>
         <button className="text-white ml-auto" onClick={handleRefresh}>
-          Add To Chart
+          Add Month To Chart
+        </button>
+        <button className="text-white" onClick={importMonth}>
+          Import Data From Previous Month
         </button>
         <button
           className="bg-white text-black px-6 py-2 rounded-lg font-medium border border-transparent hover:border-white/20 shadow-[0_0_15px_rgba(255,255,255,0.25)] hover:shadow-[0_0_20px_rgba(255,255,255,0.4)] transition-all duration-300 mr-4"

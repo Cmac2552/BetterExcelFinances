@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
-import { XAxis, YAxis, LineChart, Line, AreaChart, Area } from "recharts";
+import { XAxis, YAxis, AreaChart, Area } from "recharts";
 import { type ChartConfig, ChartContainer } from "@/components/ui/chart";
 
 type TableData = {
