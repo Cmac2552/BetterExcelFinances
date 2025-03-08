@@ -6,9 +6,8 @@ export async function GET(req){
     const session = await getServerSession(authOptions);
     const { searchParams }= new URL(req.url);
     const date = new Date(searchParams.get('date'));
-    const lastMonthFirstDay = new Date(date.getFullYear(), date.getMonth() - 1, 1);
-    const lastMonthLastDay = new Date(date.getFullYear(), date.getMonth(), 0);
-
+    const lastMonthFirstDay = new Date(Date.UTC(date.getFullYear(), date.getMonth() - 1, 1));
+    const lastMonthLastDay = new Date(Date.UTC(date.getFullYear(), date.getMonth(), 0, 23, 59, 59, 999));
     
     const original = await prisma.section.findMany({
         where:{
@@ -42,8 +41,18 @@ export async function GET(req){
 const createSectionsWithItems = async (data) => {
     return await Promise.all(
       data.map(section => 
-        prisma.section.create({
-          data: {
+        prisma.section.upsert({
+          where: {title_month: {
+            title:section.title,
+            month:section.month
+          }},
+          update:{
+            ...section,
+            values: {
+              create: section.values
+            }
+          }, 
+          create:{
             ...section,
             values: {
               create: section.values

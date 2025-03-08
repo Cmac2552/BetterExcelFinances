@@ -13,12 +13,12 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 interface NewSectionProps {
-  data: Date;
+  date: Date;
   onSectionAddition: (data: FinancialSectionData) => void;
 }
 
 export default function AddButton({
-  data,
+  date,
   onSectionAddition,
 }: NewSectionProps) {
   const [isOpen, setIsOpen] = useState(false);
@@ -58,6 +58,7 @@ export default function AddButton({
         console.log("Not Logged In");
         return;
       }
+      const newDate = new Date(date.getUTCFullYear(), date.getUTCMonth());
       const response = await fetch("/api/section", {
         method: "POST",
         headers: {
@@ -67,7 +68,7 @@ export default function AddButton({
           title: title,
           fieldNames: nameInputs,
           fieldValues: moneyInputs,
-          month: data,
+          month: newDate,
         }),
       });
       if (response.ok) {
@@ -75,7 +76,7 @@ export default function AddButton({
         const responseBody = await response.json();
         onSectionAddition({
           id: responseBody.id,
-          month: data,
+          month: date,
           title: title,
           values: responseBody.values,
           userId: session.user.id,

@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 interface ChildComponentProps {
   onMonthChange: (data: string) => void;
 }
-export default function dateInput({ onMonthChange }: ChildComponentProps) {
+export default function DateInput({ onMonthChange }: ChildComponentProps) {
   const [currentMonth, setCurrentMonth] = useState<string>("");
 
   useEffect(() => {
@@ -18,8 +18,9 @@ export default function dateInput({ onMonthChange }: ChildComponentProps) {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
+    console.log(value);
     setCurrentMonth(value);
-    onMonthChange(value + "-15");
+    onMonthChange(value);
   };
 
   return (

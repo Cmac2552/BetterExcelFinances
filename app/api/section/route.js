@@ -16,7 +16,6 @@ export async function POST(request) {
         })
         delete submissionData.fieldNames;
         delete submissionData.fieldValues;
-        console.log(submissionData);
         const newSection = await prisma.section.create({
             data:submissionData, 
             include: {

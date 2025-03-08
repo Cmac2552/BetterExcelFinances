@@ -10,10 +10,19 @@ export default function Home() {
   const [date, setDate] = useState(new Date());
   const [loading, setLoading] = useState(true);
   const previousDateRef = useRef<Date>(null);
-  const handleDataChange = (data: string) => {
-    const newDate = new Date(data);
-    if (newDate.getTime() !== date.getTime()) {
-      setDate(newDate);
+  const handleDateChange = (dateString: string) => {
+    const newDate = new Date(dateString);
+    const newDateUTC = new Date(
+      newDate.getUTCFullYear(),
+      newDate.getUTCMonth(),
+      newDate.getUTCDate(),
+      newDate.getUTCHours(),
+      newDate.getUTCMinutes(),
+      newDate.getUTCSeconds()
+    );
+    console.log(date);
+    if (newDateUTC.getTime() !== date.getTime()) {
+      setDate(newDateUTC);
       previousDateRef.current = date;
     }
   };
@@ -57,7 +66,7 @@ export default function Home() {
             (section1, section2) =>
               section1.values.length - section2.values.length
           )}
-          onMonthChange={handleDataChange}
+          onMonthChange={handleDateChange}
           onSectionAddition={addSection}
           date={date}
           loading={loading}
