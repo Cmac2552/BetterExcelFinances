@@ -41,7 +41,7 @@ export default function FinancialInputs({
   };
 
   const importMonth = async () => {
-    const response = await fetch(`api/new-month?date=${date}`, {
+    const response = await fetch(`api/copy-month?date=${date}`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
@@ -50,6 +50,12 @@ export default function FinancialInputs({
     if (response.ok) {
       setSections(await response.json());
     }
+  };
+  const onSectionModify = (updatedSection: any) => {
+    const updatedSections = sections.map((section) => {
+      return section.id === updatedSection.id ? updatedSection : section;
+    });
+    setSections(updatedSections);
   };
   const gatherDataForMonth = () => {
     return sections.reduce(
@@ -68,7 +74,7 @@ export default function FinancialInputs({
       <div className="flex items-center gap-x-4">
         <div className="grid-cols-2">
           <DateInput onMonthChange={onMonthChange} />
-          <NewSection data={date} onSectionAddition={onSectionAddition} />
+          <NewSection date={date} onSectionAddition={onSectionAddition} />
         </div>
         <button className="text-white ml-auto" onClick={handleRefresh}>
           Add Month To Chart
@@ -93,6 +99,7 @@ export default function FinancialInputs({
                 section={dataEntry}
                 key={index + "Financial Input"}
                 open={sectionsOpen}
+                onSectionModify={onSectionModify}
               />
             ))}
           </div>

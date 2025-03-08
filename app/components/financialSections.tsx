@@ -19,11 +19,13 @@ export type FinancialSectionItemData = {
 interface FinancialSectionProps {
   section: FinancialSectionData;
   open: boolean;
+  onSectionModify: (data: any) => void;
 }
 
 export default function FinancialSection({
   section,
   open,
+  onSectionModify,
 }: FinancialSectionProps) {
   const [sectionData, setSectionData] = useState(section);
   useEffect(() => {
@@ -66,8 +68,7 @@ export default function FinancialSection({
             value.id === responseData.id ? responseData : value
           ),
         };
-
-        setSectionData(newSectionData);
+        onSectionModify(newSectionData);
       }
     } catch (error) {
       console.log("somethingbroke", error);

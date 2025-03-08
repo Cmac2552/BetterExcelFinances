@@ -11,8 +11,15 @@ export async function POST(request) {
  try {
     const data = await request.json();
     const session = await getServerSession(authOptions);
+
     const submissionData = JSON.parse(JSON.stringify(data));
+    
+    const sumbittedDate = new Date(submissionData.date)
+    const normalizedDate = new Date(sumbittedDate.getFullYear(), sumbittedDate.getMonth(), 15);
+
+    submissionData.date = normalizedDate;
     submissionData.userId = session.user.id;
+
     const newTableData = await prisma.tableData.upsert({
       where:{userId_date: { 
          userId: submissionData.userId,
@@ -34,9 +41,8 @@ export async function GET() {
    try{
       const session = await getServerSession(authOptions);
       const date = new Date();
-      const startDate = new Date(date.getFullYear(), date.getMonth()-11, 1);
-      const endDate = new Date(date.getFullYear(), date.getMonth()+1);
-      console.log(endDate);
+      const startDate = new Date(Date.UTC(date.getFullYear(), date.getMonth()-10, 1));
+      const endDate = new Date(Date.UTC(date.getFullYear(), date.getMonth()+1, 0, 23, 59, 59, 999));
       const tableData = await prisma.tableData.findMany({
          where:{
             userId:session.user.id,
@@ -74,10 +80,8 @@ return formattedData;
 
 function getNext12MonthsWithYears(startDate = new Date()) {
   
- 
    const startMonthIndex = startDate.getMonth();
-   const startYear = startDate.getFullYear();
-   
+   const startYear = startDate.getFullYear();   
    const next12Months = [];
    for (let i = 0; i < 12; i++) {
      const monthIndex = (startMonthIndex + i) % 12;
