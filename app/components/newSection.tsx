@@ -12,9 +12,15 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { Switch } from "@/components/ui/switch";
 interface NewSectionProps {
   date: Date;
   onSectionAddition: (data: FinancialSectionData) => void;
+}
+
+enum AssetClass {
+  ASSET = "ASSET",
+  DEBT = "DEBT",
 }
 
 export default function AddButton({
@@ -25,6 +31,7 @@ export default function AddButton({
   const [moneyInputs, setMoneyInputs] = useState<number[]>([0]);
   const [nameInputs, setNameInputs] = useState<string[]>([""]);
   const [title, setTitle] = useState("");
+  const [assetClass, setAssetClass] = useState<boolean>(false);
   const { data: session } = useSession();
   const handleInputChange = (index: number, event: string | undefined) => {
     if (event) {
@@ -69,6 +76,7 @@ export default function AddButton({
           fieldNames: nameInputs,
           fieldValues: moneyInputs,
           month: newDate,
+          assetClass: assetClass ? AssetClass.DEBT : AssetClass.ASSET,
         }),
       });
       if (response.ok) {
@@ -83,9 +91,16 @@ export default function AddButton({
         });
         handleDataClear();
       }
+      console.log(assetClass);
     } catch (error) {
       console.log("ERROR", error);
     }
+  };
+
+  const onCheckedChange = (checked: boolean) => {
+    console.log(checked);
+    setAssetClass(checked);
+    console.log("TEst");
   };
 
   return (
@@ -135,6 +150,9 @@ export default function AddButton({
               Add Additional Item
             </button>
             <DialogFooter className="sm:justify-end">
+              <span className="text-white">Asset</span>
+              <Switch onCheckedChange={(checked) => onCheckedChange(checked)} />
+              <span className="text-white">Debt</span>
               <DialogClose asChild>
                 <button
                   className="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-gray-900 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-gray-700 bg-gray-800 text-white hover:bg-gray-700 h-10 px-4 py-2"

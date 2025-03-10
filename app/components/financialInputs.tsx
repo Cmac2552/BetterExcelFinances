@@ -6,6 +6,7 @@ import FinancialSection, {
   FinancialSectionItemData,
 } from "./financialSections";
 import { useState } from "react";
+
 interface FinancialInputProps {
   sections: FinancialSectionData[];
   onMonthChange: (data: string) => void;
@@ -71,7 +72,9 @@ export default function FinancialInputs({
         finalValue +
         sectionData.values.reduce(
           (finalValue: number, currentValue: FinancialSectionItemData) =>
-            finalValue + currentValue.value,
+            sectionData.assetClass === "ASSET"
+              ? finalValue + currentValue.value
+              : -1 * (finalValue + currentValue.value),
           0
         ),
       0
