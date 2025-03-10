@@ -57,6 +57,14 @@ export default function FinancialInputs({
     });
     setSections(updatedSections);
   };
+
+  const onSectionDelete = (sectionId: number) => {
+    const updatedSections = sections.filter((section) => {
+      return section.id !== sectionId;
+    });
+    setSections(updatedSections);
+  };
+
   const gatherDataForMonth = () => {
     return sections.reduce(
       (finalValue: number, sectionData: FinancialSectionData) =>
@@ -100,6 +108,7 @@ export default function FinancialInputs({
                 key={index + "Financial Input"}
                 open={sectionsOpen}
                 onSectionModify={onSectionModify}
+                sectionDelete={onSectionDelete}
               />
             ))}
           </div>
