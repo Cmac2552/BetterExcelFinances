@@ -1,13 +1,7 @@
 import { useEffect, useState } from "react";
 import CurrencyInput from "react-currency-input-field";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { FaArrowTrendDown, FaArrowTrendUp } from "react-icons/fa6";
 
 export type FinancialSectionData = {
   id: number;
@@ -15,6 +9,7 @@ export type FinancialSectionData = {
   title: String;
   values: FinancialSectionItemData[];
   userId: string;
+  assetClass: string;
 };
 
 export type FinancialSectionItemData = {
@@ -96,7 +91,7 @@ export default function FinancialSection({
     <div className="my-4 w-1/3 h-full">
       <Card className="bg-black h-full w-[95%]">
         <CardHeader className="p-2">
-          <div className="w-full flex">
+          <div className="w-full flex items-center">
             <CardTitle>
               <span className="text-white text-2xl max-w-[85%] whitespace-nowrap overflow-hidden text-ellipsis">
                 {section.title}
@@ -105,6 +100,11 @@ export default function FinancialSection({
                 ${sectionValue.toLocaleString()}
               </span>
             </CardTitle>
+            {sectionData.assetClass === "DEBT" ? (
+              <FaArrowTrendDown className="text-red-500 text-2xl" />
+            ) : (
+              <FaArrowTrendUp className="text-green-500 text-2xl" />
+            )}
           </div>
         </CardHeader>
         {open && (
