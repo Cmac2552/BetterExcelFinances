@@ -12,7 +12,6 @@ interface FinancialInputProps {
   onMonthChange: (data: string) => void;
   onSectionAddition: (data: FinancialSectionData) => void;
   date: Date;
-  loading: boolean;
   setSections: (data: any[]) => void;
 }
 
@@ -21,7 +20,6 @@ export default function FinancialInputs({
   onMonthChange,
   onSectionAddition,
   date,
-  loading,
   setSections,
 }: FinancialInputProps) {
   const [sectionsOpen, setSectionsOpen] = useState(false);
@@ -85,7 +83,16 @@ export default function FinancialInputs({
       <div className="flex items-center gap-x-4">
         <div className="grid-cols-2">
           <DateInput onMonthChange={onMonthChange} />
-          <NewSection date={date} onSectionAddition={onSectionAddition} />
+          <NewSection
+            date={date}
+            onSectionAddition={onSectionAddition}
+            modalTitle="Add Account"
+            trigger={
+              <button className="rounded-full w-10 h-10 inline-flex items-center justify-center text-sm font-medium bg-white text-black hover:bg-gray-200 m-4">
+                +
+              </button>
+            }
+          />
         </div>
         <button className="text-white ml-auto" onClick={handleRefresh}>
           Add Month To Chart
@@ -100,23 +107,18 @@ export default function FinancialInputs({
           Toggle All Sections
         </button>
       </div>
-      {loading ? (
-        <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-blue-500"></div>
-      ) : (
-        <div>
-          <div className="flex flex-wrap w-full">
-            {sections?.map((dataEntry: FinancialSectionData, index: number) => (
-              <FinancialSection
-                section={dataEntry}
-                key={index + "Financial Input"}
-                open={sectionsOpen}
-                onSectionModify={onSectionModify}
-                sectionDelete={onSectionDelete}
-              />
-            ))}
-          </div>
-        </div>
-      )}
+      <div className="flex flex-wrap w-full">
+        {sections?.map((dataEntry: FinancialSectionData, index: number) => (
+          <FinancialSection
+            section={dataEntry}
+            key={index + "Financial Input"}
+            open={sectionsOpen}
+            onSectionModify={onSectionModify}
+            sectionDelete={onSectionDelete}
+            date={date}
+          />
+        ))}
+      </div>
     </div>
   );
 }

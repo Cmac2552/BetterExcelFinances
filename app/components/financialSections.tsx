@@ -2,11 +2,15 @@ import { useEffect, useState } from "react";
 import CurrencyInput from "react-currency-input-field";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { FaArrowTrendDown, FaArrowTrendUp } from "react-icons/fa6";
+import { GoXCircleFill } from "react-icons/go";
+import { TiPencil } from "react-icons/ti";
+import { FaMoneyBill1 } from "react-icons/fa6";
+import NewSection from "./newSection";
 
 export type FinancialSectionData = {
   id: number;
   month: Date;
-  title: String;
+  title: string;
   values: FinancialSectionItemData[];
   userId: string;
   assetClass: string;
@@ -24,6 +28,7 @@ interface FinancialSectionProps {
   open: boolean;
   onSectionModify: (data: any) => void;
   sectionDelete: (data: number) => void;
+  date: Date;
 }
 
 export default function FinancialSection({
@@ -31,6 +36,7 @@ export default function FinancialSection({
   open,
   onSectionModify,
   sectionDelete,
+  date,
 }: FinancialSectionProps) {
   const [sectionData, setSectionData] = useState(section);
   useEffect(() => {
@@ -88,23 +94,47 @@ export default function FinancialSection({
   };
 
   return (
-    <div className="my-4 w-1/3 h-full">
+    <div className="my-4 w-1/3 h-full group">
       <Card className="bg-black h-full w-[95%]">
         <CardHeader className="p-2">
-          <div className="w-full flex items-center">
+          <div className="flex items-center">
             <CardTitle>
-              <span className="text-white text-2xl max-w-[85%] whitespace-nowrap overflow-hidden text-ellipsis">
-                {section.title}
-              </span>
-              <span className="text-white text-2xl">
-                ${sectionValue.toLocaleString()}
-              </span>
+              <div className="flex gap-1 items-center">
+                {sectionData.assetClass === "DEBT" ? (
+                  <FaMoneyBill1 className="text-red-500 text-2xl" />
+                ) : (
+                  <FaMoneyBill1 className="text-green-500 text-2xl" />
+                )}
+                <span className="text-white text-2xl">{section.title}</span>
+                <span className="text-white text-2xl">
+                  ${sectionValue.toLocaleString()}
+                </span>
+              </div>
             </CardTitle>
-            {sectionData.assetClass === "DEBT" ? (
-              <FaArrowTrendDown className="text-red-500 text-2xl" />
-            ) : (
-              <FaArrowTrendUp className="text-green-500 text-2xl" />
-            )}
+            <div className="flex justify-end invisible mr-1 text-white w-full group-hover:visible">
+              <NewSection
+                date={date}
+                onSectionAddition={onSectionModify}
+                modalTitle="Add Account"
+                trigger={
+                  <button className="p-2 rounded-md border border-transparent hover:border-gray-400 hover:bg-gray-700 transition-all duration-300">
+                    <TiPencil />
+                  </button>
+                }
+                lineItemValues={sectionData.values.map((value) => value.value)}
+                lineItemNames={sectionData.values.map((value) => value.label)}
+                givenTitle={sectionData.title}
+                giventAsset={sectionData.assetClass}
+                givenId={sectionData.id}
+              />
+
+              <button
+                onClick={onSectionDelete}
+                className="p-2 rounded-md border border-transparent hover:border-gray-400 hover:bg-gray-700 transition-all duration-300"
+              >
+                <GoXCircleFill />
+              </button>
+            </div>
           </div>
         </CardHeader>
         {open && (
@@ -141,9 +171,6 @@ export default function FinancialSection({
                   )
                 )}
               </div>
-            </div>
-            <div className="flex justify-end text-white w-full">
-              <button onClick={onSectionDelete}>X</button>
             </div>
           </CardContent>
         )}

@@ -13,13 +13,16 @@ const chartConfig = {
     color: "hsl(var(--chart-1))",
   },
 } satisfies ChartConfig;
-export default function Chart() {
+
+interface LineInputProps {
+  lineLoading: (loading: boolean) => void;
+}
+export default function Chart({ lineLoading }: LineInputProps) {
   const [tableData, setTableData] = useState([] as TableData[]);
-  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchData = async () => {
-      setLoading(true);
+      lineLoading(true);
       try {
         const result = await fetch("/api/table-data", {
           cache: "no-store",
@@ -32,7 +35,7 @@ export default function Chart() {
       } catch (err) {
         console.log(err);
       } finally {
-        setLoading(false);
+        lineLoading(false);
       }
     };
     fetchData();
@@ -40,26 +43,22 @@ export default function Chart() {
 
   return (
     <div className="min-h-[500px] max-h-[500px] w-full">
-      {loading ? (
-        <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-blue-500"></div>
-      ) : (
-        <ChartContainer config={chartConfig} className="max-h-[500px] w-full">
-          <AreaChart
-            data={tableData}
-            margin={{ left: 0, right: 65, bottom: 0 }}
-            className="w-full max-w-[400px] mx-auto"
-          >
-            <XAxis
-              dataKey="month"
-              tickLine={false}
-              axisLine={false}
-              interval={0}
-            ></XAxis>
-            <YAxis />
-            <Area dataKey="value" type="monotone" />
-          </AreaChart>
-        </ChartContainer>
-      )}
+      <ChartContainer config={chartConfig} className="max-h-[500px] w-full">
+        <AreaChart
+          data={tableData}
+          margin={{ left: 0, right: 65, bottom: 0 }}
+          className="w-full max-w-[400px] mx-auto"
+        >
+          <XAxis
+            dataKey="month"
+            tickLine={false}
+            axisLine={false}
+            interval={0}
+          ></XAxis>
+          <YAxis />
+          <Area dataKey="value" type="monotone" />
+        </AreaChart>
+      </ChartContainer>
     </div>
   );
 }
