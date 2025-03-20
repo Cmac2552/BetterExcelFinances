@@ -9,6 +9,7 @@ export default function Home() {
   const [data, setData] = useState<FinancialSectionData[]>([]);
   const [date, setDate] = useState(new Date());
   const [loading, setLoading] = useState(true);
+  const [chartLoading, setChartLoading] = useState(true);
   const previousDateRef = useRef<Date>(null);
   const handleDateChange = (dateString: string) => {
     const newDate = new Date(dateString);
@@ -60,18 +61,24 @@ export default function Home() {
         <h1 className="text-3xl text-white ml-4">BetterExcel</h1>
       </div>
       <div className="z-10 w-full h-[40rem]">
-        <LineChart />
-        <FinancialInputs
-          sections={data.sort(
-            (section1, section2) =>
-              section1.values.length - section2.values.length
-          )}
-          onMonthChange={handleDateChange}
-          onSectionAddition={addSection}
-          date={date}
-          loading={loading}
-          setSections={setSections}
-        />
+        {loading && chartLoading ? (
+          <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-blue-500"></div>
+        ) : (
+          <div>
+            <LineChart lineLoading={setChartLoading} />
+            <FinancialInputs
+              sections={data.sort(
+                (section1, section2) =>
+                  section1.values.length - section2.values.length
+              )}
+              onMonthChange={handleDateChange}
+              onSectionAddition={addSection}
+              date={date}
+              setSections={setSections}
+            />
+          </div>
+        )}
+
         <button className="bg-white" onClick={() => signIn("google")}>
           Log In
         </button>
