@@ -30,7 +30,7 @@ enum AssetClass {
   DEBT = "DEBT",
 }
 
-export default function AddButton({
+export default function NewSection({
   date,
   modalTitle,
   trigger,
@@ -180,7 +180,10 @@ export default function AddButton({
             </button>
             <DialogFooter className="sm:justify-end">
               <span className="text-white">Asset</span>
-              <Switch onCheckedChange={(checked) => onCheckedChange(checked)} />
+              <Switch
+                checked={assetClass}
+                onCheckedChange={(checked) => onCheckedChange(checked)}
+              />
               <span className="text-white">Debt</span>
               <DialogClose asChild>
                 <button

@@ -97,9 +97,6 @@ export default function FinancialInputs({
         <button className="text-white ml-auto" onClick={handleRefresh}>
           Add Month To Chart
         </button>
-        <button className="text-white" onClick={importMonth}>
-          Import Data From Previous Month
-        </button>
         <button
           className="bg-white text-black px-6 py-2 rounded-lg font-medium border border-transparent hover:border-white/20 shadow-[0_0_15px_rgba(255,255,255,0.25)] hover:shadow-[0_0_20px_rgba(255,255,255,0.4)] transition-all duration-300 mr-4"
           onClick={() => setSectionsOpen(!sectionsOpen)}
@@ -108,6 +105,16 @@ export default function FinancialInputs({
         </button>
       </div>
       <div className="flex flex-wrap w-full">
+        {sections?.length === 0 && (
+          <div className="w-full flex justify-center">
+            <button
+              onClick={importMonth}
+              className="bg-white text-black px-6 py-2 rounded-lg font-medium border border-transparent hover:border-white/20 shadow-[0_0_15px_rgba(255,255,255,0.25)] hover:shadow-[0_0_20px_rgba(255,255,255,0.4)] transition-all duration-300 mr-4"
+            >
+              Import Data From Previous Month
+            </button>
+          </div>
+        )}
         {sections?.map((dataEntry: FinancialSectionData, index: number) => (
           <FinancialSection
             section={dataEntry}

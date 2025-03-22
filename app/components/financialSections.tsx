@@ -64,6 +64,12 @@ export default function FinancialSection({
         headers: {
           "Content-Type": "application/json",
         },
+        body: JSON.stringify({
+          parentid: section.id,
+          sectionLabel: value.label,
+          id: value.id,
+          value: newValue,
+        }),
       });
       if (response.ok) {
         const responseData = await response.json();
