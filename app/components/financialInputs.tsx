@@ -1,5 +1,5 @@
 "use client";
-import NewSection from "./newSection";
+import NewSection from "./SectionModal";
 import DateInput from "./dateInput";
 import FinancialSection, {
   FinancialSectionData,
@@ -22,7 +22,7 @@ export default function FinancialInputs({
   date,
   setSections,
 }: FinancialInputProps) {
-  const [sectionsOpen, setSectionsOpen] = useState(false);
+  const [allSectionsOpen, setAllSectionsOpen] = useState(false);
   const handleRefresh = async () => {
     const response = await fetch("/api/table-data", {
       method: "POST",
@@ -99,7 +99,7 @@ export default function FinancialInputs({
         </button>
         <button
           className="bg-white text-black px-6 py-2 rounded-lg font-medium border border-transparent hover:border-white/20 shadow-[0_0_15px_rgba(255,255,255,0.25)] hover:shadow-[0_0_20px_rgba(255,255,255,0.4)] transition-all duration-300 mr-4"
-          onClick={() => setSectionsOpen(!sectionsOpen)}
+          onClick={() => setAllSectionsOpen(!allSectionsOpen)}
         >
           Toggle All Sections
         </button>
@@ -119,7 +119,7 @@ export default function FinancialInputs({
           <FinancialSection
             section={dataEntry}
             key={index + "Financial Input"}
-            open={sectionsOpen}
+            open={allSectionsOpen}
             onSectionModify={onSectionModify}
             sectionDelete={onSectionDelete}
             date={date}

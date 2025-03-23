@@ -30,7 +30,7 @@ enum AssetClass {
   DEBT = "DEBT",
 }
 
-export default function NewSection({
+export default function SectionModal({
   date,
   modalTitle,
   trigger,

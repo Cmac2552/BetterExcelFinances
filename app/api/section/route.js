@@ -30,20 +30,3 @@ export async function POST(request) {
         return new Response(JSON.stringify({error:"Error creating section"}, {status:500}));
     }
 }
-//This should be in a diff file
-export async function PATCH(request) {
-    try{
-        const data = await request.json();
-        const updatedSection = await prisma.sectionItem.update({
-            where: {id: data.id},
-            data:{
-                value: data.value
-            }
-        })
-
-        return new Response(JSON.stringify(updatedSection), { status:200});
-    } 
-    catch (error) {
-        return new Response(JSON.stringify({error:"Error patching section"}, {status:500}));
-    }
-}
