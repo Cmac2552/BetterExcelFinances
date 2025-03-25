@@ -27,7 +27,7 @@ export default function DateInput({ onMonthChange }: ChildComponentProps) {
       type="month"
       id="month-picker"
       name="month-picker"
-      className=" px-4 py-2 bg-gray-800 text-white border border-gray-600 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 w-[12rem]"
+      className=" px-4 py-2 bg-[#1E2228] text-[#f4f0e1] border border-gray-600 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 w-[12rem]"
       value={selectedMonth}
       onChange={handleChange}
     />

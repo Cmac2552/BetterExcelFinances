@@ -2,7 +2,10 @@
 import { useEffect, useRef, useState } from "react";
 import FinancialInputs from "./components/financialInputs.tsx";
 import LineChart from "./components/Line.tsx";
-import { FinancialSectionData } from "./components/financialSections.jsx";
+import {
+  FinancialSectionData,
+  FinancialSectionItemData,
+} from "./components/financialSections.jsx";
 import { signIn, signOut } from "next-auth/react";
 import { useSession } from "next-auth/react";
 
@@ -33,6 +36,38 @@ export default function Home() {
   };
   const setSections = (sections: any[]) => {
     setData(sections);
+    setTableData(sections);
+  };
+
+  const setTableData = async (sections: any[]) => {
+    const response = await fetch("/api/table-data", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        date: date,
+        sectionValue: gatherDataForMonth(sections),
+      }),
+    });
+    if (response.ok) {
+      console.log("ok");
+    }
+  };
+
+  const gatherDataForMonth = (sections: any[]) => {
+    return sections.reduce(
+      (finalValue: number, sectionData: FinancialSectionData) =>
+        finalValue +
+        sectionData.values.reduce(
+          (finalValue: number, currentValue: FinancialSectionItemData) =>
+            sectionData.assetClass === "ASSET"
+              ? finalValue + currentValue.value
+              : -1 * (finalValue + currentValue.value),
+          0
+        ),
+      0
+    );
   };
 
   const sortSections = (sections: FinancialSectionData[]) => {
@@ -65,19 +100,19 @@ export default function Home() {
   }, [date]);
   return (
     <main className="min-h-screen">
-      <div className="w-full h-[4rem] bg-gray-950 mb-4 flex items-center justify-between px-4">
-        <h1 className="text-3xl text-white ml-4">BetterFinance</h1>
+      <div className="w-full h-[4rem] bg-[#141414] mb-4 flex items-center justify-between px-4 border-b-2 border-[#f4f0e1]">
+        <h1 className="text-3xl text-[#f4f0e1] ml-4">BetterExcelFinances</h1>
         <div className="flex gap-4">
           {!session ? (
             <button
-              className="bg-white px-4 py-2 rounded-md hover:bg-gray-200 transition-colors duration-200"
+              className="bg-[#f4f0e1] px-4 py-2 rounded-md hover:bg-gray-200 transition-colors duration-200"
               onClick={() => signIn("google")}
             >
               Log In
             </button>
           ) : (
             <button
-              className="bg-white px-4 py-2 rounded-md hover:bg-gray-200 transition-colors duration-200"
+              className="bg-[#f4f0e1] px-4 py-2 rounded-md hover:bg-gray-200 transition-colors duration-200"
               onClick={() => signOut()}
             >
               Log Out

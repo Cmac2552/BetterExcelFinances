@@ -139,16 +139,16 @@ export default function SectionModal({
   return (
     <Dialog onOpenChange={(open) => handleDataClear(open)}>
       <DialogTrigger asChild>{trigger}</DialogTrigger>
-      <DialogContent className="sm:max-w-md bg-gray-900 border border-gray-800">
+      <DialogContent className="sm:max-w-md bg-[#141414] border border-[#141414]">
         <DialogHeader>
-          <DialogTitle className="text-white">{modalTitle}</DialogTitle>
+          <DialogTitle className="text-[#f4f0e1]">{modalTitle}</DialogTitle>
         </DialogHeader>
         <div className="flex items-center space-x-2">
           <div className="grid flex-1 gap-3">
             <input
               placeholder="Title"
               value={title}
-              className="flex h-10 w-full rounded-md border border-gray-700 bg-gray-800 px-3 py-2 text-sm text-white ring-offset-gray-900 file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-gray-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-300 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+              className="flex h-10 w-full rounded-md border border-gray-700 bg-[#1E2228] px-3 py-2 text-sm text-[#f4f0e1] ring-offset-gray-900 file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-gray-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-300 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
               onChange={(event) => setTitle(event.target.value)}
             />
             {moneyInputs.map((input, index) => (
@@ -157,7 +157,7 @@ export default function SectionModal({
                   key={index + "input"}
                   value={nameInputs[index]}
                   onChange={(event) => handleNameChange(index, event)}
-                  className="flex h-10 w-full rounded-md border border-gray-700 bg-gray-800 px-3 py-2 text-sm text-white ring-offset-gray-900 file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-gray-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-300 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                  className="flex h-10 w-full rounded-md border border-gray-700 bg-[#1E2228] px-3 py-2 text-sm text-[#f4f0e1] ring-offset-gray-900 file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-gray-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-300 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                 />
                 <CurrencyInput
                   key={index}
@@ -167,27 +167,27 @@ export default function SectionModal({
                   decimalsLimit={2}
                   prefix="$"
                   onValueChange={(event) => handleInputChange(index, event)}
-                  className="flex h-10 rounded-md border border-gray-700 bg-gray-800 px-3 py-2 text-sm text-white ring-offset-gray-900 file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-gray-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 w-1/2"
+                  className="flex h-10 rounded-md border border-gray-700 bg-[#1E2228] px-3 py-2 text-sm text-[#f4f0e1] ring-offset-gray-900 file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-gray-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 w-1/2"
                 />
               </div>
             ))}
             <button
               type="button"
               onClick={handleAddItem}
-              className="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-gray-900 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-gray-700 bg-gray-800 text-white hover:bg-gray-700 h-10 px-4 py-2"
+              className="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-gray-900 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-gray-700 bg-[#1E2228] text-[#f4f0e1] hover:bg-gray-700 h-10 px-4 py-2"
             >
               Add Additional Item
             </button>
             <DialogFooter className="sm:justify-end">
-              <span className="text-white">Asset</span>
+              <span className="text-[#f4f0e1]">Asset</span>
               <Switch
                 checked={assetClass}
                 onCheckedChange={(checked) => onCheckedChange(checked)}
               />
-              <span className="text-white">Debt</span>
+              <span className="text-[#f4f0e1]">Debt</span>
               <DialogClose asChild>
                 <button
-                  className="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-gray-900 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-gray-700 bg-gray-800 text-white hover:bg-gray-700 h-10 px-4 py-2"
+                  className="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-gray-900 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-gray-700 bg-[#1E2228] text-[#f4f0e1] hover:bg-gray-700 h-10 px-4 py-2"
                   onClick={(event) => handleDataClear(false)}
                 >
                   Cancel
@@ -195,7 +195,7 @@ export default function SectionModal({
               </DialogClose>
               <DialogClose asChild>
                 <button
-                  className="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-gray-900 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-white text-black hover:bg-gray-200 h-10 px-4 py-2 ml-2"
+                  className="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-gray-900 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-[#f4f0e1] text-black hover:bg-gray-200 h-10 px-4 py-2 ml-2"
                   onClick={handleAdjust}
                 >
                   Submit
