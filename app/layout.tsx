@@ -12,7 +12,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={inter.className + " bg-gray-900 h-full"}>
+      <body className={inter.className + " bg-[#141414] h-full"}>
         <SessionProvider>{children}</SessionProvider>
       </body>
     </html>

@@ -88,17 +88,14 @@ export default function FinancialInputs({
             onSectionAddition={onSectionAddition}
             modalTitle="Add Account"
             trigger={
-              <button className="rounded-full w-10 h-10 inline-flex items-center justify-center text-sm font-medium bg-white text-black hover:bg-gray-200 m-4">
+              <button className="rounded-full w-10 h-10 inline-flex items-center justify-center text-sm font-medium bg-[#f4f0e1] text-black hover:bg-[#f4f0e1] m-4">
                 +
               </button>
             }
           />
         </div>
-        <button className="text-white ml-auto" onClick={handleRefresh}>
-          Add Month To Chart
-        </button>
         <button
-          className="bg-white text-black px-6 py-2 rounded-lg font-medium border border-transparent hover:border-white/20 shadow-[0_0_15px_rgba(255,255,255,0.25)] hover:shadow-[0_0_20px_rgba(255,255,255,0.4)] transition-all duration-300 mr-4"
+          className="bg-[#f4f0e1] text-black px-6 py-2 rounded-lg font-medium border border-transparent hover:border-white/20 shadow-[0_0_15px_rgba(255,255,255,0.25)] hover:shadow-[0_0_20px_rgba(255,255,255,0.4)] transition-all duration-300 mr-4"
           onClick={() => setAllSectionsOpen(!allSectionsOpen)}
         >
           Toggle All Sections
@@ -109,7 +106,7 @@ export default function FinancialInputs({
           <div className="w-full flex justify-center">
             <button
               onClick={importMonth}
-              className="bg-white text-black px-6 py-2 rounded-lg font-medium border border-transparent hover:border-white/20 shadow-[0_0_15px_rgba(255,255,255,0.25)] hover:shadow-[0_0_20px_rgba(255,255,255,0.4)] transition-all duration-300 mr-4"
+              className="bg-[#f4f0e1] text-black px-6 py-2 rounded-lg font-medium border border-transparent hover:border-white/20 shadow-[0_0_15px_rgba(255,255,255,0.25)] hover:shadow-[0_0_20px_rgba(255,255,255,0.4)] transition-all duration-300 mr-4"
             >
               Import Data From Previous Month
             </button>

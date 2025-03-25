@@ -56,7 +56,12 @@ export default function Chart({ lineLoading }: LineInputProps) {
             interval={0}
           ></XAxis>
           <YAxis />
-          <Area dataKey="value" type="monotone" />
+          <Area
+            dataKey="value"
+            type="monotone"
+            fill="#00A896"
+            stroke="#00A896"
+          />
         </AreaChart>
       </ChartContainer>
     </div>

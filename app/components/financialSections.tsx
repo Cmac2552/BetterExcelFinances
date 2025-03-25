@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
-import CurrencyInput from "react-currency-input-field";
+import { NumericFormat } from "react-number-format";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { FaArrowTrendDown, FaArrowTrendUp } from "react-icons/fa6";
 import { GoXCircleFill } from "react-icons/go";
 import { TiPencil } from "react-icons/ti";
 import { FaMoneyBill1 } from "react-icons/fa6";
@@ -49,12 +48,9 @@ export default function FinancialSection({
   );
 
   const handleItemValueChange = async (
-    e: React.ChangeEvent<HTMLInputElement>,
+    newValue: number,
     value: FinancialSectionItemData
   ) => {
-    const newValue = parseInt(
-      e.target.value.slice(1, e.target.value.length).replaceAll(",", "")
-    );
     if (newValue === value.value) {
       return;
     }
@@ -118,7 +114,7 @@ export default function FinancialSection({
   };
   return (
     <div className="my-4 w-1/3 h-full group">
-      <Card className="bg-black h-full w-[95%]">
+      <Card className="bg-[#141414] h-full w-[95%]">
         <CardHeader className="p-2">
           <div className="flex items-center justify-between">
             <CardTitle>
@@ -126,17 +122,17 @@ export default function FinancialSection({
                 {sectionData.assetClass === "DEBT" ? (
                   <FaMoneyBill1 className="text-red-500 text-2xl w-[2rem] h-[2rem]" />
                 ) : (
-                  <FaMoneyBill1 className="text-green-500 text-2xl w-[2rem] h-[2rem]" />
+                  <FaMoneyBill1 className="text-[#00A896] text-2xl w-[2rem] h-[2rem]" />
                 )}
-                <span className="text-white text-2xl overflow-hidden text-ellipsis whitespace-nowrap grow">
+                <span className="text-[#f4f0e1] text-2xl overflow-hidden text-ellipsis whitespace-nowrap grow">
                   {section.title}
                 </span>
-                <span className="text-white text-2xl whitespace-nowrap">
+                <span className="text-[#f4f0e1] text-2xl whitespace-nowrap">
                   ${sectionValue.toLocaleString()}
                 </span>
               </div>
             </CardTitle>
-            <div className="flex justify-end invisible mr-1 text-white w-full group-hover:visible">
+            <div className="flex justify-end invisible mr-1 text-[#f4f0e1] w-full group-hover:visible">
               <NewSection
                 date={date}
                 onSectionAddition={onSectionModify}
@@ -175,27 +171,34 @@ export default function FinancialSection({
                       <div></div>
                       <div className="flex items-center ">
                         <label
-                          className="text-white mr-2"
+                          className="text-[#f4f0e1] mr-2"
                           key={index + value.label}
                         >
                           {value.label}
                         </label>
                       </div>
-                      <CurrencyInput
+                      <NumericFormat
                         key={index + value.label + "currentyInput"}
                         id={value.label}
                         name={value.label}
-                        placeholder="Please enter a number"
-                        defaultValue={value.value}
-                        decimalsLimit={2}
+                        value={value.value}
+                        thousandSeparator={true}
                         prefix="$"
-                        className="w-[90%] px-4 py-2 bg-gray-800 text-white border border-gray-600 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 placeholder-gray-400 my-1 mx-[10%]"
-                        onBlur={(event) => handleItemValueChange(event, value)}
+                        fixedDecimalScale={true}
+                        allowNegative={false}
+                        placeholder="Please enter a number"
+                        onValueChange={(values) => {
+                          handleItemValueChange(
+                            Number(values.floatValue),
+                            value
+                          );
+                        }}
+                        className="w-[90%] px-4 py-2 bg-[#1E2228] text-[#f4f0e1] border border-gray-600 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 placeholder-gray-400 my-1 mx-[10%]"
                       />
 
                       <button
                         onClick={() => deleteSectionItem(value)}
-                        className=" text-white p-2 rounded-full border border-transparent hover:border-gray-400 hover:bg-gray-700 transition-all duration-300 ml-auto justify-self-center self-center"
+                        className=" text-[#f4f0e1] p-2 rounded-full border border-transparent hover:border-gray-400 hover:bg-gray-700 transition-all duration-300 ml-auto justify-self-center self-center"
                       >
                         <GoXCircleFill />
                       </button>
