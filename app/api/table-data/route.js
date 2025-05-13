@@ -72,14 +72,13 @@ function mapDatesAndDbDate(dates, dbDate) {
 const formattedData = dates.map((monthYear, index) => {
   return {
     month: monthYear,
-    value: dbMap.get(monthYear) || 0 
+    value: dbMap.get(monthYear) || 0
   };
 });
 return formattedData;
 }
 
 function getNext12MonthsWithYears(startDate = new Date()) {
-  
    const startMonthIndex = startDate.getMonth();
    const startYear = startDate.getFullYear();   
    const next12Months = [];
