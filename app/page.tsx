@@ -6,8 +6,7 @@ import {
   FinancialSectionData,
   FinancialSectionItemData,
 } from "./components/financialSections.jsx";
-import { signIn, signOut } from "next-auth/react";
-import { useSession } from "next-auth/react";
+import { signIn, signOut, useSession } from "next-auth/react";
 
 export default function Home() {
   const [data, setData] = useState<FinancialSectionData[]>([]);
@@ -33,9 +32,10 @@ export default function Home() {
   };
   const addSection = (newSection: any) => {
     setData((data) => [...data, newSection]);
+    setTableData([...data, newSection]);
   };
   const setSections = (sections: any[]) => {
-    setData(sections);
+    setData(sortSections(sections));
     setTableData(sections);
   };
 
@@ -112,7 +112,7 @@ export default function Home() {
             </button>
           ) : (
             <button
-              className="bg-[#f4f0e1] px-4 py-2 rounded-md hover:bg-gray-200 transition-colors duration-200"
+              className="bg-[#f4f0e1] px-4 py-2 rounded-md hover:border-white/20 shadow-[0_0_15px_rgba(255,255,255,0.25)] hover:shadow-[0_0_20px_rgba(255,255,255,0.4)] transition-all duration-300"
               onClick={() => signOut()}
             >
               Log Out

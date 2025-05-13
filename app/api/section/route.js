@@ -6,7 +6,7 @@ export async function POST(request) {
     try {
         const data = await request.json();
         const session = await getServerSession(authOptions);
-
+        
         const submissionData = JSON.parse(JSON.stringify(data))
         submissionData.userId = session.user.id;
         

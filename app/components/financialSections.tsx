@@ -113,32 +113,27 @@ export default function FinancialSection({
     }
   };
   return (
-    <div className="my-4 w-1/3 h-full group">
+    <div className="my-4 w-1/3 h-full">
       <Card className="bg-[#141414] h-full w-[95%]">
         <CardHeader className="p-2">
-          <div className="flex items-center justify-between">
-            <CardTitle>
-              <div className="flex gap-1 items-center w-[80%]">
-                {sectionData.assetClass === "DEBT" ? (
-                  <FaMoneyBill1 className="text-red-500 text-2xl w-[2rem] h-[2rem]" />
-                ) : (
-                  <FaMoneyBill1 className="text-[#00A896] text-2xl w-[2rem] h-[2rem]" />
-                )}
-                <span className="text-[#f4f0e1] text-2xl overflow-hidden text-ellipsis whitespace-nowrap grow">
-                  {section.title}
-                </span>
-                <span className="text-[#f4f0e1] text-2xl whitespace-nowrap">
-                  ${sectionValue.toLocaleString()}
-                </span>
-              </div>
-            </CardTitle>
-            <div className="flex justify-end invisible mr-1 text-[#f4f0e1] w-full group-hover:visible">
+          <div className="flex items-center justify-between group">
+            <div className="w-[55%] overflow-hidden flex">
+              {sectionData.assetClass === "DEBT" ? (
+                <FaMoneyBill1 className="text-[#7B0323] text-2xl w-[2rem] h-[2rem]" />
+              ) : (
+                <FaMoneyBill1 className="text-[#00A896] text-2xl w-[2rem] h-[2rem]" />
+              )}
+              <span className="text-[#f4f0e1] text-2xl overflow-hidden text-ellipsis whitespace-nowrap ml-2">
+                {section.title}
+              </span>
+            </div>
+            <div className="flex justify-end invisible mr-1 text-[#f4f0e1] ml-auto group-hover:visible">
               <NewSection
                 date={date}
                 onSectionAddition={onSectionModify}
                 modalTitle="Add Account"
                 trigger={
-                  <button className="p-2 rounded-md border border-transparent hover:border-gray-400 hover:bg-gray-700 transition-all duration-300">
+                  <button className="py-2 px-1 rounded-md border border-transparent hover:border-gray-400 hover:bg-gray-700 transition-all duration-300">
                     <TiPencil />
                   </button>
                 }
@@ -151,22 +146,27 @@ export default function FinancialSection({
 
               <button
                 onClick={onSectionDelete}
-                className="p-2 rounded-md border border-transparent hover:border-gray-400 hover:bg-gray-700 transition-all duration-300"
+                className="py-2 px-1 rounded-md border border-transparent hover:border-gray-400 hover:bg-gray-700 transition-all duration-300"
               >
                 <GoXCircleFill />
               </button>
+            </div>
+            <div className=" mr-1 text-[#f4f0e1] overflow-hidden text-ellipsis whitespace-nowrap">
+              <span className="text-[#f4f0e1] text-2xl whitespace-nowrap">
+                ${sectionValue.toLocaleString()}
+              </span>
             </div>
           </div>
         </CardHeader>
         {open && (
           <CardContent>
-            <div className="w-full grid grid-cols-1 group">
+            <div className="w-full grid grid-cols-1">
               <div className="flex flex-col justify-center w-full items-center">
                 {sectionData.values.map(
                   (value: FinancialSectionItemData, index: number) => (
                     <div
                       key={index}
-                      className="grid grid-cols-[4%_30%_55%_11%] w-full"
+                      className="grid grid-cols-[4%_30%_55%_11%] w-full group"
                     >
                       <div></div>
                       <div className="flex items-center ">
@@ -193,12 +193,12 @@ export default function FinancialSection({
                             value
                           );
                         }}
-                        className="w-[90%] px-4 py-2 bg-[#1E2228] text-[#f4f0e1] border border-gray-600 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 placeholder-gray-400 my-1 mx-[10%]"
+                        className="w-[90%] px-4 py-2 bg-[#1E2228] text-[#f4f0e1] border border-gray-600 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus-visible:ring-[#f4f0e1] placeholder-gray-400 my-1 mx-[10%]"
                       />
 
                       <button
                         onClick={() => deleteSectionItem(value)}
-                        className=" text-[#f4f0e1] p-2 rounded-full border border-transparent hover:border-gray-400 hover:bg-gray-700 transition-all duration-300 ml-auto justify-self-center self-center"
+                        className=" text-[#f4f0e1] p-2 rounded-md border border-transparent hover:border-gray-400 hover:bg-gray-700 transition-all duration-50 ml-auto justify-self-center self-center invisible group-hover:visible"
                       >
                         <GoXCircleFill />
                       </button>
