@@ -43,7 +43,6 @@ export async function PUT(request, props) {
     try {
         const { id } = params;
         const data = await request.json();
-        // const session = await getServerSession(authOptions);
         const session = await auth();
 
         const submissionData = JSON.parse(JSON.stringify(data));
