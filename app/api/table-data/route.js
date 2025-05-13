@@ -1,6 +1,5 @@
 import { prisma } from "../../lib/prisma";
-import { authOptions } from "../auth/[...nextauth]/route";
-import { getServerSession } from "next-auth";
+import { auth } from "@/auth"
 
 const monthNames = [
    "January", "February", "March", "April", "May", "June", 
@@ -10,7 +9,7 @@ const monthNames = [
 export async function POST(request) {
  try {
     const data = await request.json();
-    const session = await getServerSession(authOptions);
+    const session = await auth();
 
     const submissionData = JSON.parse(JSON.stringify(data));
     
@@ -39,7 +38,7 @@ export async function POST(request) {
 
 export async function GET() {
    try{
-      const session = await getServerSession(authOptions);
+      const session = await auth();
       const date = new Date();
       const startDate = new Date(Date.UTC(date.getFullYear(), date.getMonth()-10, 1));
       const endDate = new Date(Date.UTC(date.getFullYear(), date.getMonth()+1, 0, 23, 59, 59, 999));

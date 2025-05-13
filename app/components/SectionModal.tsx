@@ -13,6 +13,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Switch } from "@/components/ui/switch";
+import { NumericFormat } from "react-number-format";
 interface NewSectionProps {
   date: Date;
   modalTitle: string;
@@ -48,10 +49,10 @@ export default function SectionModal({
   const [title, setTitle] = useState("");
   const [assetClass, setAssetClass] = useState<boolean>(false);
   const { data: session } = useSession();
-  const handleInputChange = (index: number, event: string | undefined) => {
+  const handleInputChange = (index: number, event: number) => {
     if (event) {
       const currentMoneyInputs = [...moneyInputs];
-      currentMoneyInputs[index] = parseInt(event);
+      currentMoneyInputs[index] = event;
       setMoneyInputs(currentMoneyInputs);
     }
   };
@@ -159,15 +160,18 @@ export default function SectionModal({
                   onChange={(event) => handleNameChange(index, event)}
                   className="flex h-10 w-full rounded-md border border-gray-700 bg-[#1E2228] px-3 py-2 text-sm text-[#f4f0e1] ring-offset-gray-900 file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-gray-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#f4f0e1] focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                 />
-                <CurrencyInput
-                  key={index}
-                  placeholder="$0"
+                <NumericFormat
+                  key={index + "currentyInput"}
                   value={moneyInputs[index]}
-                  defaultValue={moneyInputs[index]}
-                  decimalsLimit={2}
+                  thousandSeparator={true}
                   prefix="$"
-                  onValueChange={(event) => handleInputChange(index, event)}
-                  className="flex h-10 rounded-md border border-gray-700 bg-[#1E2228] px-3 py-2 text-sm text-[#f4f0e1] ring-offset-gray-900 file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-gray-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#f4f0e1] focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 w-1/2"
+                  fixedDecimalScale={true}
+                  allowNegative={false}
+                  placeholder="Please enter a number"
+                  onValueChange={(values) => {
+                    handleInputChange(index, Number(values.floatValue));
+                  }}
+                  className="w-[90%] px-4 py-2 bg-[#1E2228] text-[#f4f0e1] border border-gray-600 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus-visible:ring-[#f4f0e1] placeholder-gray-400 my-1 mx-[10%]"
                 />
               </div>
             ))}
