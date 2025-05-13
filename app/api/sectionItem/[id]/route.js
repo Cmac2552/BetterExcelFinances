@@ -1,6 +1,7 @@
 import { prisma } from "../../../lib/prisma"; // Adjust path as needed
 
-export async function DELETE(request, { params }) {
+export async function DELETE(request, props) {
+  const params = await props.params;
   try {
     const { id } = params; 
     const sectionItem = await prisma.sectionItem.findUnique({
@@ -26,7 +27,8 @@ export async function DELETE(request, { params }) {
   }
 }
 
-export async function PATCH(request, { params }) {
+export async function PATCH(request, props) {
+  const params = await props.params;
   try{
       const { id } = params; 
       const data = await request.json();

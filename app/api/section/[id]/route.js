@@ -1,8 +1,8 @@
 import { prisma } from "../../../lib/prisma";
-import { authOptions } from "../../auth/[...nextauth]/route";
-import { getServerSession } from "next-auth";
+import { auth } from "@/auth"
 
-export async function DELETE(request, {params}) {
+export async function DELETE(request, props) {
+    const params = await props.params;
     try {
         const { id } = params;
         await prisma.section.delete({
@@ -38,11 +38,13 @@ async function updateSectionItems(fieldNames, fieldValues, existingSectionItems,
 }
 
 
-export async function PUT(request, { params }) {
+export async function PUT(request, props) {
+    const params = await props.params;
     try {
         const { id } = params;
         const data = await request.json();
-        const session = await getServerSession(authOptions);
+        // const session = await getServerSession(authOptions);
+        const session = await auth();
 
         const submissionData = JSON.parse(JSON.stringify(data));
         submissionData.userId = session.user.id;

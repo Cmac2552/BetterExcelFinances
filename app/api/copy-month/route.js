@@ -1,9 +1,8 @@
-import { getServerSession } from "next-auth";
 import { prisma } from "../../lib/prisma";
-import { authOptions } from "../auth/[...nextauth]/route";
+import { auth } from "@/auth"
 
 export async function GET(req){
-    const session = await getServerSession(authOptions);
+    const session = await auth();
     const { searchParams }= new URL(req.url);
     const date = new Date(searchParams.get('date'));
     const lastMonthFirstDay = new Date(Date.UTC(date.getFullYear(), date.getMonth() - 1, 1));
