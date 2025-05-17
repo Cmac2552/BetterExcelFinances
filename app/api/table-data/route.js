@@ -11,11 +11,10 @@ export async function POST(request) {
     const data = await request.json();
     const session = await auth();
 
-    const submissionData = JSON.parse(JSON.stringify(data));
+    const submissionData = { ...data };
     
-    const sumbittedDate = new Date(submissionData.date)
-    const normalizedDate = new Date(sumbittedDate.getFullYear(), sumbittedDate.getMonth(), 15);
-
+    const submittedDate = new Date(submissionData.date)
+    const normalizedDate = new Date(Date.UTC(submittedDate.getUTCFullYear(), submittedDate.getUTCMonth(), 15, 0, 0, 0, 0));
     submissionData.date = normalizedDate;
     submissionData.userId = session.user.id;
 
@@ -39,9 +38,9 @@ export async function POST(request) {
 export async function GET() {
    try{
       const session = await auth();
-      const date = new Date();
-      const startDate = new Date(Date.UTC(date.getFullYear(), date.getMonth()-10, 1));
-      const endDate = new Date(Date.UTC(date.getFullYear(), date.getMonth()+1, 0, 23, 59, 59, 999));
+      const now = new Date();
+      const startDate = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() - 10, 1, 0, 0, 0, 0));
+      const endDate = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth()+1, 0, 23, 59, 59, 999));
       const tableData = await prisma.tableData.findMany({
          where:{
             userId:session.user.id,
@@ -51,7 +50,6 @@ export async function GET() {
             }
          }
       })
-
       const formattedData = mapDatesAndDbDate(getNext12MonthsWithYears(startDate), tableData);
       return new Response(JSON.stringify(formattedData), {status:200});
    }
@@ -64,11 +62,11 @@ export async function GET() {
 function mapDatesAndDbDate(dates, dbDate) {
    const dbMap = new Map();
    dbDate.forEach(({ date, sectionValue }) => {
-      const monthYear = `${monthNames[date.getMonth()]} ${date.getFullYear()}`;
+      const monthYear = `${monthNames[date.getUTCMonth()]} ${date.getUTCFullYear()}`;
       dbMap.set(monthYear, sectionValue);
    });
 
-const formattedData = dates.map((monthYear, index) => {
+const formattedData = dates.map((monthYear) => {
   return {
     month: monthYear,
     value: dbMap.get(monthYear) || 0
@@ -78,14 +76,13 @@ return formattedData;
 }
 
 function getNext12MonthsWithYears(startDate = new Date()) {
-   const startMonthIndex = startDate.getMonth();
-   const startYear = startDate.getFullYear();   
+   const startMonthIndex = startDate.getUTCMonth() - 1;
+   const startYear = startDate.getUTCFullYear();  
    const next12Months = [];
    for (let i = 0; i < 12; i++) {
      const monthIndex = (startMonthIndex + i) % 12;
      const year = startYear + Math.floor((startMonthIndex + i) / 12);
      next12Months.push(`${monthNames[monthIndex]} ${year}`);
    }
- 
    return next12Months;
  }
