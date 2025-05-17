@@ -146,7 +146,7 @@ export default function SectionModal({
         <div className="flex items-center space-x-2">
           <div className="grid flex-1 gap-3">
             <input
-              placeholder="Title"
+              placeholder="Account Name"
               value={title}
               className="flex h-10 w-full rounded-md border border-gray-700 bg-[#1E2228] px-3 py-2 text-sm text-[#f4f0e1] ring-offset-gray-900 file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-gray-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#f4f0e1] focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
               onChange={(event) => setTitle(event.target.value)}
@@ -156,6 +156,7 @@ export default function SectionModal({
                 <input
                   key={index + "input"}
                   value={nameInputs[index]}
+                  placeholder="(e.g. Travel, Emergency Fund)"
                   onChange={(event) => handleNameChange(index, event)}
                   className="flex h-10 w-full rounded-md border border-gray-700 bg-[#1E2228] px-3 py-2 text-sm text-[#f4f0e1] ring-offset-gray-900 file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-gray-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#f4f0e1] focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                 />
@@ -170,7 +171,7 @@ export default function SectionModal({
                   onValueChange={(values) => {
                     handleInputChange(index, Number(values.floatValue));
                   }}
-                  className="w-[90%] px-4 py-2 bg-[#1E2228] text-[#f4f0e1] border border-gray-600 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus-visible:ring-[#f4f0e1] placeholder-gray-400 my-1 mx-[10%]"
+                  className="flex h-10 rounded-md border border-gray-700 bg-[#1E2228] px-3 py-2 text-sm text-[#f4f0e1] ring-offset-gray-900 file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-gray-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#f4f0e1] focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 w-1/2"
                 />
               </div>
             ))}
