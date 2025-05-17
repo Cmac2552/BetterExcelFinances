@@ -7,6 +7,8 @@ import {
   FinancialSectionItemData,
 } from "./financialSections.jsx";
 import { signOut } from "next-auth/react";
+import { Tailspin } from "ldrs/react";
+import "ldrs/react/Tailspin.css";
 
 export default function Dashboard() {
   const [data, setData] = useState<FinancialSectionData[]>([]);
@@ -139,18 +141,22 @@ export default function Dashboard() {
       <div className="z-10 w-full h-[40rem]">
         {loading && chartLoading ? (
           <div className="flex justify-center items-center h-full">
-            <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-blue-500"></div>
+            <Tailspin size="75" stroke="5" speed="0.9" color="#f4f0e1" />
           </div>
         ) : (
-          <div>
-            <LineChart lineLoading={setChartLoading} />
-            <FinancialInputs
-              sections={data}
-              onMonthChange={handleMonthChange}
-              onSectionAddition={addSection}
-              date={date}
-              setSections={setSections}
-            />
+          <div className="w-full flex items-center justify-center flex-col">
+            <div className="w-full h-full">
+              <LineChart lineLoading={setChartLoading} />
+            </div>
+            <div className="w-full">
+              <FinancialInputs
+                sections={data}
+                onMonthChange={handleMonthChange}
+                onSectionAddition={addSection}
+                date={date}
+                setSections={setSections}
+              />
+            </div>
           </div>
         )}
       </div>
