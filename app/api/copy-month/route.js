@@ -5,8 +5,8 @@ export async function GET(req){
     const session = await auth();
     const { searchParams }= new URL(req.url);
     const date = new Date(searchParams.get('date'));
-    const lastMonthFirstDay = new Date(Date.UTC(date.getFullYear(), date.getMonth() - 1, 1));
-    const lastMonthLastDay = new Date(Date.UTC(date.getFullYear(), date.getMonth(), 0, 23, 59, 59, 999));
+    const lastMonthFirstDay = new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth() - 1, 1));
+    const lastMonthLastDay = new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), 0, 23, 59, 59, 999));
     
     const original = await prisma.section.findMany({
         where:{
