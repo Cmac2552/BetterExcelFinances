@@ -10,7 +10,7 @@ import {
 } from "recharts";
 import { type ChartConfig, ChartContainer } from "@/components/ui/chart";
 
-type TableData = {
+export type TableData = {
   month: string;
   value: number;
 };

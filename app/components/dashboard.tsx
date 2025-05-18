@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
 import FinancialInputs from "./financialInputs";
-import LineChart from "./Line";
+import LineChart, { TableData } from "./Line";
 import {
   FinancialSectionData,
   FinancialSectionItemData,
@@ -21,7 +21,7 @@ export default function Dashboard() {
     return new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), 1));
   });
   const [loading, setLoading] = useState(true);
-  const [tableData, setTableData] = useState<any[]>([]);
+  const [tableData, setTableData] = useState<TableData[]>([]);
   const [allSectionsOpen, setAllSectionsOpen] = useState(false);
   const previousDateRef = useRef<Date>(null);
 
@@ -148,15 +148,15 @@ export default function Dashboard() {
         if (!res.ok) {
           throw new Error("Failed to fetch data");
         }
-        const result = await res.json();
-        setData(sortSections(result as FinancialSectionData[]));
-        const result2 = await fetch("/api/table-data", {
+        const sectionDataResult = await res.json();
+        setData(sortSections(sectionDataResult as FinancialSectionData[]));
+        const tableDataResult = await fetch("/api/table-data", {
           cache: "no-store",
         });
-        if (!result2.ok) {
+        if (!tableDataResult.ok) {
           throw new Error("Failed to fetch Table Data");
         }
-        const tableData = await result2.json();
+        const tableData = await tableDataResult.json();
         if (tableData.error) {
           throw new Error(tableData.error);
         }
