@@ -185,7 +185,7 @@ export default function Dashboard() {
       </div>
       <div className="z-10 w-full h-[40rem]">
         <div className="w-full flex items-center justify-center flex-col">
-          <div className="w-full h-full">
+          <div className="w-full h-[450px]">
             <LineChart tableData={tableData} />
           </div>
           <div className="flex items-center gap-x-4 w-full pl-4 pr-2">

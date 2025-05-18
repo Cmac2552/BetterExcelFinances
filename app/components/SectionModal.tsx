@@ -73,6 +73,7 @@ export default function SectionModal({
       setTitle("");
       setNameInputs([""]);
       setMoneyInputs([0]);
+      setAssetClass(false);
     }
   };
 
