@@ -10,7 +10,7 @@ import {
 } from "recharts";
 import { type ChartConfig, ChartContainer } from "@/components/ui/chart";
 
-type TableData = {
+export type TableData = {
   month: string;
   value: number;
 };
@@ -22,49 +22,12 @@ const chartConfig = {
 } satisfies ChartConfig;
 
 interface LineInputProps {
-  lineLoading: (loading: boolean) => void;
+  tableData: TableData[];
 }
 
-export default function Chart({ lineLoading }: LineInputProps) {
-  const [tableData, setTableData] = useState([] as TableData[]);
-
-  const fetchData = async () => {
-    const fetchData = async () => {
-      lineLoading(true);
-      try {
-        const result = await fetch("/api/table-data", {
-          cache: "no-store",
-        });
-        if (!result.ok) {
-          throw new Error("Failed to fetch Table Data");
-        }
-        const tableData = await result.json();
-        if (tableData.error) {
-          throw new Error(tableData.error);
-        }
-        setTableData(tableData);
-      } catch (err) {
-        console.log(err);
-        setTableData([]);
-      } finally {
-        lineLoading(false);
-      }
-    };
-    fetchData();
-  };
-
-  useEffect(() => {
-    fetchData();
-  }, []);
-
+export default function Chart({ tableData }: LineInputProps) {
   return (
-    <div className="min-h-[550px] max-h-[550px] w-full flex flex-col items-center gap-12">
-      <button
-        className="bg-[#f4f0e1] self-end w-fit mr-2 py-1 px-4 font-medium rounded-md text-black hover:border-white/20 shadow-[0_0_15px_rgba(255,255,255,0.25)] hover:shadow-[0_0_20px_rgba(255,255,255,0.4)] transition-all duration-300"
-        onClick={fetchData}
-      >
-        Refresh Chart
-      </button>
+    <div className="min-h-[450px] max-h-[450px] w-full flex flex-col items-center gap-12">
       <ChartContainer config={chartConfig} className="max-h-[375px] w-[75%]">
         <AreaChart
           data={tableData}

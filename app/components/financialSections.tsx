@@ -140,7 +140,7 @@ export default function FinancialSection({
                 lineItemValues={sectionData.values.map((value) => value.value)}
                 lineItemNames={sectionData.values.map((value) => value.label)}
                 givenTitle={sectionData.title}
-                giventAsset={sectionData.assetClass}
+                givenAsset={sectionData.assetClass}
                 givenId={sectionData.id}
               />
 
