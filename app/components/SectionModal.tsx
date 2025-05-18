@@ -20,7 +20,7 @@ interface NewSectionProps {
   lineItemValues?: number[];
   lineItemNames?: string[];
   givenTitle?: string;
-  giventAsset?: string;
+  givenAsset?: string;
   givenId?: number;
   onSectionAddition: (data: FinancialSectionData) => void;
 }
@@ -37,7 +37,7 @@ export default function SectionModal({
   lineItemValues,
   lineItemNames,
   givenTitle,
-  giventAsset,
+  givenAsset,
   givenId,
   onSectionAddition,
 }: NewSectionProps) {
@@ -46,7 +46,7 @@ export default function SectionModal({
   );
   const [nameInputs, setNameInputs] = useState<string[]>([""]);
   const [title, setTitle] = useState("");
-  const [assetClass, setAssetClass] = useState<boolean>(false);
+  const [assetClass, setAssetClass] = useState<boolean>(givenAsset !== "ASSET");
   const { data: session } = useSession();
   const handleInputChange = (index: number, event: number) => {
     if (event) {
@@ -183,12 +183,16 @@ export default function SectionModal({
               Add Additional Item
             </button>
             <DialogFooter className="sm:justify-end">
-              <span className="text-[#f4f0e1]">Asset</span>
-              <Switch
-                checked={assetClass}
-                onCheckedChange={(checked) => onCheckedChange(checked)}
-              />
-              <span className="text-[#f4f0e1]">Debt</span>
+              <div className="self-center flex gap-1 justify-center items-center">
+                <span className="text-[#f4f0e1]">Asset</span>
+                <Switch
+                  className="data-[state=unchecked]:bg-[#00A896] data-[state=checked]:bg-[#7B0323]"
+                  checked={assetClass}
+                  onCheckedChange={(checked) => onCheckedChange(checked)}
+                />
+                <span className="text-[#f4f0e1]">Debt</span>
+              </div>
+
               <DialogClose asChild>
                 <button
                   className="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-gray-900 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-gray-700 bg-[#1E2228] text-[#f4f0e1] hover:bg-gray-700 h-10 px-4 py-2"
