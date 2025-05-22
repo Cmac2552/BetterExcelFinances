@@ -17,7 +17,7 @@ export async function DELETE(request, props) {
 }
 
 async function updateSectionItems(fieldNames, fieldValues, existingSectionItems, sectionId) {
-    const updates = fieldNames.map((fieldName, index) => {
+    const createsAndUpdates = fieldNames.map((fieldName, index) => {
         const existingValue = existingSectionItems.find(
             (ev) => ev.label === fieldName
         );
@@ -33,8 +33,15 @@ async function updateSectionItems(fieldNames, fieldValues, existingSectionItems,
                 data: { label: fieldName, value: fieldValue, sectionId: sectionId },
             });
         }
+        
     });
-    return await Promise.all(updates);
+    const deletes = existingSectionItems.filter((ev) => !fieldNames.find((fieldName) => ev.label === fieldName)).map((deleteItem) =>{
+        return prisma.sectionItem.delete({
+            where:{ id: deleteItem.id }
+        })
+    });
+    
+    return await Promise.all([...createsAndUpdates, ...deletes]);
 }
 
 

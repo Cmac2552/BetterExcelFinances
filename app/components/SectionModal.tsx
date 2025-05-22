@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/dialog";
 import { Switch } from "@/components/ui/switch";
 import { NumericFormat } from "react-number-format";
+import { GoXCircleFill } from "react-icons/go";
 interface NewSectionProps {
   date: Date;
   modalTitle: string;
@@ -137,10 +138,17 @@ export default function SectionModal({
     setAssetClass(checked);
   };
 
+  const handleRowRemove = (rowIndex: number) => {
+    if (moneyInputs.length > 1) {
+      setMoneyInputs(moneyInputs.filter((item, index) => index !== rowIndex));
+      setNameInputs(nameInputs.filter((item, index) => index !== rowIndex));
+    }
+  };
+
   return (
     <Dialog onOpenChange={(open) => handleDataClear(open)}>
       <DialogTrigger asChild>{trigger}</DialogTrigger>
-      <DialogContent className="sm:max-w-md bg-[#141414] border border-[#141414]">
+      <DialogContent className="sm:max-w-lg bg-[#141414] border border-[#141414]">
         <DialogHeader>
           <DialogTitle className="text-[#f4f0e1]">{modalTitle}</DialogTitle>
         </DialogHeader>
@@ -174,6 +182,12 @@ export default function SectionModal({
                   }}
                   className="flex h-10 rounded-md border border-gray-700 bg-[#1E2228] px-3 py-2 text-sm text-[#f4f0e1] ring-offset-gray-900 file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-gray-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#f4f0e1] focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 w-1/2"
                 />
+                <button
+                  onClick={() => handleRowRemove(index)}
+                  className=" text-[#f4f0e1] p-2 rounded-md border border-transparent hover:border-gray-400 hover:bg-gray-700 transition-all duration-50 ml-auto justify-self-center self-center group-hover:visible"
+                >
+                  <GoXCircleFill />
+                </button>
               </div>
             ))}
             <button
