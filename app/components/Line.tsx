@@ -1,5 +1,4 @@
 "use client";
-import { useEffect, useState } from "react";
 import {
   XAxis,
   YAxis,
@@ -9,6 +8,7 @@ import {
   Tooltip,
 } from "recharts";
 import { type ChartConfig, ChartContainer } from "@/components/ui/chart";
+import { format } from "date-fns";
 
 export type TableData = {
   month: string;
@@ -35,7 +35,12 @@ export default function Chart({ tableData }: LineInputProps) {
           className="w-full max-w-[400px] mx-auto"
         >
           <CartesianGrid stroke="#393939" vertical={false} />
-          <XAxis dataKey="month" tickLine={false} axisLine={false}></XAxis>
+          <XAxis
+            dataKey="month"
+            tickLine={false}
+            axisLine={false}
+            tickFormatter={(value) => format(new Date(value), "MMM yyyy")}
+          ></XAxis>
           <YAxis />
           <Tooltip
             contentStyle={{
