@@ -2,15 +2,14 @@
 import { useEffect, useRef, useState } from "react";
 import FinancialInputs from "./financialInputs";
 import LineChart, { TableData } from "./Line";
-import {
-  FinancialSectionData,
-  FinancialSectionItemData,
-} from "./financialSections.jsx";
+import { FinancialSectionData } from "./financialSections.jsx";
 import { signOut } from "next-auth/react";
 import { Tailspin } from "ldrs/react";
 import "ldrs/react/Tailspin.css";
 import NewSection from "./SectionModal";
 import DateInput from "./dateInput";
+import { gatherDataForMonth, generateNewTableData } from "../utils/monthUtils";
+import { sortSections } from "../utils/accountUtils";
 
 //currently god component
 //NEEDS REFACTOR
@@ -46,12 +45,9 @@ export default function Dashboard() {
   };
 
   const addSection = (newSection: FinancialSectionData) => {
-    setData((currentData) => {
-      const combinedData = [...currentData, newSection];
-      const sortedNewData = sortSections(combinedData);
-      updateTableData(sortedNewData);
-      return sortedNewData;
-    });
+    const newSections = [...data, newSection];
+    setData(sortSections(newSections));
+    updateTableData(newSections);
   };
 
   const updateTableData = async (sections: any[]) => {
@@ -67,72 +63,14 @@ export default function Dashboard() {
       body: JSON.stringify(update),
     });
     if (response.ok) {
-      setTableData(generateNewTableData(update));
+      setTableData(generateNewTableData(update, tableData, date));
     }
   };
-
-  const generateNewTableData = (update: {
-    date: Date;
-    sectionValue: number;
-  }) => {
-    return tableData.map((monthData) => {
-      if (
-        monthData?.month ===
-        monthNames[date.getUTCMonth()] + " " + date.getUTCFullYear()
-      ) {
-        return { ...monthData, value: update.sectionValue };
-      }
-      return monthData;
-    });
-  };
-
-  const monthNames = [
-    "January",
-    "February",
-    "March",
-    "April",
-    "May",
-    "June",
-    "July",
-    "August",
-    "September",
-    "October",
-    "November",
-    "December",
-  ];
 
   const setSections = (newSections: FinancialSectionData[]) => {
     const sortedSections = sortSections(newSections);
     setData(sortedSections);
     updateTableData(sortedSections);
-  };
-
-  const gatherDataForMonth = (
-    sectionsToProcess: FinancialSectionData[]
-  ): number => {
-    return sectionsToProcess.reduce(
-      (grandTotal: number, sectionData: FinancialSectionData) => {
-        const sectionItemsSum = sectionData.values.reduce(
-          (sum: number, item: FinancialSectionItemData) => sum + item.value,
-          0
-        );
-        const valueForThisSection =
-          sectionData.assetClass === "ASSET"
-            ? sectionItemsSum
-            : -sectionItemsSum;
-        return grandTotal + valueForThisSection;
-      },
-      0
-    );
-  };
-
-  const sortSections = (sections: FinancialSectionData[]) => {
-    return [...sections].sort((a, b) => {
-      const lengthDiff = a.values.length - b.values.length;
-      if (lengthDiff !== 0) return lengthDiff;
-
-      return a.title.localeCompare(b.title);
-    });
   };
 
   useEffect(() => {
@@ -176,7 +114,7 @@ export default function Dashboard() {
         <h1 className="text-3xl text-[#f4f0e1] ml-4">BetterExcelFinances</h1>
         <div className="flex gap-4">
           <button
-            className="bg-[#f4f0e1] px-4 py-2 rounded-md hover:border-white/20 shadow-[0_0_15px_rgba(255,255,255,0.25)] hover:shadow-[0_0_20px_rgba(255,255,255,0.4)] transition-all duration-300"
+            className="bg-[#f4f0e1] px-4 py-2 rounded-md hover:border-white/20 shadow-[0_0_15px_rgba(255,255,255,0.25)] hover:shadow-[0_0_20px_rgba(255,255,255,0.4)] transition-all duration-300 font-medium"
             onClick={() => signOut()}
           >
             Log Out
@@ -189,7 +127,7 @@ export default function Dashboard() {
             <LineChart tableData={tableData} />
           </div>
           <div className="flex items-center gap-x-4 w-full pl-4 pr-2">
-            <div className="grid-cols-2">
+            <div className="grid grid-cols-2 gap-4">
               <DateInput onMonthChange={handleMonthChange} />
               <NewSection
                 date={date}
@@ -197,8 +135,8 @@ export default function Dashboard() {
                 modalTitle="Add Account"
                 givenAsset={"ASSET"}
                 trigger={
-                  <button className="rounded-full w-10 h-10 inline-flex items-center justify-center text-sm font-medium bg-[#f4f0e1] text-black hover:bg-[#f4f0e1] m-4 hover:border-white/20 shadow-[0_0_15px_rgba(255,255,255,0.25)] hover:shadow-[0_0_20px_rgba(255,255,255,0.4)] transition-all duration-300">
-                    +
+                  <button className="bg-[#f4f0e1] text-black px-2 py-2 rounded-lg font-medium border border-transparent hover:border-white/20 shadow-[0_0_15px_rgba(255,255,255,0.25)] hover:shadow-[0_0_20px_rgba(255,255,255,0.4)] transition-all duration-300 mr-4">
+                    Add Account
                   </button>
                 }
               />
@@ -207,7 +145,7 @@ export default function Dashboard() {
               className="bg-[#f4f0e1] text-black px-6 py-2 rounded-lg font-medium border border-transparent hover:border-white/20 shadow-[0_0_15px_rgba(255,255,255,0.25)] hover:shadow-[0_0_20px_rgba(255,255,255,0.4)] transition-all duration-300 mr-4 ml-auto"
               onClick={() => setAllSectionsOpen(!allSectionsOpen)}
             >
-              Toggle All Sections
+              Toggle All Accounts
             </button>
           </div>
           {loading ? (
