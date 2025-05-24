@@ -21,7 +21,7 @@ export default function FinancialSection({
   onSectionModify,
   sectionDelete,
   date,
-}: SectionProps) {
+}: Readonly<SectionProps>) {
   const [sectionData, setSectionData] = useState(section);
   useEffect(() => {
     setSectionData(section);

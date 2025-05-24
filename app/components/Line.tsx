@@ -10,6 +10,8 @@ import {
 import { type ChartConfig, ChartContainer } from "@/components/ui/chart";
 import { format } from "date-fns";
 import { TableData } from "../types";
+import { Tailspin } from "ldrs/react";
+import "ldrs/react/Tailspin.css";
 
 const chartConfig = {
   desktop: {
@@ -22,7 +24,14 @@ interface LineInputProps {
   tableData: TableData[];
 }
 
-export default function Chart({ tableData }: LineInputProps) {
+export default function Chart({ tableData }: Readonly<LineInputProps>) {
+  if (tableData.length === 0) {
+    return (
+      <div className="flex justify-center items-center h-full">
+        <Tailspin size="75" stroke="5" speed="0.9" color="#f4f0e1" />
+      </div>
+    );
+  }
   return (
     <div className="min-h-[450px] max-h-[450px] w-full flex flex-col items-center gap-12">
       <ChartContainer config={chartConfig} className="max-h-[375px] w-[75%]">

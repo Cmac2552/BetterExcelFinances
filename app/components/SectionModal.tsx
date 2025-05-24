@@ -41,7 +41,7 @@ export default function SectionModal({
   givenAsset,
   givenId,
   onSectionAddition,
-}: NewSectionProps) {
+}: Readonly<NewSectionProps>) {
   const [moneyInputs, setMoneyInputs] = useState<number[]>(
     lineItemValues || [0]
   );
