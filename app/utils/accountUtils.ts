@@ -1,4 +1,4 @@
-import { FinancialSectionData } from "../components/financialSections";
+import { FinancialSectionData } from "../types";
 
 export const sortSections = (sections: FinancialSectionData[]) => {
     return [...sections].sort((a, b) => {
