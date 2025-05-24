@@ -9,11 +9,8 @@ import {
 } from "recharts";
 import { type ChartConfig, ChartContainer } from "@/components/ui/chart";
 import { format } from "date-fns";
+import { TableData } from "../types";
 
-export type TableData = {
-  month: string;
-  value: number;
-};
 const chartConfig = {
   desktop: {
     label: "Desktop",

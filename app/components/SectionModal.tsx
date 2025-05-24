@@ -1,7 +1,6 @@
 "use client";
 import { useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
-import { FinancialSectionData } from "./financialSections";
 import {
   Dialog,
   DialogClose,
@@ -14,6 +13,7 @@ import {
 import { Switch } from "@/components/ui/switch";
 import { NumericFormat } from "react-number-format";
 import { GoXCircleFill } from "react-icons/go";
+import { FinancialSectionData } from "../types";
 interface NewSectionProps {
   date: Date;
   modalTitle: string;
