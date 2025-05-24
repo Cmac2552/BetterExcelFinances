@@ -185,6 +185,7 @@ export default function SectionModal({
                 <button
                   onClick={() => handleRowRemove(index)}
                   className=" text-[#f4f0e1] p-2 rounded-md border border-transparent hover:border-gray-400 hover:bg-gray-700 transition-all duration-50 ml-auto justify-self-center self-center group-hover:visible"
+                  title="Remove Account Item"
                 >
                   <GoXCircleFill />
                 </button>

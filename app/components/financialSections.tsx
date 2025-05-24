@@ -133,7 +133,10 @@ export default function FinancialSection({
                 onSectionAddition={onSectionModify}
                 modalTitle="Add Account"
                 trigger={
-                  <button className="py-2 px-1 rounded-md border border-transparent hover:border-gray-400 hover:bg-gray-700 transition-all duration-300">
+                  <button
+                    className="py-2 px-1 rounded-md border border-transparent hover:border-gray-400 hover:bg-gray-700 transition-all duration-300"
+                    title="Edit Account"
+                  >
                     <TiPencil />
                   </button>
                 }
@@ -147,6 +150,7 @@ export default function FinancialSection({
               <button
                 onClick={onSectionDelete}
                 className="py-2 px-1 rounded-md border border-transparent hover:border-gray-400 hover:bg-gray-700 transition-all duration-300"
+                title="Delete Account"
               >
                 <GoXCircleFill />
               </button>
@@ -199,6 +203,7 @@ export default function FinancialSection({
                       <button
                         onClick={() => deleteSectionItem(value)}
                         className=" text-[#f4f0e1] p-2 rounded-md border border-transparent hover:border-gray-400 hover:bg-gray-700 transition-all duration-50 ml-auto justify-self-center self-center invisible group-hover:visible"
+                        title="Delete Account Item"
                       >
                         <GoXCircleFill />
                       </button>
