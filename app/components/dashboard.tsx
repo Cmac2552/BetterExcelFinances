@@ -1,18 +1,25 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
 import FinancialInputs from "./financialInputs";
-import LineChart, { TableData } from "./Line";
-import { FinancialSectionData } from "./financialSections.jsx";
+import LineChart from "./Line";
 import { signOut } from "next-auth/react";
 import { Tailspin } from "ldrs/react";
 import "ldrs/react/Tailspin.css";
 import NewSection from "./SectionModal";
 import DateInput from "./dateInput";
-import { gatherDataForMonth, generateNewTableData } from "../utils/monthUtils";
+import {
+  gatherDataForMonth,
+  generateNewTableData,
+  parseNewMonth,
+} from "../utils/monthUtils";
 import { sortSections } from "../utils/accountUtils";
+import {
+  fetchSections,
+  fetchTableData,
+  updateTableData,
+} from "../actions/financial";
+import { FinancialSectionData, TableData } from "../types";
 
-//currently god component
-//NEEDS REFACTOR
 export default function Dashboard() {
   const [data, setData] = useState<FinancialSectionData[]>([]);
   const [date, setDate] = useState(() => {
@@ -24,53 +31,33 @@ export default function Dashboard() {
   const [allSectionsOpen, setAllSectionsOpen] = useState(false);
   const previousDateRef = useRef<Date>(null);
 
-  const handleMonthChange = (monthInput: string) => {
-    const parts = monthInput.split("-");
-    if (parts.length === 2) {
-      const year = parseInt(parts[0]);
-      const month = parseInt(parts[1]);
-
-      if (!isNaN(year) && !isNaN(month) && month >= 1 && month <= 12) {
-        const newDateAtUTCMidnight = new Date(Date.UTC(year, month - 1, 1));
-
-        if (date.getTime() !== newDateAtUTCMidnight.getTime()) {
-          setDate(newDateAtUTCMidnight);
-        }
-      } else {
-        console.error("Invalid year or month parsed from input:", monthInput);
-      }
-    } else {
-      console.error("Invalid month input format received:", monthInput);
+  const postTableData = async (sections: any[]) => {
+    const update = {
+      date: date,
+      sectionValue: gatherDataForMonth(sections),
+    };
+    try {
+      await updateTableData(update);
+      setTableData(generateNewTableData(update, tableData, date));
+    } catch {
+      console.error("Error posting table data");
     }
+  };
+
+  const handleMonthChange = (monthInput: string) => {
+    setDate(parseNewMonth(monthInput, date));
   };
 
   const addSection = (newSection: FinancialSectionData) => {
     const newSections = [...data, newSection];
     setData(sortSections(newSections));
-    updateTableData(newSections);
-  };
-
-  const updateTableData = async (sections: any[]) => {
-    const update = {
-      date: date,
-      sectionValue: gatherDataForMonth(sections),
-    };
-    const response = await fetch("/api/table-data", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(update),
-    });
-    if (response.ok) {
-      setTableData(generateNewTableData(update, tableData, date));
-    }
+    postTableData(newSections);
   };
 
   const setSections = (newSections: FinancialSectionData[]) => {
     const sortedSections = sortSections(newSections);
     setData(sortedSections);
-    updateTableData(sortedSections);
+    postTableData(sortedSections);
   };
 
   useEffect(() => {
@@ -80,24 +67,9 @@ export default function Dashboard() {
     const fetchData = async () => {
       setLoading(true);
       try {
-        const res = await fetch(`/api/sections?date=${date.toISOString()}`, {
-          cache: "no-store",
-        });
-        if (!res.ok) {
-          throw new Error("Failed to fetch data");
-        }
-        const sectionDataResult = await res.json();
-        setData(sortSections(sectionDataResult as FinancialSectionData[]));
-        const tableDataResult = await fetch("/api/table-data", {
-          cache: "no-store",
-        });
-        if (!tableDataResult.ok) {
-          throw new Error("Failed to fetch Table Data");
-        }
-        const tableData = await tableDataResult.json();
-        if (tableData.error) {
-          throw new Error(tableData.error);
-        }
+        const financialSectionData = await fetchSections(date);
+        const tableData = await fetchTableData();
+        setData(sortSections(financialSectionData));
         setTableData(tableData);
         previousDateRef.current = date;
       } catch (err) {

@@ -1,26 +1,11 @@
 import { useEffect, useState } from "react";
 import { NumericFormat } from "react-number-format";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { GoXCircleFill } from "react-icons/go";
 import { TiPencil } from "react-icons/ti";
 import { FaMoneyBill1 } from "react-icons/fa6";
 import NewSection from "./SectionModal";
-
-export type FinancialSectionData = {
-  id: number;
-  month: Date;
-  title: string;
-  values: FinancialSectionItemData[];
-  userId: string;
-  assetClass: string;
-};
-
-export type FinancialSectionItemData = {
-  id?: number;
-  label: string;
-  value: number;
-  sectionId?: number;
-};
+import { FinancialSectionData, FinancialSectionItemData } from "../types";
 
 interface SectionProps {
   section: FinancialSectionData;
