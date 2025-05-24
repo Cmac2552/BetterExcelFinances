@@ -3,7 +3,9 @@ import { useEffect, useState } from "react";
 interface ChildComponentProps {
   onMonthChange: (data: string) => void;
 }
-export default function DateInput({ onMonthChange }: ChildComponentProps) {
+export default function DateInput({
+  onMonthChange,
+}: Readonly<ChildComponentProps>) {
   const [selectedMonth, setSelectedMonth] = useState<string>("");
 
   useEffect(() => {

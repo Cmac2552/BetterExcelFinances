@@ -15,7 +15,7 @@ export default function FinancialInputs({
   date,
   setSections,
   allSectionsOpen,
-}: FinancialInputProps) {
+}: Readonly<FinancialInputProps>) {
   const importMonth = async () => {
     const response = await fetch(`api/copy-month?date=${date}`, {
       method: "GET",
