@@ -1,5 +1,7 @@
 "use client";
-import FinancialSection, { FinancialSectionData } from "./financialSections";
+
+import { FinancialSectionData } from "../types";
+import FinancialSection from "./financialSections";
 
 interface FinancialInputProps {
   sections: FinancialSectionData[];
