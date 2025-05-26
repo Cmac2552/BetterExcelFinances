@@ -4,7 +4,18 @@ export default function LandingPage() {
   return (
     <main className="min-h-screen bg-[#141414] text-[#f4f0e1] flex flex-col items-center justify-center p-4">
       <div className="text-center">
-        {/* Simple abstract visual element */}
+        {/* Image Slot Start: Replace the div below with your img tag or Next.js Image component */}
+        {/* Recommended aspect ratio: 16:9 for consistency, but flexible */}
+        <div className="mb-8"> {/* Container for image slot */}
+          <div className="w-full max-w-md h-64 bg-gray-800 border-2 border-dashed border-gray-600 rounded-lg flex items-center justify-center text-gray-500 text-lg">
+            Your Image Here
+            <br />
+            (e.g., 16:9 aspect ratio)
+          </div>
+        </div>
+        {/* Image Slot End */}
+
+        {/* Simple abstract visual element (can be kept or removed by user) */}
         <div className="flex justify-center items-end space-x-2 h-16 mb-6">
           <div className="w-4 h-8 bg-gray-700 rounded-t-sm"></div>
           <div className="w-4 h-12 bg-gray-600 rounded-t-sm"></div>
