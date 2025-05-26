@@ -1,5 +1,7 @@
 "use client";
-import FinancialSection, { FinancialSectionData } from "./financialSections";
+
+import { FinancialSectionData } from "../types";
+import FinancialSection from "./financialSections";
 
 interface FinancialInputProps {
   sections: FinancialSectionData[];
@@ -13,7 +15,7 @@ export default function FinancialInputs({
   date,
   setSections,
   allSectionsOpen,
-}: FinancialInputProps) {
+}: Readonly<FinancialInputProps>) {
   const importMonth = async () => {
     const response = await fetch(`api/copy-month?date=${date}`, {
       method: "GET",

@@ -1,26 +1,11 @@
 import { useEffect, useState } from "react";
 import { NumericFormat } from "react-number-format";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { GoXCircleFill } from "react-icons/go";
 import { TiPencil } from "react-icons/ti";
 import { FaMoneyBill1 } from "react-icons/fa6";
 import NewSection from "./SectionModal";
-
-export type FinancialSectionData = {
-  id: number;
-  month: Date;
-  title: string;
-  values: FinancialSectionItemData[];
-  userId: string;
-  assetClass: string;
-};
-
-export type FinancialSectionItemData = {
-  id?: number;
-  label: string;
-  value: number;
-  sectionId?: number;
-};
+import { FinancialSectionData, FinancialSectionItemData } from "../types";
 
 interface SectionProps {
   section: FinancialSectionData;
@@ -36,7 +21,7 @@ export default function FinancialSection({
   onSectionModify,
   sectionDelete,
   date,
-}: SectionProps) {
+}: Readonly<SectionProps>) {
   const [sectionData, setSectionData] = useState(section);
   useEffect(() => {
     setSectionData(section);
@@ -133,7 +118,10 @@ export default function FinancialSection({
                 onSectionAddition={onSectionModify}
                 modalTitle="Add Account"
                 trigger={
-                  <button className="py-2 px-1 rounded-md border border-transparent hover:border-gray-400 hover:bg-gray-700 transition-all duration-300">
+                  <button
+                    className="py-2 px-1 rounded-md border border-transparent hover:border-gray-400 hover:bg-gray-700 transition-all duration-300"
+                    title="Edit Account"
+                  >
                     <TiPencil />
                   </button>
                 }
@@ -147,6 +135,7 @@ export default function FinancialSection({
               <button
                 onClick={onSectionDelete}
                 className="py-2 px-1 rounded-md border border-transparent hover:border-gray-400 hover:bg-gray-700 transition-all duration-300"
+                title="Delete Account"
               >
                 <GoXCircleFill />
               </button>
@@ -199,6 +188,7 @@ export default function FinancialSection({
                       <button
                         onClick={() => deleteSectionItem(value)}
                         className=" text-[#f4f0e1] p-2 rounded-md border border-transparent hover:border-gray-400 hover:bg-gray-700 transition-all duration-50 ml-auto justify-self-center self-center invisible group-hover:visible"
+                        title="Delete Account Item"
                       >
                         <GoXCircleFill />
                       </button>
