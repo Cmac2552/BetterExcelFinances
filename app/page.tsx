@@ -5,7 +5,7 @@ import { auth } from "@/auth";
 export default async function Home() {
   const session = await auth();
   if (!session) {
-    redirect("/api/auth/signin?callbackUrl=/");
+    redirect("/landing");
   }
   return <Dashboard></Dashboard>;
 }
