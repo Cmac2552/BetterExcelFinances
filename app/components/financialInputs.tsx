@@ -9,6 +9,7 @@ interface FinancialInputProps {
   setSections: (data: any[]) => void;
   allSectionsOpen: boolean;
   handleSectionMouseLeave: () => void;
+  handleDeleteSection: (sectionId: number) => void;
 }
 
 export default function FinancialInputs({
@@ -17,6 +18,7 @@ export default function FinancialInputs({
   setSections,
   allSectionsOpen,
   handleSectionMouseLeave,
+  handleDeleteSection,
 }: Readonly<FinancialInputProps>) {
   const importMonth = async () => {
     const response = await fetch(`api/copy-month?date=${date}`, {
@@ -32,13 +34,6 @@ export default function FinancialInputs({
   const onSectionModify = (updatedSection: any) => {
     const updatedSections = sections.map((section) => {
       return section.id === updatedSection.id ? updatedSection : section;
-    });
-    setSections(updatedSections);
-  };
-
-  const onSectionDelete = (sectionId: number) => {
-    const updatedSections = sections.filter((section) => {
-      return section.id !== sectionId;
     });
     setSections(updatedSections);
   };
@@ -61,8 +56,8 @@ export default function FinancialInputs({
             section={dataEntry}
             key={index + "Financial Input"}
             open={allSectionsOpen}
-            onSectionModify={onSectionModify}
-            sectionDelete={onSectionDelete}
+            onSectionModify={onSectionModify} // This internal onSectionModify calls setSections (for deferred sort)
+            sectionDelete={handleDeleteSection} // This is passed directly from Dashboard (for immediate delete)
             date={date}
             handleSectionMouseLeave={handleSectionMouseLeave}
           />

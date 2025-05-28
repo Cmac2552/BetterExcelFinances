@@ -64,6 +64,16 @@ export default function Dashboard() {
     setPendingSort(false);
   };
 
+  const handleDeleteSection = async (sectionId: number) => {
+    const remainingSections = data.filter(
+      (section) => section.id !== sectionId
+    );
+    const sortedRemainingSections = sortSections(remainingSections);
+    setData(sortedRemainingSections);
+    await postTableData(sortedRemainingSections);
+    setPendingSort(false);
+  };
+
   const setSections = (newSections: FinancialSectionData[]) => {
     setData(newSections);
     setPendingSort(true); // Always set pendingSort to true
@@ -148,6 +158,7 @@ export default function Dashboard() {
                 setSections={setSections}
                 allSectionsOpen={allSectionsOpen}
                 handleSectionMouseLeave={handleSectionMouseLeave}
+                handleDeleteSection={handleDeleteSection}
               />
             </div>
           )}
