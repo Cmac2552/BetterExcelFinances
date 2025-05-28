@@ -1,4 +1,5 @@
 import Link from "next/link"; // Import Link for Next.js navigation
+import Image from "next/image";
 
 export default function LandingPage() {
   return (
@@ -14,15 +15,13 @@ export default function LandingPage() {
       <div className="text-center">
         {/* Image Slot Start: Replace the div below with your img tag or Next.js Image component */}
         {/* Recommended aspect ratio: 16:9 for consistency, but flexible */}
-        <div className="mb-8">
-          {" "}
-          {/* Container for image slot */}
-          <div className="w-full max-w-md h-64 bg-gray-800 border-2 border-dashed border-gray-600 rounded-lg flex items-center justify-center text-gray-500 text-lg">
-            Your Image Here
-            <br />
-            (e.g., 16:9 aspect ratio)
-          </div>
-        </div>
+        <Image
+          src="/images/dashboard.png"
+          alt="My photo"
+          width={750}
+          height={500}
+          className="border-2 border-[#f4f0e1] rounded-sm mb-8"
+        />
 
         <p className="text-xl text-gray-400 mb-8">
           Track your finances with clarity.
