@@ -50,18 +50,9 @@ export default function Dashboard() {
   };
 
   const addSection = (newSection: FinancialSectionData) => {
-    const tempSections = [...data, newSection];
-    const sortedSections = sortSections(tempSections);
+    const sortedSections = sortSections([...data, newSection]);
     setData(sortedSections);
-    postTableData(sortedSections); // Ensure this uses sortedSections
-    setPendingSort(false);
-  };
-
-  const applyPendingSort = () => {
-    const sortedData = sortSections(data);
-    setData(sortedData);
-    postTableData(sortedData);
-    setPendingSort(false);
+    postTableData(sortedSections);
   };
 
   const handleDeleteSection = async (sectionId: number) => {
@@ -70,13 +61,19 @@ export default function Dashboard() {
     );
     const sortedRemainingSections = sortSections(remainingSections);
     setData(sortedRemainingSections);
-    await postTableData(sortedRemainingSections);
-    setPendingSort(false);
+    postTableData(sortedRemainingSections);
   };
 
   const setSections = (newSections: FinancialSectionData[]) => {
     setData(newSections);
-    setPendingSort(true); // Always set pendingSort to true
+    postTableData(newSections);
+    setPendingSort(true);
+  };
+
+  const applyPendingSort = () => {
+    const sortedData = sortSections(data);
+    setData(sortedData);
+    setPendingSort(false);
   };
 
   const handleSectionMouseLeave = () => {
