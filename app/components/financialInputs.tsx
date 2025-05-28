@@ -8,6 +8,7 @@ interface FinancialInputProps {
   date: Date;
   setSections: (data: any[]) => void;
   allSectionsOpen: boolean;
+  handleSectionMouseLeave: () => void;
 }
 
 export default function FinancialInputs({
@@ -15,6 +16,7 @@ export default function FinancialInputs({
   date,
   setSections,
   allSectionsOpen,
+  handleSectionMouseLeave,
 }: Readonly<FinancialInputProps>) {
   const importMonth = async () => {
     const response = await fetch(`api/copy-month?date=${date}`, {
@@ -62,6 +64,7 @@ export default function FinancialInputs({
             onSectionModify={onSectionModify}
             sectionDelete={onSectionDelete}
             date={date}
+            handleSectionMouseLeave={handleSectionMouseLeave}
           />
         ))}
       </div>

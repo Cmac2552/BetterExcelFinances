@@ -22,6 +22,7 @@ import { FinancialSectionData, TableData } from "../types";
 
 export default function Dashboard() {
   const [data, setData] = useState<FinancialSectionData[]>([]);
+  const [pendingSort, setPendingSort] = useState(false);
   const [date, setDate] = useState(() => {
     const today = new Date();
     return new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), 1));
@@ -49,15 +50,29 @@ export default function Dashboard() {
   };
 
   const addSection = (newSection: FinancialSectionData) => {
-    const newSections = [...data, newSection];
-    setData(sortSections(newSections));
-    postTableData(newSections);
+    const tempSections = [...data, newSection];
+    const sortedSections = sortSections(tempSections);
+    setData(sortedSections);
+    postTableData(sortedSections); // Ensure this uses sortedSections
+    setPendingSort(false);
+  };
+
+  const applyPendingSort = () => {
+    const sortedData = sortSections(data);
+    setData(sortedData);
+    postTableData(sortedData);
+    setPendingSort(false);
   };
 
   const setSections = (newSections: FinancialSectionData[]) => {
-    const sortedSections = sortSections(newSections);
-    setData(sortedSections);
-    postTableData(sortedSections);
+    setData(newSections);
+    setPendingSort(true); // Always set pendingSort to true
+  };
+
+  const handleSectionMouseLeave = () => {
+    if (pendingSort) {
+      applyPendingSort();
+    }
   };
 
   useEffect(() => {
@@ -71,6 +86,7 @@ export default function Dashboard() {
         const tableData = await fetchTableData();
         setData(sortSections(financialSectionData));
         setTableData(tableData);
+        setPendingSort(false);
         previousDateRef.current = date;
       } catch (err) {
         console.error("Error fetching data:", err);
@@ -131,6 +147,7 @@ export default function Dashboard() {
                 date={date}
                 setSections={setSections}
                 allSectionsOpen={allSectionsOpen}
+                handleSectionMouseLeave={handleSectionMouseLeave}
               />
             </div>
           )}

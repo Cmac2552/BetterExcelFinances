@@ -13,6 +13,7 @@ interface SectionProps {
   onSectionModify: (data: any) => void;
   sectionDelete: (data: number) => void;
   date: Date;
+  handleSectionMouseLeave: () => void;
 }
 
 export default function FinancialSection({
@@ -21,6 +22,7 @@ export default function FinancialSection({
   onSectionModify,
   sectionDelete,
   date,
+  handleSectionMouseLeave,
 }: Readonly<SectionProps>) {
   const [sectionData, setSectionData] = useState(section);
   useEffect(() => {
@@ -98,7 +100,10 @@ export default function FinancialSection({
     }
   };
   return (
-    <div className="my-4 w-1/3 h-full">
+    <div
+      className="my-4 w-1/3 h-full"
+      onMouseLeave={handleSectionMouseLeave}
+    >
       <Card className="bg-[#141414] h-full w-[95%]">
         <CardHeader className="p-2">
           <div className="flex items-center justify-between group">
