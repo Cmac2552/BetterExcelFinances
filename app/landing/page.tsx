@@ -19,8 +19,6 @@ export default async function LandingPage() {
       <h1 className="text-5xl font-bold mb-6">BetterExcelFinances</h1>
 
       <div className="text-center">
-        {/* Image Slot Start: Replace the div below with your img tag or Next.js Image component */}
-        {/* Recommended aspect ratio: 16:9 for consistency, but flexible */}
         <Image
           src="/images/dashboard.png"
           alt="My photo"
