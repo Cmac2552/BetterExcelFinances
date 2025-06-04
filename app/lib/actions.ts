@@ -84,7 +84,7 @@ export async function saveSection(data: {
       if (!existingSection) {
         return { error: 'Section not found or user not authorized to update this section.', success: false };
       }
-        const data = {
+        const data: SectionUpdateInput =  {
           title,
           month,
           assetClass,
@@ -99,7 +99,7 @@ export async function saveSection(data: {
       revalidatePath('/'); // Or a more specific path if you have one e.g. /dashboard
       return { success: true, section: updatedSection };
     } else {
-      const data =  {
+      const data : SectionCreateInput =  {
         title,
         month,
         assetClass,
