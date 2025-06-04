@@ -22,7 +22,7 @@ interface SectionModalProps {
   lineItemValues?: number[];
   lineItemNames?: string[];
   givenTitle?: string;
-  givenAsset?: "ASSET" | "DEBT"; // Match server action type
+  givenAsset?: string; // Match server action type
   givenId?: number;
   onSectionAddition: (data: FinancialSectionData) => void;
 }
