@@ -12,7 +12,7 @@ import {
 import { Switch } from "@/components/ui/switch";
 import { NumericFormat } from "react-number-format";
 import { GoXCircleFill } from "react-icons/go";
-import { FinancialSectionData, SectionItem as FinancialSectionItem } from "../types";
+import { FinancialSectionData, FinancialSectionItemData } from "../types";
 import { saveSection } from "../lib/actions"; // Server Action
 
 interface SectionModalProps {
@@ -54,38 +54,34 @@ export default function SectionModal({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-
   const resetFormStates = () => {
     setTitle("");
     setNameInputs([""]);
     setMoneyInputs([0]);
     setAssetClassIsDebt(false); // Default to ASSET
     setErrorMessage(null);
-    // Do not reset givenId, givenTitle etc. as they are props for editing
   };
 
   const populateFormForEditing = () => {
-    if (givenId) { // Editing mode
-      setTitle(givenTitle || "");
+    if (givenId) {
+      setTitle(givenTitle ?? "");
       setNameInputs(lineItemNames || [""]);
       setMoneyInputs(lineItemValues || [0]);
       setAssetClassIsDebt(givenAsset === "DEBT");
-    } else { // New section mode
+    } else {
       resetFormStates();
     }
   };
 
-  // Effect to populate form when dialog opens for editing, or reset for new
   useEffect(() => {
     if (isOpen) {
       populateFormForEditing();
     }
   }, [isOpen, givenId, givenTitle, givenAsset, lineItemNames, lineItemValues]);
 
-
   const handleInputChange = (index: number, value: number | undefined) => {
     const currentMoneyInputs = [...moneyInputs];
-    currentMoneyInputs[index] = value || 0; // Default to 0 if undefined
+    currentMoneyInputs[index] = value ?? 0;
     setMoneyInputs(currentMoneyInputs);
   };
 
@@ -106,11 +102,9 @@ export default function SectionModal({
   const handleOpenChange = (open: boolean) => {
     setIsOpen(open);
     if (!open) {
-      // Reset form only if it's not an editing scenario or to clear after successful submission
-      // This behavior might need adjustment based on desired UX for closing an edit modal without saving
-       if (!givenId) {
-         resetFormStates();
-       }
+      if (!givenId) {
+        resetFormStates();
+      }
     }
   };
 
@@ -119,65 +113,76 @@ export default function SectionModal({
     setIsSubmitting(true);
     setErrorMessage(null);
 
-    // Basic client-side validation
     if (!title.trim()) {
-        setErrorMessage("Account Name is required.");
-        setIsSubmitting(false);
-        return;
+      setErrorMessage("Account Name is required.");
+      setIsSubmitting(false);
+      return;
     }
-    if (nameInputs.some(name => !name.trim()) || moneyInputs.some(value => isNaN(value))) {
-        setErrorMessage("All item names must be filled and values must be valid numbers.");
-        setIsSubmitting(false);
-        return;
+    if (
+      nameInputs.some((name) => !name.trim()) ||
+      moneyInputs.some((value) => isNaN(value))
+    ) {
+      setErrorMessage(
+        "All item names must be filled and values must be valid numbers."
+      );
+      setIsSubmitting(false);
+      return;
     }
 
-
-    const currentAssetClass = assetClassIsDebt ? "DEBT" : "ASSET";
-    const newDate = new Date(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate());
-
+    const currentAssetClass = assetClassIsDebt
+      ? "DEBT"
+      : ("ASSET" as "DEBT" | "ASSET");
+    const newDate = new Date(
+      date.getUTCFullYear(),
+      date.getUTCMonth(),
+      date.getUTCDate()
+    );
 
     const actionData = {
       title: title,
-      fieldNames: nameInputs.filter(name => name.trim() !== ""), // Filter out empty names
-      fieldValues: moneyInputs.slice(0, nameInputs.filter(name => name.trim() !== "").length), // Ensure arrays are same length
+      fieldNames: nameInputs.filter((name) => name.trim() !== ""),
+      fieldValues: moneyInputs.slice(
+        0,
+        nameInputs.filter((name) => name.trim() !== "").length
+      ),
       month: newDate,
       assetClass: currentAssetClass,
-      ...(givenId && { id: givenId }), // Add id if it exists
+      ...(givenId && { id: givenId }),
     };
 
     if (actionData.fieldNames.length === 0) {
-        setErrorMessage("At least one item must be added.");
-        setIsSubmitting(false);
-        return;
+      setErrorMessage("At least one item must be added.");
+      setIsSubmitting(false);
+      return;
     }
-
 
     const result = await saveSection(actionData);
 
     if (result.success && result.section) {
-      // Map server action result (Section with SectionItem[]) to FinancialSectionData
-      const financialSectionItems: FinancialSectionItem[] = result.section.items.map(item => ({
-        id: item.id, // Assuming SectionItem from Prisma has an id
-        label: item.name,
-        value: item.value,
-        sectionId: result.section!.id, // sectionId from the parent section
-      }));
+      const financialSectionItems: FinancialSectionItemData[] =
+        result.section.values.map((item) => ({
+          id: item.id,
+          label: item.label,
+          value: item.value,
+          sectionId: result.section.id,
+        }));
 
       onSectionAddition({
         id: result.section.id,
-        month: result.section.month, // Use month from response
+        month: result.section.month,
         title: result.section.title,
         values: financialSectionItems,
-        // userId: result.section.userId, // userId is in result.section but not in FinancialSectionData
+        userId: result.section.userId,
         assetClass: result.section.assetClass as "ASSET" | "DEBT",
       });
       setIsOpen(false); // Close dialog on success
-      if (!givenId) { // If it was a new section, reset form for next time
+      if (!givenId) {
+        // If it was a new section, reset form for next time
         resetFormStates();
       }
     } else {
       console.error("Failed to save section:", result.error);
-      setErrorMessage(result.error || "An unknown error occurred.");
+      setErrorMessage(result.error ?? "An unknown error occurred.");
     }
     setIsSubmitting(false);
   };
@@ -191,7 +196,6 @@ export default function SectionModal({
       setMoneyInputs(moneyInputs.filter((_, index) => index !== rowIndex));
       setNameInputs(nameInputs.filter((_, index) => index !== rowIndex));
     } else {
-      // Optionally, clear the single row instead of removing it, or prevent removal of the last row
       setMoneyInputs([0]);
       setNameInputs([""]);
     }
@@ -199,19 +203,17 @@ export default function SectionModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={handleOpenChange}>
-      <DialogTrigger asChild onClick={() => setIsOpen(true)}>{trigger}</DialogTrigger>
+      <DialogTrigger asChild onClick={() => setIsOpen(true)}>
+        {trigger}
+      </DialogTrigger>
       <DialogContent className="sm:max-w-lg bg-[#141414] border border-[#141414]">
         <DialogHeader>
           <DialogTitle className="text-[#f4f0e1]">{modalTitle}</DialogTitle>
         </DialogHeader>
         <form onSubmit={clientHandleSubmit} className="flex flex-col space-y-4">
-          {/* Hidden inputs for date and id if needed by form data, but we pass them directly in clientHandleSubmit */}
-          {/* <input type="hidden" name="month" value={date.toISOString()} /> */}
-          {/* {givenId && <input type="hidden" name="id" value={givenId} />} */}
-
           <div className="grid flex-1 gap-3">
             <input
-              name="title" // Name attribute for potential FormData use, though we use controlled state
+              name="title"
               placeholder="Account Name"
               value={title}
               className="flex h-10 w-full rounded-md border border-gray-700 bg-[#1E2228] px-3 py-2 text-sm text-[#f4f0e1] ring-offset-gray-900 file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-gray-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#f4f0e1] focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
@@ -221,19 +223,18 @@ export default function SectionModal({
             {nameInputs.map((_, index) => (
               <div className="flex gap-2 items-center" key={`item-${index}`}>
                 <input
-                  name={`fieldNames[${index}]`} // Example of naming for FormData, though we use state
+                  name={`fieldNames[${index}]`}
                   value={nameInputs[index]}
                   placeholder="(e.g. Travel, Emergency Fund)"
                   onChange={(event) => handleNameChange(index, event)}
                   className="flex h-10 w-full rounded-md border border-gray-700 bg-[#1E2228] px-3 py-2 text-sm text-[#f4f0e1] ring-offset-gray-900 file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-gray-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#f4f0e1] focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                 />
                 <NumericFormat
-                  name={`fieldValues[${index}]`} // Example of naming for FormData
+                  name={`fieldValues[${index}]`}
                   value={moneyInputs[index]}
                   thousandSeparator={true}
                   prefix="$"
                   fixedDecimalScale={true}
-                  decimalScale={2}
                   allowNegative={false}
                   placeholder="Amount"
                   onValueChange={(values) => {
@@ -242,7 +243,7 @@ export default function SectionModal({
                   className="flex h-10 rounded-md border border-gray-700 bg-[#1E2228] px-3 py-2 text-sm text-[#f4f0e1] ring-offset-gray-900 file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-gray-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#f4f0e1] focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 w-1/2"
                 />
                 <button
-                  type="button" // Prevent form submission
+                  type="button"
                   onClick={() => handleRowRemove(index)}
                   className="text-[#f4f0e1] p-2 rounded-md border border-transparent hover:border-gray-400 hover:bg-gray-700 transition-all duration-50"
                   title="Remove Account Item"
@@ -252,18 +253,20 @@ export default function SectionModal({
               </div>
             ))}
             <button
-              type="button" // Prevent form submission
+              type="button"
               onClick={handleAddItem}
               className="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-gray-900 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-gray-700 bg-[#1E2228] text-[#f4f0e1] hover:bg-gray-700 h-10 px-4 py-2"
             >
               Add Additional Item
             </button>
-            {errorMessage && <p className="text-red-500 text-sm">{errorMessage}</p>}
+            {errorMessage && (
+              <p className="text-red-500 text-sm">{errorMessage}</p>
+            )}
             <DialogFooter className="sm:justify-end mt-4">
               <div className="self-center flex gap-1 justify-center items-center">
                 <span className="text-[#f4f0e1]">Asset</span>
                 <Switch
-                  name="assetClass" // Name attribute for potential FormData use
+                  name="assetClass"
                   className="data-[state=unchecked]:bg-[#00A896] data-[state=checked]:bg-[#7B0323]"
                   checked={assetClassIsDebt}
                   onCheckedChange={onSwitchCheckedChange}
@@ -273,9 +276,8 @@ export default function SectionModal({
 
               <DialogClose asChild>
                 <button
-                  type="button" // Important: Set to "button" to not submit the form
+                  type="button"
                   className="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-gray-900 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-gray-700 bg-[#1E2228] text-[#f4f0e1] hover:bg-gray-700 h-10 px-4 py-2"
-                  // onClick={() => setIsOpen(false)} // DialogClose handles this
                 >
                   Cancel
                 </button>

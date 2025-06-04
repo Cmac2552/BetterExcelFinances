@@ -7,7 +7,7 @@ import { Prisma } from '@prisma/client'; // Import Prisma for types if needed
 
 // Define a type for SectionItem based on expected structure
 interface SectionItemCreateInput {
-  name: string;
+  label: string;
   value: number;
 }
 
@@ -29,32 +29,31 @@ export async function saveSection(data: {
 
     const { id, title, fieldNames, fieldValues, month, assetClass } = data;
 
-    if (!title || typeof title !== 'string' || title.trim() === '') {
-        return { error: 'Title is required and must be a non-empty string.', success: false };
+    const validations = [
+      { condition: !title || typeof title !== 'string' || title.trim() === '', error: 'Title is required and must be a non-empty string.' },
+      { condition: !month || !(month instanceof Date) || isNaN(month.valueOf()), error: 'Month is required and must be a valid Date object.' },
+      { condition: !assetClass || (assetClass !== 'ASSET' && assetClass !== 'DEBT'), error: 'Asset class is required and must be either "ASSET" or "DEBT".' },
+      { condition: !Array.isArray(fieldNames) || !Array.isArray(fieldValues), error: 'Field names and field values must be arrays.' },
+      { condition: fieldNames.length !== fieldValues.length, error: 'Field names and values arrays must have the same length.' },
+    ];
+
+    for (const { condition, error } of validations) {
+      if (condition) {
+        return { error, success: false };
+      }
     }
-    if (!month || !(month instanceof Date) || isNaN(month.valueOf())) {
-        return { error: 'Month is required and must be a valid Date object.', success: false };
-    }
-    if (!assetClass || (assetClass !== 'ASSET' && assetClass !== 'DEBT')) {
-        return { error: 'Asset class is required and must be either "ASSET" or "DEBT".', success: false };
-    }
-    if (!Array.isArray(fieldNames) || !Array.isArray(fieldValues)) {
-        return { error: 'Field names and field values must be arrays.', success: false };
-    }
-    if (fieldNames.length !== fieldValues.length) {
-      return { error: 'Field names and values arrays must have the same length.', success: false };
-    }
+
     for (let i = 0; i < fieldNames.length; i++) {
-        if (typeof fieldNames[i] !== 'string' || fieldNames[i].trim() === '') {
-            return { error: `Field name at index ${i} must be a non-empty string.`, success: false };
-        }
-        if (typeof fieldValues[i] !== 'number' || isNaN(fieldValues[i])) {
-            return { error: `Field value at index ${i} must be a valid number.`, success: false };
-        }
+      if (typeof fieldNames[i] !== 'string' || fieldNames[i].trim() === '') {
+        return { error: `Field name at index ${i} must be a non-empty string.`, success: false };
+      }
+      if (typeof fieldValues[i] !== 'number' || isNaN(fieldValues[i])) {
+        return { error: `Field value at index ${i} must be a valid number.`, success: false };
+      }
     }
 
     const sectionItemsToCreate: SectionItemCreateInput[] = fieldNames.map((name, index) => ({
-      name: name, // Assuming Prisma schema for SectionItem uses 'name'
+      label: name, // Assuming Prisma schema for SectionItem uses 'name'
       value: fieldValues[index],
     }));
 
@@ -77,13 +76,13 @@ export async function saveSection(data: {
           assetClass,
           // For items, delete existing ones and create new ones
           // This simplifies logic compared to diffing items
-          items: {
+          values: {
             deleteMany: { sectionId: id }, // Delete items associated with this section
             create: sectionItemsToCreate,
           },
         },
         include: {
-          items: true, // Include the items in the response
+          values: true, // Include the items in the response
         },
       });
 
@@ -97,12 +96,12 @@ export async function saveSection(data: {
           month,
           assetClass,
           userId,
-          items: {
+          values: {
             create: sectionItemsToCreate,
           },
         },
         include: {
-          items: true, // Include the items in the response
+          values: true, // Include the items in the response
         },
       });
       revalidatePath('/'); // Or a more specific path
