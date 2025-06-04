@@ -25,14 +25,7 @@ interface SectionModalProps {
   givenAsset?: "ASSET" | "DEBT"; // Match server action type
   givenId?: number;
   onSectionAddition: (data: FinancialSectionData) => void;
-  // userId is not needed as prop, server action gets it from session
 }
-
-// Enum for AssetClass already defined in server action, but useful for client-side state if needed
-// enum AssetClassEnum {
-//   ASSET = "ASSET",
-//   DEBT = "DEBT",
-// }
 
 export default function SectionModal({
   date,
@@ -129,9 +122,7 @@ export default function SectionModal({
       return;
     }
 
-    const currentAssetClass = assetClassIsDebt
-      ? "DEBT"
-      : ("ASSET" as "DEBT" | "ASSET");
+    const currentAssetClass = assetClassIsDebt ? "DEBT" : "ASSET";
     const newDate = new Date(
       date.getUTCFullYear(),
       date.getUTCMonth(),
@@ -173,7 +164,7 @@ export default function SectionModal({
         title: result.section.title,
         values: financialSectionItems,
         userId: result.section.userId,
-        assetClass: result.section.assetClass as "ASSET" | "DEBT",
+        assetClass: result.section.assetClass,
       });
       setIsOpen(false); // Close dialog on success
       if (!givenId) {

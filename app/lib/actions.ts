@@ -13,7 +13,7 @@ interface SectionItemCreateInput {
 interface SectionUpdateInput {
   title: string;
   month: Date;
-  assetClass: 'ASSET' | 'DEBT';
+  assetClass: string;
   userId: string;
   values: {
     create: SectionItemCreateInput[];
@@ -24,7 +24,7 @@ interface SectionUpdateInput {
 interface SectionCreateInput {
   title: string;
   month: Date;
-  assetClass: 'ASSET' | 'DEBT';
+  assetClass: string;
   userId: string;
   values: {
     create: SectionItemCreateInput[];
@@ -36,7 +36,7 @@ export async function saveSection(data: {
   fieldNames: string[];
   fieldValues: number[];
   month: Date;
-  assetClass: 'ASSET' | 'DEBT';
+  assetClass: string;
   id?: number;
 }) {
   try {
