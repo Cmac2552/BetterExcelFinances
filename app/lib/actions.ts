@@ -74,7 +74,7 @@ export async function saveSection(data: {
 
     const { id, title, fieldNames, fieldValues, month, assetClass } = result.data;
 
-    const sectionItemsToCreate: SectionItemCreateInput[] = fieldNames.map((name, index) => ({
+    const sectionItemsToCreate: SectionItemCreateInput[] = fieldNames.map((name : string, index : number) => ({
       label: name,
       value: fieldValues[index],
     }));
