@@ -1,14 +1,34 @@
 'use server';
 
-import prisma from './prisma'; // Adjusted path assuming prisma.ts is in the same directory
+import prisma from './prisma'; 
 import { auth } from '../../auth';
 import { revalidatePath } from 'next/cache';
-import { Prisma } from '@prisma/client'; // Import Prisma for types if needed
+import { Prisma } from '@prisma/client'; 
 
-// Define a type for SectionItem based on expected structure
 interface SectionItemCreateInput {
   label: string;
   value: number;
+}
+
+interface SectionUpdateInput {
+  title: string;
+  month: Date;
+  assetClass: 'ASSET' | 'DEBT';
+  userId: string;
+  values: {
+    create: SectionItemCreateInput[];
+    deleteMany: {sectionId: number}
+  };
+}
+
+interface SectionCreateInput {
+  title: string;
+  month: Date;
+  assetClass: 'ASSET' | 'DEBT';
+  userId: string;
+  values: {
+    create: SectionItemCreateInput[];
+  };
 }
 
 export async function saveSection(data: {
@@ -22,7 +42,6 @@ export async function saveSection(data: {
   try {
     const session = await auth();
     if (!session?.user?.id) {
-      // In a real app, you might throw an error or return a more structured error response
       return { error: 'Unauthorized', success: false };
     }
     const userId = session.user.id;
@@ -53,13 +72,11 @@ export async function saveSection(data: {
     }
 
     const sectionItemsToCreate: SectionItemCreateInput[] = fieldNames.map((name, index) => ({
-      label: name, // Assuming Prisma schema for SectionItem uses 'name'
+      label: name, 
       value: fieldValues[index],
     }));
 
     if (id) {
-      // Update existing section
-      // Check if section exists and belongs to the user
       const existingSection = await prisma.section.findFirst({
         where: { id, userId },
       });
@@ -67,49 +84,36 @@ export async function saveSection(data: {
       if (!existingSection) {
         return { error: 'Section not found or user not authorized to update this section.', success: false };
       }
-
-      const updatedSection = await prisma.section.update({
-        where: { id }, // id is unique, no need for userId here if we already checked ownership
-        data: {
-          title,
-          month,
-          assetClass,
-          // For items, delete existing ones and create new ones
-          // This simplifies logic compared to diffing items
-          values: {
-            deleteMany: { sectionId: id }, // Delete items associated with this section
-            create: sectionItemsToCreate,
-          },
-        },
-        include: {
-          values: true, // Include the items in the response
-        },
-      });
-
-      revalidatePath('/'); // Or a more specific path if you have one e.g. /dashboard
-      return { success: true, section: updatedSection };
-    } else {
-      // Create new section
-      const newSection = await prisma.section.create({
-        data: {
+        const data = {
           title,
           month,
           assetClass,
           userId,
           values: {
+            deleteMany: { sectionId: id }, 
             create: sectionItemsToCreate,
           },
+        }
+      const updatedSection = await updateSection(data, id);
+
+      revalidatePath('/'); // Or a more specific path if you have one e.g. /dashboard
+      return { success: true, section: updatedSection };
+    } else {
+      const data =  {
+        title,
+        month,
+        assetClass,
+        userId,
+        values: {
+          create: sectionItemsToCreate,
         },
-        include: {
-          values: true, // Include the items in the response
-        },
-      });
+      }
+      const newSection = await createNewSection(data);
       revalidatePath('/'); // Or a more specific path
       return { success: true, section: newSection };
     }
   } catch (error) {
     console.error('Error saving section:', error);
-    // Check for Prisma-specific errors if you want to provide more granular feedback
     if (error instanceof Prisma.PrismaClientKnownRequestError) {
       // Example: P2002 is unique constraint violation
       if (error.code === 'P2002') {
@@ -118,4 +122,23 @@ export async function saveSection(data: {
     }
     return { error: 'Failed to save section due to a server error.', success: false };
   }
+}
+
+const createNewSection = async (data: SectionCreateInput) => {
+  return await prisma.section.create({
+    data,
+    include: {
+      values: true, // Include the items in the response
+    },
+  });
+}
+
+const updateSection = async (data: SectionUpdateInput, id: number) => {
+  return await prisma.section.update({
+    where: { id }, 
+    data,
+    include: {
+      values: true, 
+    },
+  });
 }
