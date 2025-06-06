@@ -1,35 +1,30 @@
 "use client";
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 import FinancialInputs from "./financialInputs";
 import LineChart from "./Line";
 import { signOut } from "next-auth/react";
-import { Tailspin } from "ldrs/react";
 import "ldrs/react/Tailspin.css";
 import NewSection from "./SectionModal";
 import DateInput from "./dateInput";
-import {
-  gatherDataForMonth,
-  generateNewTableData,
-  parseNewMonth,
-} from "../utils/monthUtils";
+import { gatherDataForMonth, generateNewTableData } from "../utils/monthUtils";
 import { sortSections } from "../utils/accountUtils";
-import {
-  fetchSections,
-  fetchTableData,
-  updateTableData,
-} from "../actions/financial";
+import { updateTableData } from "../actions/financial";
 import { FinancialSectionData, TableData } from "../types";
 
-export default function Dashboard() {
-  const [data, setData] = useState<FinancialSectionData[]>([]);
-  const [date, setDate] = useState(() => {
-    const today = new Date();
-    return new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), 1));
-  });
-  const [loading, setLoading] = useState(true);
-  const [tableData, setTableData] = useState<TableData[]>([]);
+interface DashboardInputProps {
+  sections: FinancialSectionData[];
+  tableDataInput: TableData[];
+  date: Date;
+}
+export default function Dashboard({
+  sections,
+  tableDataInput,
+  date,
+}: Readonly<DashboardInputProps>) {
+  const [data, setData] = useState<FinancialSectionData[]>(sections);
+
+  const [tableData, setTableData] = useState<TableData[]>(tableDataInput);
   const [allSectionsOpen, setAllSectionsOpen] = useState(false);
-  const previousDateRef = useRef<Date>(null);
 
   const postTableData = async (sections: any[]) => {
     const update = {
@@ -44,10 +39,6 @@ export default function Dashboard() {
     }
   };
 
-  const handleMonthChange = (monthInput: string) => {
-    setDate(parseNewMonth(monthInput, date));
-  };
-
   const addSection = (newSection: FinancialSectionData) => {
     const newSections = [...data, newSection];
     setData(sortSections(newSections));
@@ -60,26 +51,6 @@ export default function Dashboard() {
     postTableData(sortedSections);
   };
 
-  useEffect(() => {
-    if (previousDateRef.current?.getTime() === date.getTime()) {
-      return;
-    }
-    const fetchData = async () => {
-      setLoading(true);
-      try {
-        const financialSectionData = await fetchSections(date);
-        const tableData = await fetchTableData();
-        setData(sortSections(financialSectionData));
-        setTableData(tableData);
-        previousDateRef.current = date;
-      } catch (err) {
-        console.error("Error fetching data:", err);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchData();
-  }, [date]);
   return (
     <main className="min-h-screen">
       <div className="w-full h-[4rem] bg-[#141414] mb-4 flex items-center justify-between px-4 border-b-2 border-[#f4f0e1]">
@@ -100,7 +71,11 @@ export default function Dashboard() {
           </div>
           <div className="flex items-center gap-x-4 w-full pl-4 pr-2">
             <div className="grid grid-cols-2 gap-4">
-              <DateInput onMonthChange={handleMonthChange} />
+              <DateInput
+                onMonthChange={() => {
+                  console.log("hi");
+                }}
+              />
               <NewSection
                 date={date}
                 onSectionAddition={addSection}
@@ -120,20 +95,16 @@ export default function Dashboard() {
               Toggle All Accounts
             </button>
           </div>
-          {loading ? (
-            <div className="flex justify-center items-center h-full">
-              <Tailspin size="75" stroke="5" speed="0.9" color="#f4f0e1" />
-            </div>
-          ) : (
-            <div className="w-full">
-              <FinancialInputs
-                sections={data}
-                date={date}
-                setSections={setSections}
-                allSectionsOpen={allSectionsOpen}
-              />
-            </div>
-          )}
+          (
+          <div className="w-full">
+            <FinancialInputs
+              sections={data}
+              date={date}
+              setSections={setSections}
+              allSectionsOpen={allSectionsOpen}
+            />
+          </div>
+          )
         </div>
       </div>
     </main>
