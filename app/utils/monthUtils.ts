@@ -35,7 +35,7 @@ export const generateNewTableData = (update: {
       );
     };
 
-  export const parseNewMonth = (monthInput:string, currentDate: Date) : Date => {
+  export const parseNewMonth = (monthInput:string) : Date => {
     const parts = monthInput.split("-");
     if (parts.length === 2) {
       const year = parseInt(parts[0]);
@@ -43,17 +43,14 @@ export const generateNewTableData = (update: {
 
       if (!isNaN(year) && !isNaN(month) && month >= 1 && month <= 12) {
         const newDateAtUTCMidnight = new Date(Date.UTC(year, month - 1, 1));
-
-        if (currentDate.getTime() !== newDateAtUTCMidnight.getTime()) {
           return(newDateAtUTCMidnight);
-        }
       } else {
         console.error("Invalid year or month parsed from input:", monthInput);
       }
     } else {
       console.error("Invalid month input format received:", monthInput);
     }
-    return currentDate;
+    return new Date();
   }
 
   const monthNames = [

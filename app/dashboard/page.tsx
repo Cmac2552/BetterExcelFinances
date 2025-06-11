@@ -6,10 +6,11 @@ interface DashboardPageProps {
   searchParams: any;
 }
 async function DashboardPage({ searchParams }: DashboardPageProps) {
-  const month = getCurrentMonth();
+  const params = await searchParams;
+  const month = params.month ?? getCurrentMonth();
 
   const [userData, tableData] = await Promise.all([
-    fetchSections(month),
+    fetchSections(parseNewMonth(month)),
     fetchTableData(),
   ]);
 
@@ -25,10 +26,8 @@ function getCurrentMonth() {
   const now = new Date(
     Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), 1)
   );
-  return parseNewMonth(
-    `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`,
-    now
-  );
+
+  return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
 }
 
 export default DashboardPage;
