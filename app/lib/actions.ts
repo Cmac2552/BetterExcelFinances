@@ -1,9 +1,29 @@
 'use server';
 
+import { z } from 'zod';
 import prisma from './prisma'; 
 import { auth } from '../../auth';
 import { revalidatePath } from 'next/cache';
 import { Prisma } from '@prisma/client'; 
+
+// Zod schema for SectionItemCreateInput
+const SectionItemCreateInputSchema = z.object({
+  label: z.string(),
+  value: z.number(),
+});
+
+// Zod schema for saveSection input data
+const SaveSectionInputSchema = z.object({
+  title: z.string().min(1, { message: "Title is required and must be a non-empty string." }),
+  fieldNames: z.array(z.string().min(1, { message: "Field name must be a non-empty string." })),
+  fieldValues: z.array(z.number()),
+  month: z.date({ invalid_type_error: "Month is required and must be a valid Date object." }),
+  assetClass: z.enum(["ASSET", "DEBT"], { errorMap: () => ({ message: 'Asset class must be either "ASSET" or "DEBT".' }) }),
+  id: z.number().optional(),
+}).refine(data => data.fieldNames.length === data.fieldValues.length, {
+  message: "Field names and values arrays must have the same length.",
+  path: ["fieldNames"], // you can specify a path for the error, e.g., relating to fieldNames
+});
 
 interface SectionItemCreateInput {
   label: string;
@@ -46,33 +66,16 @@ export async function saveSection(data: {
     }
     const userId = session.user.id;
 
-    const { id, title, fieldNames, fieldValues, month, assetClass } = data;
+    const result = SaveSectionInputSchema.safeParse(data);
 
-    const validations = [
-      { condition: !title || typeof title !== 'string' || title.trim() === '', error: 'Title is required and must be a non-empty string.' },
-      { condition: !month || !(month instanceof Date) || isNaN(month.valueOf()), error: 'Month is required and must be a valid Date object.' },
-      { condition: !assetClass || (assetClass !== 'ASSET' && assetClass !== 'DEBT'), error: 'Asset class is required and must be either "ASSET" or "DEBT".' },
-      { condition: !Array.isArray(fieldNames) || !Array.isArray(fieldValues), error: 'Field names and field values must be arrays.' },
-      { condition: fieldNames.length !== fieldValues.length, error: 'Field names and values arrays must have the same length.' },
-    ];
-
-    for (const { condition, error } of validations) {
-      if (condition) {
-        return { error, success: false };
-      }
+    if (!result.success) {
+      return { error: "Validation failed", issues: result.error.issues, success: false };
     }
 
-    for (let i = 0; i < fieldNames.length; i++) {
-      if (typeof fieldNames[i] !== 'string' || fieldNames[i].trim() === '') {
-        return { error: `Field name at index ${i} must be a non-empty string.`, success: false };
-      }
-      if (typeof fieldValues[i] !== 'number' || isNaN(fieldValues[i])) {
-        return { error: `Field value at index ${i} must be a valid number.`, success: false };
-      }
-    }
+    const { id, title, fieldNames, fieldValues, month, assetClass } = result.data;
 
-    const sectionItemsToCreate: SectionItemCreateInput[] = fieldNames.map((name, index) => ({
-      label: name, 
+    const sectionItemsToCreate: SectionItemCreateInput[] = fieldNames.map((name : string, index : number) => ({
+      label: name,
       value: fieldValues[index],
     }));
 
@@ -84,22 +87,22 @@ export async function saveSection(data: {
       if (!existingSection) {
         return { error: 'Section not found or user not authorized to update this section.', success: false };
       }
-        const data: SectionUpdateInput =  {
-          title,
-          month,
-          assetClass,
-          userId,
-          values: {
-            deleteMany: { sectionId: id }, 
-            create: sectionItemsToCreate,
-          },
-        }
-      const updatedSection = await updateSection(data, id);
+      const sectionData: SectionUpdateInput = { 
+        title,
+        month,
+        assetClass,
+        userId,
+        values: {
+          deleteMany: { sectionId: id },
+          create: sectionItemsToCreate,
+        },
+      }
+      const updatedSection = await updateSection(sectionData, id); 
 
-      revalidatePath('/'); // Or a more specific path if you have one e.g. /dashboard
+      revalidatePath('/'); 
       return { success: true, section: updatedSection };
     } else {
-      const data : SectionCreateInput =  {
+      const sectionData: SectionCreateInput = { 
         title,
         month,
         assetClass,
@@ -108,8 +111,8 @@ export async function saveSection(data: {
           create: sectionItemsToCreate,
         },
       }
-      const newSection = await createNewSection(data);
-      revalidatePath('/'); // Or a more specific path
+      const newSection = await createNewSection(sectionData); 
+      revalidatePath('/'); 
       return { success: true, section: newSection };
     }
   } catch (error) {
@@ -128,7 +131,7 @@ const createNewSection = async (data: SectionCreateInput) => {
   return await prisma.section.create({
     data,
     include: {
-      values: true, // Include the items in the response
+      values: true,
     },
   });
 }
