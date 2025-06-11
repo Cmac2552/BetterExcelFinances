@@ -99,7 +99,7 @@ export async function saveSection(data: {
       }
       const updatedSection = await updateSection(sectionData, id); 
 
-      revalidatePath('/'); 
+      revalidatePath('/dashboard'); 
       return { success: true, section: updatedSection };
     } else {
       const sectionData: SectionCreateInput = { 
@@ -112,7 +112,7 @@ export async function saveSection(data: {
         },
       }
       const newSection = await createNewSection(sectionData); 
-      revalidatePath('/'); 
+      revalidatePath('/dashboard'); 
       return { success: true, section: newSection };
     }
   } catch (error) {

@@ -123,6 +123,7 @@ export default function SectionModal({
     }
 
     const currentAssetClass = assetClassIsDebt ? "DEBT" : "ASSET";
+    console.log(date);
     const newDate = new Date(
       date.getUTCFullYear(),
       date.getUTCMonth(),

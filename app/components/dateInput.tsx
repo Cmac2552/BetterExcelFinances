@@ -1,26 +1,15 @@
-import { redirect } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 
 interface ChildComponentProps {
-  onMonthChange: (data: string) => void;
+  date: Date;
 }
-export default function DateInput({
-  onMonthChange,
-}: Readonly<ChildComponentProps>) {
-  const [selectedMonth, setSelectedMonth] = useState<string>("");
-
-  useEffect(() => {
-    if (selectedMonth === "") {
-      const now = new Date();
-      const formattedMonth = `${now.getFullYear()}-${String(
-        now.getMonth() + 1
-      ).padStart(2, "0")}`;
-      setSelectedMonth(formattedMonth);
-    }
-  }, []);
+export default function DateInput({ date }: Readonly<ChildComponentProps>) {
+  const router = useRouter();
+  console.log(date);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    redirect("/dashboard?month=" + e.target.value);
+    console.log(e.target.value);
+    router.push("/dashboard?month=" + e.target.value);
   };
 
   return (
@@ -29,7 +18,9 @@ export default function DateInput({
       id="month-picker"
       name="month-picker"
       className=" px-4 py-2 bg-[#1E2228] text-[#f4f0e1] border border-gray-600 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus-visible:ring-[#f4f0e1]  w-[12rem]"
-      value={selectedMonth}
+      value={`${date.getUTCFullYear()}-${String(
+        date.getUTCMonth() + 1
+      ).padStart(2, "0")}`}
       onChange={handleChange}
     />
   );
