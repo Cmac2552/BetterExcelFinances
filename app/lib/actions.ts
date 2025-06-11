@@ -87,7 +87,7 @@ export async function saveSection(data: {
       if (!existingSection) {
         return { error: 'Section not found or user not authorized to update this section.', success: false };
       }
-      const sectionData: SectionUpdateInput = { // Renamed from data to avoid conflict with result.data
+      const sectionData: SectionUpdateInput = { 
         title,
         month,
         assetClass,
@@ -97,12 +97,12 @@ export async function saveSection(data: {
           create: sectionItemsToCreate,
         },
       }
-      const updatedSection = await updateSection(sectionData, id); // Use sectionData
+      const updatedSection = await updateSection(sectionData, id); 
 
-      revalidatePath('/'); // Or a more specific path if you have one e.g. /dashboard
+      revalidatePath('/'); 
       return { success: true, section: updatedSection };
     } else {
-      const sectionData: SectionCreateInput = { // Renamed from data to avoid conflict with result.data
+      const sectionData: SectionCreateInput = { 
         title,
         month,
         assetClass,
@@ -111,8 +111,8 @@ export async function saveSection(data: {
           create: sectionItemsToCreate,
         },
       }
-      const newSection = await createNewSection(sectionData); // Use sectionData
-      revalidatePath('/'); // Or a more specific path
+      const newSection = await createNewSection(sectionData); 
+      revalidatePath('/'); 
       return { success: true, section: newSection };
     }
   } catch (error) {
@@ -131,7 +131,7 @@ const createNewSection = async (data: SectionCreateInput) => {
   return await prisma.section.create({
     data,
     include: {
-      values: true, // Include the items in the response
+      values: true,
     },
   });
 }
