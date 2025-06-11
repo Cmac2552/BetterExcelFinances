@@ -1,3 +1,4 @@
+import { redirect } from "next/navigation";
 import { useEffect, useState } from "react";
 
 interface ChildComponentProps {
@@ -19,9 +20,7 @@ export default function DateInput({
   }, []);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    setSelectedMonth(value);
-    onMonthChange(value);
+    redirect("/dashboard?month=" + e.target.value);
   };
 
   return (
