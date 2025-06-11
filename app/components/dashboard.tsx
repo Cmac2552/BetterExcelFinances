@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import FinancialInputs from "./financialInputs";
 import LineChart from "./Line";
 import { signOut } from "next-auth/react";
@@ -21,7 +21,9 @@ export default function Dashboard({
   tableDataInput,
   date,
 }: Readonly<DashboardInputProps>) {
-  const [data, setData] = useState<FinancialSectionData[]>(sections);
+  const [data, setData] = useState<FinancialSectionData[]>(
+    sortSections(sections)
+  );
 
   const [tableData, setTableData] = useState<TableData[]>(tableDataInput);
   const [allSectionsOpen, setAllSectionsOpen] = useState(false);
@@ -51,6 +53,11 @@ export default function Dashboard({
     postTableData(sortedSections);
   };
 
+  useEffect(() => {
+    setTableData(tableDataInput);
+    setData(sortSections(sections));
+  }, [tableDataInput, sections]);
+
   return (
     <main className="min-h-screen">
       <div className="w-full h-[4rem] bg-[#141414] mb-4 flex items-center justify-between px-4 border-b-2 border-[#f4f0e1]">
@@ -71,11 +78,7 @@ export default function Dashboard({
           </div>
           <div className="flex items-center gap-x-4 w-full pl-4 pr-2">
             <div className="grid grid-cols-2 gap-4">
-              <DateInput
-                onMonthChange={() => {
-                  console.log("hi");
-                }}
-              />
+              <DateInput date={date} />
               <NewSection
                 date={date}
                 onSectionAddition={addSection}

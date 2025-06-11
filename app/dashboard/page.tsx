@@ -2,10 +2,12 @@ import { fetchSections, fetchTableData } from "../actions/financial";
 import Dashboard from "../components/dashboard";
 import { parseNewMonth } from "../utils/monthUtils";
 
+// Add this line to force dynamic rendering
+export const dynamic = "force-dynamic";
 interface DashboardPageProps {
   searchParams: any;
 }
-async function DashboardPage({ searchParams }: DashboardPageProps) {
+async function DashboardPage({ searchParams }: Readonly<DashboardPageProps>) {
   const params = await searchParams;
   const month = params.month ?? getCurrentMonth();
 
@@ -16,7 +18,11 @@ async function DashboardPage({ searchParams }: DashboardPageProps) {
 
   return (
     <div className="dashboard">
-      <Dashboard tableDataInput={tableData} sections={userData} date={month} />
+      <Dashboard
+        tableDataInput={tableData}
+        sections={userData}
+        date={parseNewMonth(month)}
+      />
     </div>
   );
 }
