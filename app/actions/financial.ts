@@ -40,7 +40,7 @@ export async function fetchTableData(): Promise<TableData[]> {
   return formattedData;
 }
 
-function mapDatesAndDbDate(dates, dbDate) {
+function mapDatesAndDbDate(dates: string[], dbDate:{date:Date, sectionValue:number}[]) {
   const dbMap = new Map();
   dbDate.forEach(({ date, sectionValue }) => {
      const monthYear = `${monthNames[date.getUTCMonth()]} ${date.getUTCFullYear()}`;
