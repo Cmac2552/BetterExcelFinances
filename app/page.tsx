@@ -8,5 +8,4 @@ export default async function Home() {
   } else {
     redirect("/dashboard");
   }
-  return <div>test</div>;
 }

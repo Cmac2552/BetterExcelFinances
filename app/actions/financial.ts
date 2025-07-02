@@ -5,21 +5,26 @@ import prisma from "../lib/prisma";
 
 export async function fetchSections(date: Date): Promise<FinancialSectionData[]> {
     const session = await auth();
-        const firstDay = new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), 1, 0, 0, 0, 0));
-        const lastDay = new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth() + 1, 0, 23, 59, 59, 999));
+
+    if (!session?.user?.id) {
+      throw new Error("Unauthorized: No valid session found");
+    }
+
+    const firstDay = new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), 1, 0, 0, 0, 0));
+    const lastDay = new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth() + 1, 0, 23, 59, 59, 999));
     
-        return prisma.section.findMany({
-            where:{
-                userId:session?.user.id,
-                month:{
-                    gte: firstDay,
-                    lte: lastDay
-                }
-            },
-            include: {
-                values: true, // Include the related SectionItem values
-              },
-        });
+    return prisma.section.findMany({
+        where:{
+            userId:session?.user?.id,
+            month:{
+                gte: firstDay,
+                lte: lastDay
+            }
+        },
+        include: {
+            values: true, // Include the related SectionItem values
+          },
+    });
   }
 
 export async function fetchTableData(): Promise<TableData[]> {
