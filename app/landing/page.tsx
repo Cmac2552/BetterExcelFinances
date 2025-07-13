@@ -1,13 +1,7 @@
-import Link from "next/link"; // Import Link for Next.js navigation
+import Link from "next/link";
 import Image from "next/image";
-import { auth } from "@/auth";
-import { redirect } from "next/navigation";
 
 export default async function LandingPage() {
-  const session = await auth();
-  if (session) {
-    redirect("/");
-  }
   return (
     <main className="min-h-screen text-[#f4f0e1] flex flex-col items-center justify-center p-4">
       <div className="flex justify-center items-end space-x-2 h-16 mb-4">

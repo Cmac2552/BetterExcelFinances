@@ -1,5 +1,6 @@
 "use client";
 
+import { copyMonth } from "../lib/actions";
 import { FinancialSectionData } from "../types";
 import FinancialSection from "./financialSections";
 
@@ -17,15 +18,7 @@ export default function FinancialInputs({
   allSectionsOpen,
 }: Readonly<FinancialInputProps>) {
   const importMonth = async () => {
-    const response = await fetch(`api/copy-month?date=${date}`, {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
-    if (response.ok) {
-      setSections(await response.json());
-    }
+    setSections(await copyMonth(date.toUTCString()));
   };
   const onSectionModify = (updatedSection: any) => {
     const updatedSections = sections.map((section) => {

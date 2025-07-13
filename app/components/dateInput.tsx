@@ -1,15 +1,18 @@
 import { useRouter } from "next/navigation";
+import { startTransition } from "react";
 
 interface ChildComponentProps {
   date: Date;
 }
 export default function DateInput({ date }: Readonly<ChildComponentProps>) {
   const router = useRouter();
-  console.log(date);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     console.log(e.target.value);
-    router.push("/dashboard?month=" + e.target.value);
+    startTransition(() => {
+      router.push(`/dashboard?month=` + e.target.value);
+      router.refresh();
+    });
   };
 
   return (
