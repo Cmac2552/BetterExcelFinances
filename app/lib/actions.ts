@@ -1,9 +1,7 @@
 'use server';
-
 import { z } from 'zod';
 import prisma from './prisma'; 
 import { auth } from '../../auth';
-import { revalidatePath } from 'next/cache';
 import { Prisma } from '@prisma/client'; 
 
 // Zod schema for SectionItemCreateInput
@@ -99,7 +97,6 @@ export async function saveSection(data: {
       }
       const updatedSection = await updateSection(sectionData, id); 
 
-      revalidatePath('/dashboard'); 
       return { success: true, section: updatedSection };
     } else {
       const sectionData: SectionCreateInput = { 
@@ -112,7 +109,6 @@ export async function saveSection(data: {
         },
       }
       const newSection = await createNewSection(sectionData); 
-      revalidatePath('/dashboard'); 
       return { success: true, section: newSection };
     }
   } catch (error) {
@@ -144,4 +140,101 @@ const updateSection = async (data: SectionUpdateInput, id: number) => {
       values: true, 
     },
   });
+}
+
+export const copyMonth = async (dateString : string) => {
+  const session = await auth();
+      
+  const date = new Date(dateString);
+  const lastMonthFirstDay = new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth() - 1, 1));
+  const lastMonthLastDay = new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), 0, 23, 59, 59, 999));
+  
+  const original = await prisma.section.findMany({
+      where:{
+          userId:session?.user.id,
+          month:{
+              gte: lastMonthFirstDay,
+              lte: lastMonthLastDay
+          }
+      },
+      include: {
+          values: true,
+          },
+  });
+
+  const newValues = original.map((value) => {
+    const modifiedValues = value.values.map((sectionItem) => {
+      return {label: sectionItem.label, value: sectionItem.value};
+    })
+    return {month: date.toISOString(), values: modifiedValues, title: value.title, userId: value.userId, assetClass: value.assetClass};
+  });
+  const copiedSections = await createSectionsWithItems(newValues);
+  return copiedSections
+}
+
+const createSectionsWithItems = async (data : {title : string, month:string, userId:string, assetClass:string, values:{label:string, value:number}[]}[]) => {
+    return await Promise.all(
+      data.map(section => 
+        prisma.section.upsert({
+          where: {title_month: {
+            title:section.title,
+            month:section.month
+          }},
+          update:{
+            ...section,
+            values: {
+              create: section.values
+            }
+          }, 
+          create:{
+            ...section,
+            values: {
+              create: section.values
+            }
+          },
+          include: {
+            values: true
+          }
+        })
+      )
+    );
+  };
+
+export const deleteSectionItem = async (id:number) => {
+  const sectionItem = await prisma.sectionItem.findUnique({
+        where: { id: id },
+      });
+  
+  if (!sectionItem) {
+    throw new Error("Section Item Does Not Exist");
+  }
+
+  await prisma.sectionItem.delete({
+    where: { id: id },
+  });
+}
+
+export const deleteSection = async (id:number) => {
+  console.log(id);
+  const sectionItem = await prisma.section.findUnique({
+        where: { id: id },
+      });
+  
+  if (!sectionItem) {
+    throw new Error("Section Item Does Not Exist");
+  }
+  
+  await prisma.section.delete({
+    where: { id: id },
+  });
+}
+
+export const updateSectionItem = async (id:number, value: number) => {
+  return await prisma.sectionItem.update({
+      where: {id: id},
+      data:{
+          value: value
+      }
+  })
+        
 }

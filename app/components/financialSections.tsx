@@ -6,6 +6,11 @@ import { TiPencil } from "react-icons/ti";
 import { FaMoneyBill1 } from "react-icons/fa6";
 import NewSection from "./SectionModal";
 import { FinancialSectionData, FinancialSectionItemData } from "../types";
+import {
+  deleteSection,
+  deleteSectionItem,
+  updateSectionItem,
+} from "../lib/actions";
 
 interface SectionProps {
   section: FinancialSectionData;
@@ -40,62 +45,36 @@ export default function FinancialSection({
       return;
     }
     try {
-      const response = await fetch("/api/sectionItem/" + value.id, {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          parentid: section.id,
-          sectionLabel: value.label,
-          id: value.id,
-          value: newValue,
-        }),
-      });
-      if (response.ok) {
-        const responseData = await response.json();
-        const newSectionData = {
-          ...sectionData,
-          values: sectionData.values.map((value: FinancialSectionItemData) =>
-            value.id === responseData.id ? responseData : value
-          ),
-        };
-        onSectionModify(newSectionData);
-      }
+      const responseData = await updateSectionItem(
+        value.id as number,
+        newValue
+      );
+      const newSectionData = {
+        ...sectionData,
+        values: sectionData.values.map((value: FinancialSectionItemData) =>
+          value.id === responseData.id ? responseData : value
+        ),
+      };
+      onSectionModify(newSectionData);
     } catch (error) {
       console.log("somethingbroke", error);
     }
   };
 
   const onSectionDelete = async () => {
-    const response = await fetch("/api/section/" + sectionData.id, {
-      method: "DELETE",
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
-    if (!response.ok) {
-      console.log("damn that sucks");
-    }
+    await deleteSection(sectionData.id);
     sectionDelete(sectionData.id);
   };
 
-  const deleteSectionItem = async (value: FinancialSectionItemData) => {
-    const response = await fetch("/api/sectionItem/" + value.id, {
-      method: "DELETE",
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
-    if (response.ok) {
-      const newSectionData = {
-        ...sectionData,
-        values: sectionData.values.filter(
-          (item: FinancialSectionItemData) => item.id !== value.id
-        ),
-      };
-      onSectionModify(newSectionData);
-    }
+  const removeSectionItem = async (value: FinancialSectionItemData) => {
+    await deleteSectionItem(value.id as number);
+    const newSectionData = {
+      ...sectionData,
+      values: sectionData.values.filter(
+        (item: FinancialSectionItemData) => item.id !== value.id
+      ),
+    };
+    onSectionModify(newSectionData);
   };
   return (
     <div className="my-4 w-1/3 h-full">
@@ -186,7 +165,7 @@ export default function FinancialSection({
                       />
 
                       <button
-                        onClick={() => deleteSectionItem(value)}
+                        onClick={() => removeSectionItem(value)}
                         className=" text-[#f4f0e1] p-2 rounded-md border border-transparent hover:border-gray-400 hover:bg-gray-700 transition-all duration-50 ml-auto justify-self-center self-center invisible group-hover:visible"
                         title="Delete Account Item"
                       >
