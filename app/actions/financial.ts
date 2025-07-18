@@ -97,7 +97,7 @@ export async function updateTableData(update: { date: Date; sectionValue: number
         },
       },
       update: { sectionValue: update.sectionValue },
-      create: { sectionValue: update.sectionValue, date: update.date, userId: session.user.id },
+      create: { sectionValue: update.sectionValue, date: normalizedDate, userId: session.user.id },
     });
   } catch (error) {
     console.error("Error in updateTableData:", error);

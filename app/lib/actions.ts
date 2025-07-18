@@ -215,7 +215,6 @@ export const deleteSectionItem = async (id:number) => {
 }
 
 export const deleteSection = async (id:number) => {
-  console.log(id);
   const sectionItem = await prisma.section.findUnique({
         where: { id: id },
       });

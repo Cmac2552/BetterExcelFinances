@@ -3,7 +3,6 @@ import { fetchSections, fetchTableData } from "../actions/financial";
 import Dashboard from "../components/dashboard";
 import { parseNewMonth } from "../utils/monthUtils";
 import { redirect } from "next/navigation";
-import Nav from "../components/nav";
 
 // Add this line to force dynamic rendering
 export const dynamic = "force-dynamic";
@@ -25,16 +24,11 @@ async function DashboardPage({ searchParams }: Readonly<DashboardPageProps>) {
   ]);
 
   return (
-    <div className="dashboard">
-      <main className="min-h-screen">
-        <Nav />
-        <Dashboard
-          tableDataInput={tableData}
-          sections={userData}
-          date={parseNewMonth(month)}
-        />
-      </main>
-    </div>
+    <Dashboard
+      tableDataInput={tableData}
+      sections={userData}
+      date={parseNewMonth(month)}
+    />
   );
 }
 
