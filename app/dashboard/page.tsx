@@ -24,13 +24,12 @@ async function DashboardPage({ searchParams }: Readonly<DashboardPageProps>) {
   ]);
 
   return (
-    <div className="dashboard">
-      <Dashboard
-        tableDataInput={tableData}
-        sections={userData}
-        date={parseNewMonth(month)}
-      />
-    </div>
+    <Dashboard
+      key={month}
+      tableDataInput={tableData}
+      sections={userData}
+      date={parseNewMonth(month)}
+    />
   );
 }
 
