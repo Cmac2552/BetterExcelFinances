@@ -57,7 +57,7 @@ export default function FinancialSection({
       };
       onSectionModify(newSectionData);
     } catch (error) {
-      console.log("somethingbroke", error);
+      console.error("somethingbroke", error);
     }
   };
 
