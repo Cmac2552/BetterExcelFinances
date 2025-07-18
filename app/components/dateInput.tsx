@@ -8,7 +8,6 @@ export default function DateInput({ date }: Readonly<ChildComponentProps>) {
   const router = useRouter();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    console.log(e.target.value);
     startTransition(() => {
       router.push(`/dashboard?month=` + e.target.value);
       router.refresh();

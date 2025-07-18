@@ -50,11 +50,6 @@ export default function Dashboard({
     postTableData(sortedSections);
   };
 
-  useEffect(() => {
-    setTableData(tableDataInput);
-    setData(sortSections(sections));
-  }, [tableDataInput, sections]);
-
   return (
     <div className="z-10 w-full h-[80%]">
       <div className="w-full flex items-center justify-center flex-col">
