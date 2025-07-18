@@ -2,7 +2,6 @@
 import { useEffect, useState } from "react";
 import FinancialInputs from "./financialInputs";
 import LineChart from "./Line";
-import "ldrs/react/Tailspin.css";
 import NewSection from "./SectionModal";
 import DateInput from "./dateInput";
 import { gatherDataForMonth, generateNewTableData } from "../utils/monthUtils";
@@ -57,7 +56,7 @@ export default function Dashboard({
   }, [tableDataInput, sections]);
 
   return (
-    <div className="z-10 w-full h-[40rem]">
+    <div className="z-10 w-full h-[80%]">
       <div className="w-full flex items-center justify-center flex-col">
         <div className="w-full h-[450px]">
           <LineChart tableData={tableData} />
