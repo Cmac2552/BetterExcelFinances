@@ -1,3 +1,4 @@
+"use server"
 import { auth } from "@/auth";
 import { FinancialSectionData, TableData } from "../types";
 import prisma from "../lib/prisma";
@@ -77,26 +78,29 @@ const monthNames = [
   "July", "August", "September", "October", "November", "December"
 ];
 
-export async function updateTableData(update: { 
-    date: Date; 
-    sectionValue: number 
-  }) {
-    try {
-      const response = await fetch("/api/table-data", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(update),
-      });
-  
-      if (!response.ok) {
-        throw new Error("Failed to update table data");
-      }
-  
-      return response.json();
-    } catch (error) {
-      console.error("Error in updateTableData:", error);
-      throw error;
-    }
+export async function updateTableData(update: { date: Date; sectionValue: number }) {
+  const session = await auth();
+
+  if (!session?.user?.id) {
+    throw new Error("Unauthorized: No valid session found");
   }
+
+  try {
+    const submittedDate = new Date(update.date);
+    const normalizedDate = new Date(Date.UTC(submittedDate.getUTCFullYear(), submittedDate.getUTCMonth(), 15, 0, 0, 0, 0));
+
+    await prisma.tableData.upsert({
+      where: {
+        userId_date: {
+          userId: session.user.id,
+          date: normalizedDate,
+        },
+      },
+      update: { sectionValue: update.sectionValue },
+      create: { sectionValue: update.sectionValue, date: normalizedDate, userId: session.user.id },
+    });
+  } catch (error) {
+    console.error("Error in updateTableData:", error);
+    throw error;
+  }
+}
