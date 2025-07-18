@@ -34,12 +34,9 @@ async function DashboardPage({ searchParams }: Readonly<DashboardPageProps>) {
 }
 
 function getCurrentMonth() {
-  const today = new Date();
-  const now = new Date(
-    Date.UTC(today.getUTCFullYear(), today.getUTCMonth() + 1, 1)
-  );
-
-  return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
+  const year = today.getUTCFullYear();
+  const month = today.getUTCMonth() + 1;
+  return `${year}-${String(month).padStart(2, "0")}`;
 }
 
 export default DashboardPage;
