@@ -78,7 +78,7 @@ export default function Dashboard({
             Toggle All Accounts
           </button>
         </div>
-        (
+
         <div className="w-full">
           <FinancialInputs
             sections={data}
@@ -87,7 +87,6 @@ export default function Dashboard({
             allSectionsOpen={allSectionsOpen}
           />
         </div>
-        )
       </div>
     </div>
   );
