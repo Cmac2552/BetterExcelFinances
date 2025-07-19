@@ -27,7 +27,7 @@ interface SectionModalProps {
   onSectionAddition: (data: FinancialSectionData) => void;
 }
 
-export default function SectionModal({
+export function SectionModal({
   date,
   modalTitle,
   trigger,
