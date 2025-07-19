@@ -2,7 +2,7 @@
 
 import { copyMonth } from "../lib/actions";
 import { FinancialSectionData } from "../types";
-import FinancialSection from "./financialSections";
+import { FinancialSection } from "./financialSections";
 
 interface FinancialInputProps {
   sections: FinancialSectionData[];
@@ -11,7 +11,7 @@ interface FinancialInputProps {
   allSectionsOpen: boolean;
 }
 
-export default function FinancialInputs({
+export function FinancialInputs({
   sections,
   date,
   setSections,

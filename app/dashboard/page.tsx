@@ -25,7 +25,6 @@ async function DashboardPage({ searchParams }: Readonly<DashboardPageProps>) {
 
   return (
     <Dashboard
-      key={month}
       tableDataInput={tableData}
       sections={userData}
       date={parseNewMonth(month)}
