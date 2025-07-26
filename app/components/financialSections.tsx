@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { GoXCircleFill } from "react-icons/go";
 import { TiPencil } from "react-icons/ti";
 import { FaMoneyBill1 } from "react-icons/fa6";
-import NewSection from "./SectionModal";
+import { SectionModal } from "./SectionModal";
 import { FinancialSectionData, FinancialSectionItemData } from "../types";
 import {
   deleteSection,
@@ -20,7 +20,7 @@ interface SectionProps {
   date: Date;
 }
 
-export default function FinancialSection({
+export function FinancialSection({
   section,
   open,
   onSectionModify,
@@ -92,7 +92,7 @@ export default function FinancialSection({
               </span>
             </div>
             <div className="flex justify-end invisible mr-1 text-[#f4f0e1] ml-auto group-hover:visible">
-              <NewSection
+              <SectionModal
                 date={date}
                 onSectionAddition={onSectionModify}
                 modalTitle="Add Account"

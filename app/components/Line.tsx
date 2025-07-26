@@ -24,7 +24,7 @@ interface LineInputProps {
   tableData: TableData[];
 }
 
-export default function Chart({ tableData }: Readonly<LineInputProps>) {
+export function LineChart({ tableData }: Readonly<LineInputProps>) {
   if (tableData.length === 0) {
     return (
       <div className="flex justify-center items-center h-full">
