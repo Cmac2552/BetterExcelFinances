@@ -4,7 +4,7 @@ import { startTransition } from "react";
 interface ChildComponentProps {
   date: Date;
 }
-export default function DateInput({ date }: Readonly<ChildComponentProps>) {
+export function DateInput({ date }: Readonly<ChildComponentProps>) {
   const router = useRouter();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
