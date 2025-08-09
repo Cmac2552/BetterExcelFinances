@@ -39,10 +39,10 @@ function transformDataForPrisma(
         const debit = parseFloat(row.Debit) || 0;
         const amount = debit 
 
-        if (!row["Transaction Date"] || amount === 0) return null;
+        if (!row["Posted Date"] || amount === 0) return null;
 
         return {
-          date: new Date(row["Transaction Date"]),
+          date: new Date(row["Posted Date"]),
           amount,
           description: row.Description,
           category: row.Category,
@@ -56,10 +56,10 @@ function transformDataForPrisma(
   } else {
     return csvData
       .map((row) => {
-        if (!row["Trans. Date"] || !row.Amount || row.Amount < 0) return null;
+        if (!row["Post Date"] || !row.Amount || row.Amount < 0) return null;
 
         return {
-          date: new Date(row["Trans. Date"]),
+          date: new Date(row["Post Date"]),
           amount: parseFloat(row.Amount),
           description: row.Description,
           category: row.Category,

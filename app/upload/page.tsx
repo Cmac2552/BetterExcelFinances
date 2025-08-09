@@ -6,10 +6,10 @@ import { CategoryPieChart } from "./CategoryPieChart";
 import { Transaction } from "@prisma/client";
 
 interface Props {
-  searchParams: {
+  searchParams: Promise<{
     month?: string;
     year?: string;
-  };
+  }>;
 }
 
 function getStatementDateRange(month: number, year: number) {
@@ -37,17 +37,17 @@ function aggregateDataForChart(transactions: Transaction[]) {
     .sort((a, b) => b.amount - a.amount);
 }
 
-export default async function UploadPage({ searchParams }: Readonly<Props>) {
+export default async function UploadPage({ searchParams }: Props) {
   const session = await auth();
   const userId = session?.user?.id;
 
   const today = new Date();
   const params = await searchParams;
   const currentMonth = parseInt(
-    params.month || (today.getUTCMonth() + 1).toString()
+    params?.month || (today.getUTCMonth() + 1).toString()
   );
   const currentYear = parseInt(
-    params.year || today.getUTCFullYear().toString()
+    params?.year || today.getUTCFullYear().toString()
   );
 
   const { startDate, endDate } = getStatementDateRange(
