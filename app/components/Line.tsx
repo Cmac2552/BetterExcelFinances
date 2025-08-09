@@ -20,11 +20,11 @@ const chartConfig = {
   },
 } satisfies ChartConfig;
 
-interface LineInputProps {
+interface Props {
   tableData: TableData[];
 }
 
-export function LineChart({ tableData }: Readonly<LineInputProps>) {
+export function LineChart({ tableData }: Readonly<Props>) {
   if (tableData.length === 0) {
     return (
       <div className="flex justify-center items-center h-full">

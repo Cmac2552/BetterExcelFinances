@@ -15,7 +15,7 @@ import { GoXCircleFill } from "react-icons/go";
 import { FinancialSectionData, FinancialSectionItemData } from "../types";
 import { saveSection } from "../lib/actions"; // Server Action
 
-interface SectionModalProps {
+interface Props {
   date: Date;
   modalTitle: string;
   trigger: React.ReactNode;
@@ -37,7 +37,7 @@ export function SectionModal({
   givenAsset,
   givenId,
   onSectionAddition,
-}: Readonly<SectionModalProps>) {
+}: Readonly<Props>) {
   const [isOpen, setIsOpen] = useState(false);
   const [moneyInputs, setMoneyInputs] = useState<number[]>([0]);
   const [nameInputs, setNameInputs] = useState<string[]>([""]);
@@ -166,9 +166,8 @@ export function SectionModal({
         userId: result.section.userId,
         assetClass: result.section.assetClass,
       });
-      setIsOpen(false); // Close dialog on success
+      setIsOpen(false);
       if (!givenId) {
-        // If it was a new section, reset form for next time
         resetFormStates();
       }
     } else {

@@ -4,7 +4,7 @@ import { LineChart } from "./Line";
 import { FinancialSectionData, TableData } from "../types";
 import { MonthDashboard } from "./MonthDashboard";
 
-interface DashboardInputProps {
+interface Props {
   sections: FinancialSectionData[];
   tableDataInput: TableData[];
   date: Date;
@@ -13,7 +13,7 @@ export default function Dashboard({
   sections,
   tableDataInput,
   date,
-}: Readonly<DashboardInputProps>) {
+}: Readonly<Props>) {
   const [tableData, setTableData] = useState<TableData[]>(tableDataInput);
 
   return (
