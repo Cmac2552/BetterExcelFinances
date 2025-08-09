@@ -6,17 +6,21 @@ import { redirect } from "next/navigation";
 
 // Add this line to force dynamic rendering
 export const dynamic = "force-dynamic";
-interface DashboardPageProps {
-  searchParams: any;
+interface Props {
+  searchParams?: Promise<{
+    month?: string;
+    year?: string;
+  }>;
 }
-async function DashboardPage({ searchParams }: Readonly<DashboardPageProps>) {
+
+async function DashboardPage({ searchParams }: Props) {
   const session = await auth();
   if (!session) {
     redirect("/landing");
   }
 
   const params = await searchParams;
-  const month = params.month ?? getCurrentMonth();
+  const month = params?.month ?? getCurrentMonth();
 
   const [userData, tableData] = await Promise.all([
     fetchSections(parseNewMonth(month)),

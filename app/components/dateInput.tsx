@@ -1,10 +1,10 @@
 import { useRouter } from "next/navigation";
 import { startTransition } from "react";
 
-interface ChildComponentProps {
+interface Props {
   date: Date;
 }
-export function DateInput({ date }: Readonly<ChildComponentProps>) {
+export function DateInput({ date }: Readonly<Props>) {
   const router = useRouter();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {

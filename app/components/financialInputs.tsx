@@ -4,7 +4,7 @@ import { copyMonth } from "../lib/actions";
 import { FinancialSectionData } from "../types";
 import { FinancialSection } from "./financialSections";
 
-interface FinancialInputProps {
+interface Props {
   sections: FinancialSectionData[];
   date: Date;
   setSections: (data: any[]) => void;
@@ -16,7 +16,7 @@ export function FinancialInputs({
   date,
   setSections,
   allSectionsOpen,
-}: Readonly<FinancialInputProps>) {
+}: Readonly<Props>) {
   const importMonth = async () => {
     setSections(await copyMonth(date.toUTCString()));
   };

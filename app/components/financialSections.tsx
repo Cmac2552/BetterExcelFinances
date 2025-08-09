@@ -12,7 +12,7 @@ import {
   updateSectionItem,
 } from "../lib/actions";
 
-interface SectionProps {
+interface Props {
   section: FinancialSectionData;
   open: boolean;
   onSectionModify: (data: any) => void;
@@ -26,7 +26,7 @@ export function FinancialSection({
   onSectionModify,
   sectionDelete,
   date,
-}: Readonly<SectionProps>) {
+}: Readonly<Props>) {
   const [sectionData, setSectionData] = useState(section);
   useEffect(() => {
     setSectionData(section);

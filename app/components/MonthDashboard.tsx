@@ -8,7 +8,7 @@ import { sortSections } from "../utils/accountUtils";
 import { updateTableData } from "../actions/financial";
 import { FinancialSectionData, TableData } from "../types";
 
-interface MonthDashboardInputProps {
+interface Props {
   sections: FinancialSectionData[];
   tableData: TableData[];
   setTableData: (data: TableData[]) => void;
@@ -19,7 +19,7 @@ export function MonthDashboard({
   tableData,
   setTableData,
   date,
-}: Readonly<MonthDashboardInputProps>) {
+}: Readonly<Props>) {
   const [data, setData] = useState<FinancialSectionData[]>(
     sortSections(sections)
   );
