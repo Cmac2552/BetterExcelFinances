@@ -72,7 +72,7 @@ export default async function UploadPage({ searchParams }: Props) {
   }
 
   const chartData = aggregateDataForChart(transactions);
-
+  return <div>WIP</div>;
   return (
     <main className="container mx-auto p-4 text-[#f4f0e1]">
       <div className="mb-8">
