@@ -1,6 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -14,10 +11,10 @@ model Section {
   id         Int           @id @default(autoincrement())
   month      DateTime
   title      String
-  values     SectionItem[]
   userId     String
-  user       User          @relation(fields: [userId], references: [id])
   assetClass String        @default("ASSET")
+  user       User          @relation(fields: [userId], references: [id])
+  values     SectionItem[]
 
   @@unique([title, month])
 }
@@ -28,20 +25,17 @@ model User {
   email         String?         @unique
   emailVerified DateTime?
   image         String?
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
   accounts      Account[]
-  sessions      Session[]
-  // Optional for WebAuthn support
   Authenticator Authenticator[]
-
-  createdAt DateTime    @default(now())
-  updatedAt DateTime    @updatedAt
-  Section   Section[]
-  TableData TableData[]
-  Transaction Transaction[]
+  Section       Section[]
+  sessions      Session[]
+  TableData     TableData[]
 }
 
 model Account {
-  id                String  @id @default(cuid())
+  id                String   @id @default(cuid())
   userId            String
   type              String
   provider          String
@@ -53,11 +47,9 @@ model Account {
   scope             String?
   id_token          String?
   session_state     String?
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([provider, providerAccountId])
 }
@@ -67,10 +59,9 @@ model Session {
   sessionToken String   @unique
   userId       String
   expires      DateTime
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
   user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
 }
 
 model VerificationToken {
@@ -81,7 +72,6 @@ model VerificationToken {
   @@unique([identifier, token])
 }
 
-// Optional for WebAuthn support
 model Authenticator {
   credentialID         String  @unique
   userId               String
@@ -91,8 +81,7 @@ model Authenticator {
   credentialDeviceType String
   credentialBackedUp   Boolean
   transports           String?
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user                 User    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@id([userId, credentialID])
 }
@@ -101,8 +90,8 @@ model SectionItem {
   id        Int     @id @default(autoincrement())
   label     String
   value     Int
-  Section   Section @relation(fields: [sectionId], references: [id], onDelete: Cascade)
   sectionId Int
+  Section   Section @relation(fields: [sectionId], references: [id], onDelete: Cascade)
 }
 
 model TableData {
@@ -112,19 +101,5 @@ model TableData {
   userId       String
   user         User     @relation(fields: [userId], references: [id])
 
-  @@unique([userId, date]) // Compound unique constraint
-}
-
-model Transaction {
-  id          Int      @id @default(autoincrement())
-  date        DateTime
-  amount      Float
-  description String
-  category    String
-  userId      String
-  user        User     @relation(fields: [userId], references: [id])
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-
-  @@unique([date, description, amount, userId])
+  @@unique([userId, date])
 }
