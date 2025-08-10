@@ -130,6 +130,9 @@ CREATE UNIQUE INDEX "Authenticator_credentialID_key" ON "Authenticator"("credent
 -- CreateIndex
 CREATE UNIQUE INDEX "TableData_userId_date_key" ON "TableData"("userId", "date");
 
+-- CreateIndex
+CREATE UNIQUE INDEX "Transaction_date_description_amount_userId_key" ON "Transaction"("date", "description", "amount", "userId");
+
 -- AddForeignKey
 ALTER TABLE "Section" ADD CONSTRAINT "Section_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
@@ -150,3 +153,4 @@ ALTER TABLE "TableData" ADD CONSTRAINT "TableData_userId_fkey" FOREIGN KEY ("use
 
 -- AddForeignKey
 ALTER TABLE "Transaction" ADD CONSTRAINT "Transaction_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
