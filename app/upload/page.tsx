@@ -3,6 +3,7 @@ import { auth } from "@/auth";
 import { UploadForm } from "./UploadForm";
 import { TransactionViewer } from "./TransactionViewer";
 import { CategoryPieChart } from "./CategoryPieChart";
+import { CategorySpendingTable } from "./CategorySpendingTable";
 import { Transaction } from "@prisma/client";
 
 interface Props {
@@ -82,7 +83,12 @@ export default async function UploadPage({ searchParams }: Props) {
       {chartData.length > 0 && (
         <div className="mb-8">
           <h2 className="text-xl font-bold mb-4">Category Spending</h2>
-          <CategoryPieChart data={chartData} />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+            <div className="h-[400px] ">
+              <CategoryPieChart data={chartData} />
+            </div>
+            <CategorySpendingTable data={chartData} />
+          </div>
         </div>
       )}
 

@@ -15,22 +15,22 @@ type Props = {
 };
 
 const COLORS = [
-  "#0088FE",
-  "#00C49F",
-  "#FFBB28",
-  "#FF8042",
-  "#AF19FF",
-  "#FF4560",
-  "#775DD0",
-  "#546E7A",
-  "#26A69A",
-  "#D4E157",
-  "#FF7043",
-  "#8D6E63",
-  "#789262",
-  "#BA68C8",
-  "#FFD600",
-  "#43A047",
+  "#A2CFFE", // Baby Blue
+  "#D98880", // Muted Red
+  "#98FB98", // Muted Green
+  "#F3E5AB", // Muted Yellow
+  "#D3D3D3", // Light Grey
+  "#F5F5F5", // White Smoke
+  "#B0C4DE", // Light Steel Blue
+  "#E9967A", // Dark Salmon (Muted Red/Orange)
+  "#8FBC8F", // Dark Sea Green
+  "#EEE8AA", // Pale Goldenrod (Muted Yellow)
+  "#C0C0C0", // Silver
+  "#AFEEEE", // Pale Turquoise
+  "#FFB6C1", // Light Pink
+  "#90EE90", // Light Green
+  "#ADD8E6", // Light Blue
+  "#778899", // Light Slate Gray
 ];
 
 export function CategoryPieChart({ data }: Readonly<Props>) {
@@ -66,7 +66,6 @@ export function CategoryPieChart({ data }: Readonly<Props>) {
             cy="50%"
             outerRadius={80}
             fill="#8884d8"
-            label
           >
             {data.map((entry, index) => (
               <Cell
