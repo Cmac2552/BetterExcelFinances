@@ -1,36 +1,19 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# Better Excel Finances
 
-## Getting Started
+This is a personal project in order to track finances. The idea was based on making a better user expereince than inputting spending data manually into a spreadsheet.
 
-First, run the development server:
+## Net Worth Tracking
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+Net worth tracking allows users to add different asset/debt accounts and categorize where the money in those accounts is dedicated. For example under a savings account a user could attribute funds to both a sinking fund and a house saving fund.
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Monthly spending tracking
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+This functionality allows users to upload a csv of a credit card statement and see a visualization of expenses categorized by spending category. (Discover/Capital One)
 
-This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-optimization) to automatically optimize and load Inter, a custom Google Font.
+### Development
 
-## Learn More
+This project acts as a playground for me to test cutting edge AI development tools, AI has been leveraged in may different ways throughout this project.
 
-To learn more about Next.js, take a look at the following resources:
+#### Note
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+This project does not accept banking credentials. Users are not able to attach a bank account. Everything must be entered manually.
