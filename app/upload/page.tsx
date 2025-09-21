@@ -5,6 +5,7 @@ import { TransactionViewer } from "./TransactionViewer";
 import { CategoryPieChart } from "./CategoryPieChart";
 import { CategorySpendingTable } from "./CategorySpendingTable";
 import { Transaction } from "@prisma/client";
+import { DateChange } from "./dateChange";
 
 interface Props {
   searchParams: Promise<{
@@ -73,32 +74,36 @@ export default async function UploadPage({ searchParams }: Props) {
   }
 
   const chartData = aggregateDataForChart(transactions);
+
   return (
     <main className="container mx-auto p-4 text-[#f4f0e1]">
       <div className="mb-8">
         <h1 className="text-2xl font-bold mb-4">Upload CSV</h1>
-        <UploadForm />
+        <div className="flex items-center gap-4">
+          <UploadForm />
+          <DateChange currentMonth={currentMonth} currentYear={currentYear} />
+        </div>
       </div>
 
       {chartData.length > 0 && (
         <div className="mb-8">
           <h2 className="text-xl font-bold mb-4">Category Spending</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
-            <div className="h-[400px] ">
-              <CategoryPieChart data={chartData} />
+          <div className="flex justify-center">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 w-[80%]">
+              <div className="h-[400px] w-25%">
+                <CategoryPieChart data={chartData} />
+              </div>
+              <div className="h-full w-full flex justify-center">
+                <CategorySpendingTable data={chartData} />
+              </div>
             </div>
-            <CategorySpendingTable data={chartData} />
           </div>
         </div>
       )}
 
       <div>
         <h2 className="text-xl font-bold mb-4 text-[#f4f0e1]">Transactions</h2>
-        <TransactionViewer
-          transactions={transactions}
-          currentMonth={currentMonth}
-          currentYear={currentYear}
-        />
+        <TransactionViewer transactions={transactions} />
       </div>
     </main>
   );
