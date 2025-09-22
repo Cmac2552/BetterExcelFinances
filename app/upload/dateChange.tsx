@@ -8,7 +8,7 @@ import {
 } from "@/components/ui/popover";
 import { CalendarIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
+import { format } from "date-fns";
 
 type Props = Readonly<{
   currentMonth: number;
@@ -18,59 +18,30 @@ type Props = Readonly<{
 export function DateChange({ currentMonth, currentYear }: Props) {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const actualCurrentYear = new Date().getFullYear();
+  const date = new Date(Date.UTC(currentYear, currentMonth, 1, 0, 0, 0, 0));
 
-  const handleDateChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
-    const { name, value } = event.target;
+  const handleDateChange = (event: Date) => {
     const newParams = new URLSearchParams(searchParams.toString());
-    newParams.set(name, value);
+    newParams.set("month", (event.getMonth() + 1).toString());
+    newParams.set("year", event.getFullYear().toString());
     router.push(`/upload?${newParams.toString()}`);
   };
   return (
-    <div className="flex gap-2">
-      <select
-        name="month"
-        value={currentMonth}
-        onChange={handleDateChange}
-        className="bg-gray-800 text-white p-2 rounded"
-      >
-        {Array.from({ length: 12 }, (_, i) => (
-          <option key={i + 1} value={i + 1}>
-            {new Date(0, i).toLocaleString("default", { month: "long" })}
-          </option>
-        ))}
-      </select>
-      <select
-        name="year"
-        value={currentYear}
-        onChange={handleDateChange}
-        className="bg-gray-800 text-white p-2 rounded"
-      >
-        {Array.from({ length: 10 }, (_, i) => {
-          const year = actualCurrentYear - i;
-          return (
-            <option key={year} value={year}>
-              {year}
-            </option>
-          );
-        })}
-      </select>
-    </div>
-    // <Popover>
-    //   <PopoverTrigger asChild>
-    //     <Button
-    //       variant={"outline"}
-    //       className={cn(
-    //         "w-[280px] justify-start text-left font-normal text-black"
-    //       )}
-    //     >
-    //       <CalendarIcon className="mr-2 h-4 w-4" />
-    //       {<span>Pick a month</span>}
-    //     </Button>
-    //   </PopoverTrigger>
-    //   <PopoverContent className="w-auto p-0">
-    //     <MonthPicker />
-    //   </PopoverContent>
-    // </Popover>
+    <Popover>
+      <PopoverTrigger asChild>
+        <button
+          className={cn(
+            "bg-[#f4f0e1] text-black px-2 py-2 rounded-lg font-medium border border-transparent hover:border-white/20 shadow-[0_0_15px_rgba(255,255,255,0.25)] hover:shadow-[0_0_20px_rgba(255,255,255,0.4)] transition-all duration-300 flex items-center",
+            !date && "text-muted-foreground"
+          )}
+        >
+          <CalendarIcon className="mr-2 h-4 w-4" />
+          {date ? format(date, "MMM yyyy") : <span>Pick a month</span>}
+        </button>
+      </PopoverTrigger>
+      <PopoverContent className="w-auto p-0">
+        <MonthPicker onMonthSelect={handleDateChange} selectedMonth={date} />
+      </PopoverContent>
+    </Popover>
   );
 }
