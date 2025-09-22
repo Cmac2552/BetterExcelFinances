@@ -7,8 +7,6 @@ import { deleteTransaction } from "./actions";
 
 type Props = {
   transactions: Transaction[];
-  currentMonth: number;
-  currentYear: number;
 };
 
 function formatCurrency(amount: number) {
@@ -18,53 +16,9 @@ function formatCurrency(amount: number) {
   }).format(amount);
 }
 
-export function TransactionViewer({
-  transactions,
-  currentMonth,
-  currentYear,
-}: Readonly<Props>) {
-  const router = useRouter();
-  const searchParams = useSearchParams();
-  const actualCurrentYear = new Date().getFullYear();
-
-  const handleDateChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
-    const { name, value } = event.target;
-    const newParams = new URLSearchParams(searchParams.toString());
-    newParams.set(name, value);
-    router.push(`/upload?${newParams.toString()}`);
-  };
-
+export function TransactionViewer({ transactions }: Readonly<Props>) {
   return (
     <div>
-      <div className="flex gap-4 mb-4">
-        <select
-          name="month"
-          value={currentMonth}
-          onChange={handleDateChange}
-          className="bg-gray-800 text-white p-2 rounded"
-        >
-          {Array.from({ length: 12 }, (_, i) => (
-            <option key={i + 1} value={i + 1}>
-              {new Date(0, i).toLocaleString("default", { month: "long" })}
-            </option>
-          ))}
-        </select>
-        <select
-          name="year"
-          value={currentYear}
-          onChange={handleDateChange}
-          className="bg-gray-800 text-white p-2 rounded"
-        >
-          {Array.from({ length: 10 }, (_, i) => {
-            const year = actualCurrentYear - i;
-            return (
-              <option key={year} value={year}>
-                {year}
-              </option>
-            );
-          })}
-        </select>
-      </div>
       <div className="overflow-x-auto">
         <table className="min-w-full">
           <thead>

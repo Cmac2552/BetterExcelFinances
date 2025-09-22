@@ -26,7 +26,7 @@ export function UploadForm() {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="flex items-center gap-4">
+    <form onSubmit={handleSubmit} className="flex items-center gap-2">
       <label
         htmlFor="file-upload"
         className="bg-[#f4f0e1] text-black px-4 py-2 rounded-lg font-medium border border-transparent hover:border-white/20 shadow-[0_0_15px_rgba(255,255,255,0.25)] hover:shadow-[0_0_20px_rgba(255,255,255,0.4)] transition-all duration-300 cursor-pointer"
