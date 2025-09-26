@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { uploadCsv } from "./actions";
+import { Button } from "@/components/ui/button";
 
 export function UploadForm() {
   const [fileName, setFileName] = useState("");
@@ -27,12 +28,9 @@ export function UploadForm() {
 
   return (
     <form onSubmit={handleSubmit} className="flex items-center gap-2">
-      <label
-        htmlFor="file-upload"
-        className="bg-[#f4f0e1] text-black px-4 py-2 rounded-lg font-medium border border-transparent hover:border-white/20 shadow-[0_0_15px_rgba(255,255,255,0.25)] hover:shadow-[0_0_20px_rgba(255,255,255,0.4)] transition-all duration-300 cursor-pointer"
-      >
-        Choose File
-      </label>
+      <Button asChild variant="primary">
+        <label htmlFor="file-upload">Choose File</label>
+      </Button>
       <input
         id="file-upload"
         name="file"
@@ -44,13 +42,13 @@ export function UploadForm() {
         disabled={isUploading}
       />
       {fileName && <span className="text-white">{fileName}</span>}
-      <button
+      <Button
         type="submit"
-        className="bg-[#f4f0e1] text-black px-4 py-2 rounded-lg font-medium border border-transparent hover:border-white/20 shadow-[0_0_15px_rgba(255,255,255,0.25)] hover:shadow-[0_0_20px_rgba(255,255,255,0.4)] transition-all duration-300 disabled:opacity-50"
+        variant="primary"
         disabled={!fileName || isUploading}
       >
         {isUploading ? "Uploading..." : "Upload"}
-      </button>
+      </Button>
     </form>
   );
 }

@@ -9,6 +9,7 @@ import {
 import { CalendarIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
+import { Button } from "@/components/ui/button";
 
 type Props = Readonly<{
   currentMonth: number;
@@ -29,15 +30,13 @@ export function DateChange({ currentMonth, currentYear }: Props) {
   return (
     <Popover>
       <PopoverTrigger asChild>
-        <button
-          className={cn(
-            "bg-[#f4f0e1] text-black px-2 py-2 rounded-lg font-medium border border-transparent hover:border-white/20 shadow-[0_0_15px_rgba(255,255,255,0.25)] hover:shadow-[0_0_20px_rgba(255,255,255,0.4)] transition-all duration-300 flex items-center",
-            !date && "text-muted-foreground"
-          )}
+        <Button
+          variant="primary"
+          className={cn(!date && "text-muted-foreground")}
         >
           <CalendarIcon className="mr-2 h-4 w-4" />
           {date ? format(date, "MMM yyyy") : <span>Pick a month</span>}
-        </button>
+        </Button>
       </PopoverTrigger>
       <PopoverContent className="w-auto p-0">
         <MonthPicker onMonthSelect={handleDateChange} selectedMonth={date} />

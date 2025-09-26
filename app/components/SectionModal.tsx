@@ -14,6 +14,7 @@ import { NumericFormat } from "react-number-format";
 import { GoXCircleFill } from "react-icons/go";
 import { FinancialSectionData, FinancialSectionItemData } from "../types";
 import { saveSection } from "../lib/actions"; // Server Action
+import { Button } from "@/components/ui/button";
 
 interface Props {
   date: Date;
@@ -232,23 +233,25 @@ export function SectionModal({
                   }}
                   className="flex h-10 rounded-md border border-gray-700 bg-[#1E2228] px-3 py-2 text-sm text-[#f4f0e1] ring-offset-gray-900 file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-gray-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#f4f0e1] focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 w-1/2"
                 />
-                <button
+                <Button
                   type="button"
                   onClick={() => handleRowRemove(index)}
-                  className="text-[#f4f0e1] p-2 rounded-md border border-transparent hover:border-gray-400 hover:bg-gray-700 transition-all duration-50"
+                  className="text-[#f4f0e1]"
                   title="Remove Account Item"
+                  variant="ghost"
                 >
                   <GoXCircleFill />
-                </button>
+                </Button>
               </div>
             ))}
-            <button
+            <Button
               type="button"
               onClick={handleAddItem}
-              className="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-gray-900 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-gray-700 bg-[#1E2228] text-[#f4f0e1] hover:bg-gray-700 h-10 px-4 py-2"
+              variant="secondary"
+              className="text-sm"
             >
               Add Additional Item
-            </button>
+            </Button>
             {errorMessage && (
               <p className="text-red-500 text-sm">{errorMessage}</p>
             )}
@@ -265,20 +268,18 @@ export function SectionModal({
               </div>
 
               <DialogClose asChild>
-                <button
-                  type="button"
-                  className="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-gray-900 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-gray-700 bg-[#1E2228] text-[#f4f0e1] hover:bg-gray-700 h-10 px-4 py-2"
-                >
+                <Button type="button" variant="secondary" className="text-sm">
                   Cancel
-                </button>
+                </Button>
               </DialogClose>
-              <button
+              <Button
                 type="submit"
                 disabled={isSubmitting}
-                className="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-gray-900 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-[#f4f0e1] text-black hover:bg-gray-200 h-10 px-4 py-2 ml-2 disabled:opacity-70"
+                variant="primary"
+                className="text-sm"
               >
                 {isSubmitting ? "Submitting..." : "Submit"}
-              </button>
+              </Button>
             </DialogFooter>
           </div>
         </form>

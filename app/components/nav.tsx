@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { signOut } from "@/auth";
+import { Button } from "@/components/ui/button";
 
 export function Nav() {
   return (
@@ -26,12 +27,9 @@ function LogoutButton() {
         await signOut({ redirectTo: "/" });
       }}
     >
-      <button
-        className="bg-[#f4f0e1] px-4 py-2 rounded-md hover:border-white/20 shadow-[0_0_15px_rgba(255,255,255,0.25)] hover:shadow-[0_0_20px_rgba(255,255,255,0.4)] transition-all duration-300 font-medium"
-        type="submit"
-      >
+      <Button variant="primary" type="submit">
         Sign Out
-      </button>
+      </Button>
     </form>
   );
 }

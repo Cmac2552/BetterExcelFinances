@@ -11,6 +11,7 @@ import {
   deleteSectionItem,
   updateSectionItem,
 } from "../lib/actions";
+import { Button } from "@/components/ui/button";
 
 interface Props {
   section: FinancialSectionData;
@@ -97,12 +98,9 @@ export function FinancialSection({
                 onSectionAddition={onSectionModify}
                 modalTitle="Add Account"
                 trigger={
-                  <button
-                    className="py-2 px-1 rounded-md border border-transparent hover:border-gray-400 hover:bg-gray-700 transition-all duration-300"
-                    title="Edit Account"
-                  >
+                  <Button title="Edit Account" size="icon-slim" variant="ghost">
                     <TiPencil />
-                  </button>
+                  </Button>
                 }
                 lineItemValues={sectionData.values.map((value) => value.value)}
                 lineItemNames={sectionData.values.map((value) => value.label)}
@@ -111,13 +109,14 @@ export function FinancialSection({
                 givenId={sectionData.id}
               />
 
-              <button
+              <Button
                 onClick={onSectionDelete}
-                className="py-2 px-1 rounded-md border border-transparent hover:border-gray-400 hover:bg-gray-700 transition-all duration-300"
+                variant="ghost"
+                size="icon-slim"
                 title="Delete Account"
               >
                 <GoXCircleFill />
-              </button>
+              </Button>
             </div>
             <div className=" mr-1 text-[#f4f0e1] overflow-hidden text-ellipsis whitespace-nowrap">
               <span className="text-[#f4f0e1] text-2xl whitespace-nowrap">
@@ -164,13 +163,15 @@ export function FinancialSection({
                         className="w-[90%] px-4 py-2 bg-[#1E2228] text-[#f4f0e1] border border-gray-600 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus-visible:ring-[#f4f0e1] placeholder-gray-400 my-1 mx-[10%]"
                       />
 
-                      <button
+                      <Button
                         onClick={() => removeSectionItem(value)}
-                        className=" text-[#f4f0e1] p-2 rounded-md border border-transparent hover:border-gray-400 hover:bg-gray-700 transition-all duration-50 ml-auto justify-self-center self-center invisible group-hover:visible"
+                        className="text-[#f4f0e1] ml-auto justify-self-center self-center invisible group-hover:visible"
+                        variant="ghost"
+                        size="icon"
                         title="Delete Account Item"
                       >
                         <GoXCircleFill />
-                      </button>
+                      </Button>
                     </div>
                   )
                 )}
