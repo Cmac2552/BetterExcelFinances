@@ -1,5 +1,6 @@
 "use client";
 import { useState } from "react";
+import { Button } from "@/components/ui/button";
 import { FinancialInputs } from "./financialInputs";
 import { SectionModal } from "./SectionModal";
 import { DateInput } from "./dateInput";
@@ -61,18 +62,20 @@ export function MonthDashboard({
             modalTitle="Add Account"
             givenAsset={"ASSET"}
             trigger={
-              <button className="bg-[#f4f0e1] text-black px-2 py-2 rounded-lg font-medium border border-transparent hover:border-white/20 shadow-[0_0_15px_rgba(255,255,255,0.25)] hover:shadow-[0_0_20px_rgba(255,255,255,0.4)] transition-all duration-300 mr-4">
+              <Button variant="primary" size="lg" className="mr-4">
                 Add Account
-              </button>
+              </Button>
             }
           />
         </div>
-        <button
-          className="bg-[#f4f0e1] text-black px-6 py-2 rounded-lg font-medium border border-transparent hover:border-white/20 shadow-[0_0_15px_rgba(255,255,255,0.25)] hover:shadow-[0_0_20px_rgba(255,255,255,0.4)] transition-all duration-300 mr-4 ml-auto"
+        <Button
+          className="mr-4 ml-auto"
+          variant="primary"
+          size="lg"
           onClick={() => setAllSectionsOpen(!allSectionsOpen)}
         >
           Toggle All Accounts
-        </button>
+        </Button>
       </div>
 
       <div className="w-full">

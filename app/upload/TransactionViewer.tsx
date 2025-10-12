@@ -4,6 +4,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { Transaction } from "@prisma/client";
 
 import { deleteTransaction } from "./actions";
+import { Button } from "@/components/ui/button";
 
 type Props = {
   transactions: Transaction[];
@@ -47,12 +48,9 @@ export function TransactionViewer({ transactions }: Readonly<Props>) {
                       await deleteTransaction(t.id);
                     }}
                   >
-                    <button
-                      type="submit"
-                      className="bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-2 rounded"
-                    >
+                    <Button type="submit" variant="secondary">
                       Delete
-                    </button>
+                    </Button>
                   </form>
                 </td>
               </tr>
