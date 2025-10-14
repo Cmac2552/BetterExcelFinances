@@ -91,6 +91,22 @@ async function saveTransactionsToDb(
   }
 }
 
+export async function saveTransactionToDb(
+  transactions: {category:string, amount: number, description: string, date: Date}
+) {
+    const userId = await getAuthenticatedUserId();
+
+  try {
+    await prisma.transaction.create({
+      data: {...transactions, userId},
+    });
+    revalidatePath("/upload")
+  } catch (error) {
+    console.error("Error saving to database:", error);
+    throw new Error("Failed to save transactions.");
+  }
+}
+
 export async function uploadCsv(formData: FormData) {
   try {
     const file = formData.get("file") as File;
