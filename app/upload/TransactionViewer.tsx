@@ -5,7 +5,7 @@ import { Transaction } from "@prisma/client";
 
 import { deleteTransaction, saveTransactionToDb } from "./actions";
 import { Button } from "@/components/ui/button";
-import { format, set } from "date-fns";
+import { format } from "date-fns";
 import {
   Popover,
   PopoverContent,
