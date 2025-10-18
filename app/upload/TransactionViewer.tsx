@@ -31,7 +31,7 @@ export function TransactionViewer({ transactions }: Readonly<Props>) {
   const descriptionRef = useRef<HTMLInputElement | null>(null);
   const [amount, setAmount] = useState<number>(0);
   const categoryRef = useRef<HTMLInputElement | null>(null);
-  const [date, setDate] = useState<Date>(new Date());
+  const [date, setDate] = useState<Date | undefined>(undefined);
 
   const handleSubmit = async (e?: React.MouseEvent) => {
     e?.preventDefault();
@@ -39,13 +39,20 @@ export function TransactionViewer({ transactions }: Readonly<Props>) {
     const description = descriptionRef.current?.value ?? "";
     const category = categoryRef.current?.value ?? "";
 
-    console.log({ date, description, amount, category });
-    await saveTransactionToDb({ category, amount, description, date });
+    try {
+      if (date) {
+        await saveTransactionToDb({ category, amount, description, date });
+      } else {
+        throw new Error("Date undefined");
+      }
 
-    if (date) setDate(new Date());
-    if (descriptionRef.current) descriptionRef.current.value = "";
-    if (amount) setAmount(0);
-    if (categoryRef.current) categoryRef.current.value = "";
+      setDate(new Date());
+      if (descriptionRef.current) descriptionRef.current.value = "";
+      setAmount(0);
+      if (categoryRef.current) categoryRef.current.value = "";
+    } catch (error) {
+      console.error("Failed to save transaction:", error);
+    }
   };
 
   return (
@@ -69,7 +76,7 @@ export function TransactionViewer({ transactions }: Readonly<Props>) {
                     <Button variant="primary">
                       <CalendarIcon />
                       {date ? (
-                        format(date, "MM/dd/yyy")
+                        format(date, "MM/dd/yyyy")
                       ) : (
                         <span>Pick a date</span>
                       )}
