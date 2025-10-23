@@ -162,3 +162,81 @@ export async function deleteTransaction(transactionId: number) {
   }
 }
 
+// Server action: aggregate last 6 statement months in a single DB query
+export async function getLastSixMonths(month?: number, year?: number) {
+  const session = await auth();
+  if (!session?.user?.id) throw new Error("Unauthorized");
+
+  const today = new Date();
+  const currentMonth = month ?? today.getUTCMonth() + 1;
+  const currentYear = year ?? today.getUTCFullYear();
+
+  const months: { month: number; year: number }[] = [];
+  for (let i = 0; i < 6; i++) {
+    const d = new Date(Date.UTC(currentYear, currentMonth - 1, 1));
+    d.setUTCMonth(d.getUTCMonth() - i);
+    months.push({ month: d.getUTCMonth() + 1, year: d.getUTCFullYear() });
+  }
+
+  // compute entire inclusive span to fetch in one query
+  const ranges = months.map((m) => {
+    const startDate = new Date(Date.UTC(m.year, m.month - 2, 26, 0, 0, 0, 0));
+    const endDate = new Date(Date.UTC(m.year, m.month - 1, 25, 23, 59, 59, 999));
+    return { startDate, endDate };
+  });
+
+  let earliestStart = ranges[0].startDate;
+  let latestEnd = ranges[0].endDate;
+  for (const r of ranges) {
+    if (r.startDate < earliestStart) earliestStart = r.startDate;
+    if (r.endDate > latestEnd) latestEnd = r.endDate;
+  }
+
+  const txns = await prisma.transaction.findMany({
+    where: {
+      userId: session.user.id,
+      date: { gte: earliestStart, lte: latestEnd },
+      amount: { gt: 0 },
+    },
+    select: { date: true, category: true, amount: true },
+  });
+
+  // build set of target months for quick membership
+  const monthKeys = new Set(months.map((m) => `${m.year}-${m.month}`));
+
+  // map key -> category -> amount
+  const grouped: Record<string, Record<string, number>> = {};
+
+  for (const t of txns) {
+    const d = new Date(t.date);
+    const day = d.getUTCDate();
+    let stmtMonthIndex = d.getUTCMonth(); // 0-based
+    let stmtYear = d.getUTCFullYear();
+    if (day >= 26) {
+      stmtMonthIndex = stmtMonthIndex + 1;
+      if (stmtMonthIndex > 11) {
+        stmtMonthIndex = 0;
+        stmtYear += 1;
+      }
+    }
+    const stmtMonth = stmtMonthIndex + 1;
+    const key = `${stmtYear}-${stmtMonth}`;
+    if (!monthKeys.has(key)) continue; // ignore dates outside our target 6 months window
+
+    const cat = t.category || "Uncategorized";
+    grouped[key] = grouped[key] || {};
+    grouped[key][cat] = (grouped[key][cat] || 0) + Number(t.amount);
+  }
+
+  const results = months.map((m) => {
+    const key = `${m.year}-${m.month}`;
+    const agg = grouped[key] || {};
+    const data = Object.entries(agg)
+      .map(([category, amount]) => ({ category, amount: Number.parseFloat(amount.toFixed(2)) }))
+      .sort((a, b) => b.amount - a.amount);
+    return { month: m.month, year: m.year, data };
+  });
+
+  return results;
+}
+

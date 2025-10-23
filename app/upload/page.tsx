@@ -4,11 +4,13 @@ import { UploadForm } from "./UploadForm";
 import { TransactionViewer } from "./TransactionViewer";
 import { CategoryPieChart } from "./CategoryPieChart";
 import { CategorySpendingTable } from "./CategorySpendingTable";
+import { LastSixMonths } from "./LastSixMonths";
+import { getLastSixMonths } from "./actions";
 import { Transaction } from "@prisma/client";
 import { DateChange } from "./dateChange";
 
 interface Props {
-  searchParams: Promise<{
+  readonly searchParams: Promise<{
     month?: string;
     year?: string;
   }>;
@@ -63,6 +65,8 @@ export default async function UploadPage({ searchParams }: Props) {
 
   const chartData = aggregateDataForChart(transactions);
 
+  const lastSix = userId ? await getLastSixMonths(currentMonth, currentYear) : [];
+
   return (
     <main className="container mx-auto p-4 text-[#f4f0e1]">
       <div className="mb-8">
@@ -88,6 +92,8 @@ export default async function UploadPage({ searchParams }: Props) {
           </div>
         </div>
       )}
+
+  <LastSixMonths initialMonths={lastSix} />
 
       <div>
         <h2 className="text-xl font-bold mb-4 text-[#f4f0e1]">Transactions</h2>

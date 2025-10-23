@@ -6,7 +6,7 @@ interface ChartData {
 }
 
 interface Props {
-  data: ChartData[];
+  readonly data: ChartData[];
 }
 
 export function CategorySpendingTable({ data }: Props) {
