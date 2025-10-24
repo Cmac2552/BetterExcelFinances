@@ -97,13 +97,13 @@ async function saveTransactionsToDb(
 }
 
 export async function saveTransactionToDb(
-  transactions: {category:string, amount: number, description: string, date: Date}
+  transactions: {category:string, amount: number, description: string, date: Date, statementMonth: string}
 ) {
     const userId = await getAuthenticatedUserId();
 
   try {
     await prisma.transaction.create({
-      data: {...transactions, userId, statementMonth:""},
+      data: {...transactions, userId},
     });
     revalidatePath("/upload")
   } catch (error) {

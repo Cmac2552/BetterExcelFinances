@@ -89,7 +89,11 @@ export default async function UploadPage({ searchParams }: Props) {
 
       <div>
         <h2 className="text-xl font-bold mb-4 text-[#f4f0e1]">Transactions</h2>
-        <TransactionViewer transactions={transactions} />
+        <TransactionViewer
+          transactions={transactions}
+          currentMonth={currentMonth}
+          currentYear={currentYear}
+        />
       </div>
     </main>
   );
