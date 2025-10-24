@@ -40,8 +40,7 @@ function transformDataForPrisma(
   if (isDebitCreditFormat) {
     return csvData
       .map((row) => {
-        const debit = Number.parseFloat(row.Debit) || 0;
-        const amount = debit 
+        const amount = Number.parseFloat(row.Debit) || 0;
 
         if (!row["Posted Date"] || amount === 0) return null;
 
