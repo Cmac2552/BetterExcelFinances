@@ -4,7 +4,12 @@ import { useState } from "react";
 import { uploadCsv } from "./actions";
 import { Button } from "@/components/ui/button";
 
-export function UploadForm() {
+type Props = Readonly<{
+  currentMonth: number;
+  currentYear: number;
+}>;
+
+export function UploadForm({ currentMonth, currentYear }: Props) {
   const [fileName, setFileName] = useState("");
   const [isUploading, setIsUploading] = useState(false);
 
@@ -21,6 +26,7 @@ export function UploadForm() {
     event.preventDefault();
     setIsUploading(true);
     const formData = new FormData(event.currentTarget);
+    formData.set("statementMonth", `${currentMonth}-${currentYear}`);
     await uploadCsv(formData);
     setFileName("");
     setIsUploading(false);

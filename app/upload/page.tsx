@@ -14,12 +14,6 @@ interface Props {
   }>;
 }
 
-function getStatementDateRange(month: number, year: number) {
-  const startDate = new Date(Date.UTC(year, month - 2, 26));
-  const endDate = new Date(Date.UTC(year, month - 1, 25, 23, 59, 59, 999));
-  return { startDate, endDate };
-}
-
 function aggregateDataForChart(transactions: Transaction[]) {
   if (!transactions) return [];
 
@@ -34,7 +28,7 @@ function aggregateDataForChart(transactions: Transaction[]) {
   return Object.entries(spendingByCategory)
     .map(([category, amount]) => ({
       category,
-      amount: parseFloat(amount.toFixed(2)),
+      amount: Number.parseFloat(amount.toFixed(2)),
     }))
     .sort((a, b) => b.amount - a.amount);
 }
@@ -45,16 +39,11 @@ export default async function UploadPage({ searchParams }: Props) {
 
   const today = new Date();
   const params = await searchParams;
-  const currentMonth = parseInt(
+  const currentMonth = Number.parseInt(
     params?.month || (today.getUTCMonth() + 1).toString()
   );
-  const currentYear = parseInt(
+  const currentYear = Number.parseInt(
     params?.year || today.getUTCFullYear().toString()
-  );
-
-  const { startDate, endDate } = getStatementDateRange(
-    currentMonth,
-    currentYear
   );
 
   let transactions: Transaction[] = [];
@@ -62,10 +51,7 @@ export default async function UploadPage({ searchParams }: Props) {
     transactions = await prisma.transaction.findMany({
       where: {
         userId,
-        date: {
-          gte: startDate,
-          lte: endDate,
-        },
+        statementMonth: `${currentMonth}-${currentYear}`,
       },
       orderBy: {
         date: "desc",
@@ -80,7 +66,7 @@ export default async function UploadPage({ searchParams }: Props) {
       <div className="mb-8">
         <h1 className="text-2xl font-bold mb-4">Upload CSV</h1>
         <div className="flex items-center gap-4">
-          <UploadForm />
+          <UploadForm currentMonth={currentMonth} currentYear={currentYear} />
           <DateChange currentMonth={currentMonth} currentYear={currentYear} />
         </div>
       </div>
