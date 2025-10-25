@@ -6,6 +6,9 @@ import { auth } from "@/auth";
 import { revalidatePath } from "next/cache";
 import { Transaction } from "@prisma/client";
 
+type PrismaCreatedValues = "id" | "createdAt" | "updatedAt"
+type UserTransactionDate = Omit<Transaction, PrismaCreatedValues>
+
 async function getAuthenticatedUserId(): Promise<string> {
   const session = await auth();
   if (!session?.user?.id) {
@@ -28,16 +31,16 @@ function parseCsv(fileText: string): Promise<Papa.ParseResult<any>> {
 function transformDataForPrisma(
   csvData: any[],
   userId: string,
-  headers: string[]
-): Omit<Transaction, "id" | "createdAt" | "updatedAt">[] {
+  headers: string[],
+  statementMonth: string
+): UserTransactionDate[] {
   const isDebitCreditFormat =
     headers.includes("Debit") && headers.includes("Credit");
 
   if (isDebitCreditFormat) {
     return csvData
       .map((row) => {
-        const debit = parseFloat(row.Debit) || 0;
-        const amount = debit 
+        const amount = Number.parseFloat(row.Debit) || 0;
 
         if (!row["Posted Date"] || amount === 0) return null;
 
@@ -47,10 +50,11 @@ function transformDataForPrisma(
           description: row.Description,
           category: row.Category,
           userId,
+          statementMonth
         };
       })
       .filter(
-        (t): t is Omit<Transaction, "id" | "createdAt" | "updatedAt"> =>
+        (t): t is UserTransactionDate =>
           t !== null
       );
   } else {
@@ -60,21 +64,22 @@ function transformDataForPrisma(
 
         return {
           date: new Date(row["Post Date"]),
-          amount: parseFloat(row.Amount),
+          amount: Number.parseFloat(row.Amount),
           description: row.Description,
           category: row.Category,
           userId,
+          statementMonth
         };
       })
       .filter(
-        (t): t is Omit<Transaction, "id" | "createdAt" | "updatedAt"> =>
+        (t): t is UserTransactionDate =>
           t !== null
       );
   }
 }
 
 async function saveTransactionsToDb(
-  transactions: Omit<Transaction, "id" | "createdAt" | "updatedAt">[]
+  transactions: UserTransactionDate[]
 ) {
   if (transactions.length === 0) {
     console.log("No new transactions to save.");
@@ -92,7 +97,7 @@ async function saveTransactionsToDb(
 }
 
 export async function saveTransactionToDb(
-  transactions: {category:string, amount: number, description: string, date: Date}
+  transactions: {category:string, amount: number, description: string, date: Date, statementMonth: string}
 ) {
     const userId = await getAuthenticatedUserId();
 
@@ -120,8 +125,9 @@ export async function uploadCsv(formData: FormData) {
     const results = await parseCsv(fileText);
     const parsedData = results.data;
     const headers = results.meta.fields || [];
+    const statementMonth = formData.get("statementMonth") as string;
 
-    const transactions = transformDataForPrisma(parsedData, userId, headers);
+    const transactions = transformDataForPrisma(parsedData, userId, headers, statementMonth);
     await saveTransactionsToDb(transactions);
 
     revalidatePath("/upload");

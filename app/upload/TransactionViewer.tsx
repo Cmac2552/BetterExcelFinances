@@ -17,6 +17,7 @@ import { NumericFormat } from "react-number-format";
 
 type Props = {
   transactions: Transaction[];
+  statementMonth: string;
 };
 
 function formatCurrency(amount: number) {
@@ -26,7 +27,10 @@ function formatCurrency(amount: number) {
   }).format(amount);
 }
 
-export function TransactionViewer({ transactions }: Readonly<Props>) {
+export function TransactionViewer({
+  transactions,
+  statementMonth,
+}: Readonly<Props>) {
   // Use DOM refs for uncontrolled inputs (no re-renders while typing)
   const descriptionRef = useRef<HTMLInputElement | null>(null);
   const [amount, setAmount] = useState<number>(0);
@@ -41,7 +45,13 @@ export function TransactionViewer({ transactions }: Readonly<Props>) {
 
     try {
       if (date) {
-        await saveTransactionToDb({ category, amount, description, date });
+        await saveTransactionToDb({
+          category,
+          amount,
+          description,
+          date,
+          statementMonth,
+        });
       } else {
         throw new Error("Date undefined");
       }
