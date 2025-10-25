@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState, FormEvent } from "react";
+import { useEffect, useState, useCallback, FormEvent } from "react";
 import {
   Dialog,
   DialogClose,
@@ -56,7 +56,7 @@ export function SectionModal({
     setErrorMessage(null);
   };
 
-  const populateFormForEditing = () => {
+  const populateFormForEditing = useCallback(() => {
     if (givenId) {
       setTitle(givenTitle ?? "");
       setNameInputs(lineItemNames || [""]);
@@ -65,13 +65,13 @@ export function SectionModal({
     } else {
       resetFormStates();
     }
-  };
+  }, [givenId, givenTitle, givenAsset, lineItemNames, lineItemValues]);
 
   useEffect(() => {
     if (isOpen) {
       populateFormForEditing();
     }
-  }, [isOpen, givenId, givenTitle, givenAsset, lineItemNames, lineItemValues]);
+  }, [isOpen, populateFormForEditing]);
 
   const handleInputChange = (index: number, value: number | undefined) => {
     const currentMoneyInputs = [...moneyInputs];
