@@ -46,12 +46,14 @@ export default async function UploadPage({ searchParams }: Props) {
     params?.year || today.getUTCFullYear().toString()
   );
 
+  const statementMonth = `${currentMonth}-${currentYear}`;
+
   let transactions: Transaction[] = [];
   if (userId) {
     transactions = await prisma.transaction.findMany({
       where: {
         userId,
-        statementMonth: `${currentMonth}-${currentYear}`,
+        statementMonth,
       },
       orderBy: {
         date: "desc",
@@ -66,7 +68,7 @@ export default async function UploadPage({ searchParams }: Props) {
       <div className="mb-8">
         <h1 className="text-2xl font-bold mb-4">Upload CSV</h1>
         <div className="flex items-center gap-4">
-          <UploadForm currentMonth={currentMonth} currentYear={currentYear} />
+          <UploadForm statementMonth={statementMonth} />
           <DateChange currentMonth={currentMonth} currentYear={currentYear} />
         </div>
       </div>
@@ -91,8 +93,7 @@ export default async function UploadPage({ searchParams }: Props) {
         <h2 className="text-xl font-bold mb-4 text-[#f4f0e1]">Transactions</h2>
         <TransactionViewer
           transactions={transactions}
-          currentMonth={currentMonth}
-          currentYear={currentYear}
+          statementMonth={statementMonth}
         />
       </div>
     </main>

@@ -17,8 +17,7 @@ import { NumericFormat } from "react-number-format";
 
 type Props = {
   transactions: Transaction[];
-  currentMonth: number;
-  currentYear: number;
+  statementMonth: string;
 };
 
 function formatCurrency(amount: number) {
@@ -30,8 +29,7 @@ function formatCurrency(amount: number) {
 
 export function TransactionViewer({
   transactions,
-  currentMonth,
-  currentYear,
+  statementMonth,
 }: Readonly<Props>) {
   // Use DOM refs for uncontrolled inputs (no re-renders while typing)
   const descriptionRef = useRef<HTMLInputElement | null>(null);
@@ -44,7 +42,6 @@ export function TransactionViewer({
 
     const description = descriptionRef.current?.value ?? "";
     const category = categoryRef.current?.value ?? "";
-    const statementMonth = `${currentMonth}-${currentYear}`;
 
     try {
       if (date) {
