@@ -36,8 +36,6 @@ function aggregateDataForChart(transactions: Transaction[]) {
 }
 
 export default async function UploadPage({ searchParams }: Props) {
-  // transactions for the currently selected statement month (fetched via server action)
-
   const today = new Date();
   const params = await searchParams;
   const currentMonth = Number.parseInt(
@@ -55,7 +53,6 @@ export default async function UploadPage({ searchParams }: Props) {
 
   const chartData = aggregateDataForChart(transactions);
 
-  // Fetch last 6 months category spending via server action
   const lastSixMonthly = await fetchCategorySpendingLastNMonths(
     6,
     currentMonth,
@@ -96,7 +93,6 @@ export default async function UploadPage({ searchParams }: Props) {
         />
       </div>
 
-      {/* Last 6 months category spending tables */}
       <div className="mt-8">
         <h2 className="text-xl font-bold mb-4">
           Last 6 Months — Category Spending

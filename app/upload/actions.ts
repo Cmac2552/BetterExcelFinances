@@ -179,7 +179,6 @@ export async function fetchCategorySpendingLastNMonths(
 ): Promise<MonthCategorySpending[]> {
   const userId = await getAuthenticatedUserId();
 
-  // build last N months
   const months: { statementMonth: string; label: string }[] = [];
   for (let i = 0; i < n; i++) {
     const d = new Date(Date.UTC(startYear, startMonth, 1));
@@ -193,7 +192,6 @@ export async function fetchCategorySpendingLastNMonths(
 
   const statementMonths = months.map((m) => m.statementMonth);
 
-  // Use Prisma groupBy to get sums per statementMonth & category
   const groups = await prisma.transaction.groupBy({
     by: ["statementMonth", "category"],
     where: {
@@ -209,12 +207,11 @@ export async function fetchCategorySpendingLastNMonths(
     const statementMonth = g.statementMonth;
     const amt = g._sum?.amount ?? 0;
     statementMonthsSpendingMap[statementMonth] = statementMonthsSpendingMap[statementMonth] ?? [];
-    statementMonthsSpendingMap[statementMonth].push({ category: g.category || "Uncategorized", amount: Number.parseFloat(amt.toFixed(2)) });
+    statementMonthsSpendingMap[statementMonth].push({ category: g.category ?? "Uncategorized", amount: Number.parseFloat(amt.toFixed(2)) });
   }
 
-  // Ensure arrays are sorted by amount desc
   const result: MonthCategorySpending[] = months.map((m) => {
-    const data = (statementMonthsSpendingMap[m.statementMonth] || []).sort((a, b) => b.amount - a.amount);
+    const data = (statementMonthsSpendingMap[m.statementMonth] ?? []).sort((a, b) => b.amount - a.amount);
     return { statementMonth: m.statementMonth, label: m.label, data };
   });
 
