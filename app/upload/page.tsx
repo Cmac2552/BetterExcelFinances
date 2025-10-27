@@ -1,5 +1,7 @@
-import { prisma } from "@/app/lib/prisma";
-import { auth } from "@/auth";
+import {
+  fetchTransactionsForStatementMonth,
+  fetchCategorySpendingLastNMonths,
+} from "./actions";
 import { UploadForm } from "./UploadForm";
 import { TransactionViewer } from "./TransactionViewer";
 import { CategoryPieChart } from "./CategoryPieChart";
@@ -8,7 +10,7 @@ import { Transaction } from "@prisma/client";
 import { DateChange } from "./dateChange";
 
 interface Props {
-  searchParams: Promise<{
+  readonly searchParams: Promise<{
     month?: string;
     year?: string;
   }>;
@@ -34,9 +36,6 @@ function aggregateDataForChart(transactions: Transaction[]) {
 }
 
 export default async function UploadPage({ searchParams }: Props) {
-  const session = await auth();
-  const userId = session?.user?.id;
-
   const today = new Date();
   const params = await searchParams;
   const currentMonth = Number.parseInt(
@@ -48,20 +47,17 @@ export default async function UploadPage({ searchParams }: Props) {
 
   const statementMonth = `${currentMonth}-${currentYear}`;
 
-  let transactions: Transaction[] = [];
-  if (userId) {
-    transactions = await prisma.transaction.findMany({
-      where: {
-        userId,
-        statementMonth,
-      },
-      orderBy: {
-        date: "desc",
-      },
-    });
-  }
+  const transactions: Transaction[] = await fetchTransactionsForStatementMonth(
+    statementMonth
+  );
 
   const chartData = aggregateDataForChart(transactions);
+
+  const lastSixMonthly = await fetchCategorySpendingLastNMonths(
+    6,
+    currentMonth,
+    currentYear
+  );
 
   return (
     <main className="container mx-auto p-4 text-[#f4f0e1]">
@@ -95,6 +91,29 @@ export default async function UploadPage({ searchParams }: Props) {
           transactions={transactions}
           statementMonth={statementMonth}
         />
+      </div>
+
+      <div className="mt-8">
+        <h2 className="text-xl font-bold mb-4">
+          Last 6 Months — Category Spending
+        </h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {lastSixMonthly.map((m) => {
+            const data = m.data || [];
+            return (
+              <div key={m.statementMonth} className="p-4 bg-[#121212] rounded">
+                <h3 className="font-semibold mb-2">{m.label}</h3>
+                {data.length === 0 ? (
+                  <div className="text-sm text-gray-400">
+                    No spending recorded
+                  </div>
+                ) : (
+                  <CategorySpendingTable data={data} />
+                )}
+              </div>
+            );
+          })}
+        </div>
       </div>
     </main>
   );
