@@ -210,10 +210,12 @@ export async function fetchCategorySpendingLastNMonths(
     statementMonthsSpendingMap[statementMonth].push({ category: g.category ?? "Uncategorized", amount: Number.parseFloat(amt.toFixed(2)) });
   }
 
-  const result: MonthCategorySpending[] = months.map((m) => {
-    const data = (statementMonthsSpendingMap[m.statementMonth] ?? []).sort((a, b) => b.amount - a.amount);
-    return { statementMonth: m.statementMonth, label: m.label, data };
-  });
+const result: MonthCategorySpending[] = months.map((m) => {
+  const data = (statementMonthsSpendingMap[m.statementMonth] ?? []).sort((a, b) =>
+    a.category.localeCompare(b.category, undefined, { sensitivity: "base" })
+  );
+  return { statementMonth: m.statementMonth, label: m.label, data };
+});
 
   return result;
 }
