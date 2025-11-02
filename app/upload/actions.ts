@@ -106,7 +106,36 @@ async function saveTransactionsToDb(
   }
 }
 
+export async function getCategoriesForMonth(statementMonth: string) {
+  const userId = await getAuthenticatedUserId();
+  const categories = await prisma.transaction.findMany({
+    where:{userId, statementMonth},
+    distinct:['category'],
+    select: { category: true },
+  })
+
+  return categories.map((item) => {
+    return item.category
+  })
+}
+
 export async function saveTransactionToDb(
+  transaction: {category:string, amount: number, description: string, date: Date, statementMonth: string}
+) {
+    const userId = await getAuthenticatedUserId();
+
+  try {
+    await prisma.transaction.create({
+      data: {...transaction, userId},
+    });
+    revalidatePath("/upload")
+  } catch (error) {
+    console.error("Error saving to database:", error);
+    throw new Error("Failed to save transactions.");
+  }
+}
+
+export async function updateTransactionInDb(
   transactions: {category:string, amount: number, description: string, date: Date, statementMonth: string}
 ) {
     const userId = await getAuthenticatedUserId();
@@ -227,9 +256,19 @@ export async function fetchTransactionsForStatementMonth(
 
   const txs = await prisma.transaction.findMany({
     where: { userId, statementMonth },
-    orderBy: { date: "desc" },
+    orderBy: [{ date: "desc"} ,{amount: "desc" }],
   });
 
   return txs;
+}
+
+export async function updateTransaction(id: number, data: Partial<Transaction>) {
+  const updatedValue = await prisma.transaction.update({ where: { id }, data });
+  revalidatePath("/upload")
+  return updatedValue;
+}
+
+export async function changeCategory(id: number, category: string) {
+  return updateTransaction(id, { category });
 }
 
