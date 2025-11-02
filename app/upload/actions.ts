@@ -263,9 +263,26 @@ export async function fetchTransactionsForStatementMonth(
 }
 
 export async function updateTransaction(id: number, data: Partial<Transaction>) {
-  const updatedValue = await prisma.transaction.update({ where: { id }, data });
-  revalidatePath("/upload")
-  return updatedValue;
+  try {
+    const userId = await getAuthenticatedUserId();
+
+    const transaction = await prisma.transaction.findUnique({ where: { id } });
+
+    if (!transaction) {
+      throw new Error("Transaction not found.");
+    }
+
+    if (transaction.userId !== userId) {
+      throw new Error("Transaction not found or user not authorized.");
+    }
+
+    const updatedValue = await prisma.transaction.update({ where: { id }, data });
+    revalidatePath("/upload");
+    return updatedValue;
+  } catch (error) {
+    console.error("Update failed:", error);
+    throw error;
+  }
 }
 
 export async function changeCategory(id: number, category: string) {

@@ -57,7 +57,7 @@ export function TransactionViewer({
                 </td>
                 <td className="py-2 px-4 border-b w-[15rem]">
                   <Select
-                    defaultValue={t.category}
+                    value={t.category}
                     onValueChange={async (value) => {
                       await changeCategory(t.id, value);
                     }}
@@ -70,7 +70,7 @@ export function TransactionViewer({
                         return (
                           <SelectItem
                             className="focus:bg-transparent focus:border-black focus:border-2"
-                            key={t.id + value}
+                            key={`${t.id}-${value}`}
                             value={value}
                           >
                             {value}

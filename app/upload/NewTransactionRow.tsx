@@ -22,9 +22,13 @@ export function NewTransactionRow({ statementMonth }: Readonly<Props>) {
   const [amount, setAmount] = useState<number>(0);
   const categoryRef = useRef<HTMLInputElement | null>(null);
   const [date, setDate] = useState<Date | undefined>(undefined);
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = async (e?: React.MouseEvent) => {
     e?.preventDefault();
+
+    if (isLoading) return;
+    setIsLoading(true);
 
     const description = descriptionRef.current?.value ?? "";
     const category = categoryRef.current?.value ?? "";
@@ -43,12 +47,14 @@ export function NewTransactionRow({ statementMonth }: Readonly<Props>) {
       }
 
       // reset inputs
-      setDate(new Date());
+      setDate(undefined);
       if (descriptionRef.current) descriptionRef.current.value = "";
       setAmount(0);
       if (categoryRef.current) categoryRef.current.value = "";
     } catch (error) {
       console.error("Failed to save transaction:", error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -89,7 +95,8 @@ export function NewTransactionRow({ statementMonth }: Readonly<Props>) {
           value={amount}
           thousandSeparator={true}
           prefix="$"
-          fixedDecimalScale={true}
+          fixedDecimalScale={false}
+          decimalScale={2}
           allowNegative={false}
           onValueChange={(vals) => {
             setAmount(vals.floatValue ?? 0);
@@ -111,6 +118,7 @@ export function NewTransactionRow({ statementMonth }: Readonly<Props>) {
           variant="secondary"
           size={"sm"}
           className="w-[4rem]"
+          disabled={isLoading}
         >
           Add
         </Button>
