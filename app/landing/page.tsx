@@ -139,7 +139,7 @@ export default async function LandingPage() {
           <div className="space-y-4">
             <h2 className="text-5xl font-bold">Ready to take control?</h2>
             <p className="text-xl text-slate-400">
-              Join others who've already transformed their financial lives.
+              Join others who&apos;ve already transformed their financial lives.
             </p>
           </div>
           <Link
