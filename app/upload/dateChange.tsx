@@ -39,7 +39,11 @@ export function DateChange({ currentMonth, currentYear }: Props) {
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-auto p-0">
-        <MonthPicker onMonthSelect={handleDateChange} selectedMonth={date} />
+        <MonthPicker
+          onMonthSelect={handleDateChange}
+          selectedMonth={date}
+          className="bg-[#f4f0e1]"
+        />
       </PopoverContent>
     </Popover>
   );

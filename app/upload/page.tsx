@@ -1,6 +1,7 @@
 import {
   fetchTransactionsForStatementMonth,
   fetchCategorySpendingLastNMonths,
+  getCategoriesForMonth,
 } from "./actions";
 import { UploadForm } from "./UploadForm";
 import { TransactionViewer } from "./TransactionViewer";
@@ -47,17 +48,14 @@ export default async function UploadPage({ searchParams }: Props) {
 
   const statementMonth = `${currentMonth}-${currentYear}`;
 
-  const transactions: Transaction[] = await fetchTransactionsForStatementMonth(
-    statementMonth
-  );
+  const [transactions, lastSixMonthly, statementMonthCategories] =
+    await Promise.all([
+      fetchTransactionsForStatementMonth(statementMonth),
+      fetchCategorySpendingLastNMonths(6, currentMonth, currentYear),
+      getCategoriesForMonth(statementMonth),
+    ]);
 
   const chartData = aggregateDataForChart(transactions);
-
-  const lastSixMonthly = await fetchCategorySpendingLastNMonths(
-    6,
-    currentMonth,
-    currentYear
-  );
 
   return (
     <main className="container mx-auto p-4 text-[#f4f0e1]">
@@ -90,6 +88,7 @@ export default async function UploadPage({ searchParams }: Props) {
         <TransactionViewer
           transactions={transactions}
           statementMonth={statementMonth}
+          categoryOptions={statementMonthCategories ?? []}
         />
       </div>
 
