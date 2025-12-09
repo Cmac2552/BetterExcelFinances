@@ -2,6 +2,7 @@ import {
   fetchTransactionsForStatementMonth,
   fetchCategorySpendingLastNMonths,
   getCategoriesForMonth,
+  meanNMonthSpending,
 } from "./actions";
 import { UploadForm } from "./UploadForm";
 import { TransactionViewer } from "./TransactionViewer";
@@ -48,11 +49,12 @@ export default async function UploadPage({ searchParams }: Props) {
 
   const statementMonth = `${currentMonth}-${currentYear}`;
 
-  const [transactions, lastSixMonthly, statementMonthCategories] =
+  const [transactions, lastSixMonthly, statementMonthCategories, last6Mean] =
     await Promise.all([
       fetchTransactionsForStatementMonth(statementMonth),
       fetchCategorySpendingLastNMonths(6, currentMonth, currentYear),
       getCategoriesForMonth(statementMonth),
+      meanNMonthSpending(6, currentMonth, currentYear),
     ]);
 
   const chartData = aggregateDataForChart(transactions);
@@ -113,6 +115,10 @@ export default async function UploadPage({ searchParams }: Props) {
             );
           })}
         </div>
+      </div>
+      <div>
+        <h2> Last 6 Month Mean</h2>
+        <CategorySpendingTable data={last6Mean}></CategorySpendingTable>
       </div>
     </main>
   );
