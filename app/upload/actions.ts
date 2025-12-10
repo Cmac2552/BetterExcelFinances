@@ -185,7 +185,7 @@ export async function deleteTransaction(transactionId: number) {
       where: { id: transactionId },
     });
 
-    if (!transaction || transaction.userId !== userId) {
+    if (transaction?.userId !== userId) {
       throw new Error("Transaction not found or user not authorized.");
     }
 
@@ -201,13 +201,11 @@ export async function deleteTransaction(transactionId: number) {
   }
 }
 
-export async function fetchCategorySpendingLastNMonths(
+function generateMonthRange(
   n: number,
   startMonth: number,
   startYear: number
-): Promise<MonthCategorySpending[]> {
-  const userId = await getAuthenticatedUserId();
-
+): { statementMonth: string; label: string }[] {
   const months: { statementMonth: string; label: string }[] = [];
   for (let i = 0; i < n; i++) {
     const d = new Date(Date.UTC(startYear, startMonth, 1));
@@ -218,6 +216,17 @@ export async function fetchCategorySpendingLastNMonths(
     const label = d.toLocaleString("en-US", { month: "short", year: "numeric" });
     months.push({ statementMonth: statementMonthStr, label });
   }
+  return months;
+}
+
+export async function fetchCategorySpendingLastNMonths(
+  n: number,
+  startMonth: number,
+  startYear: number
+): Promise<MonthCategorySpending[]> {
+  const userId = await getAuthenticatedUserId();
+
+  const months = generateMonthRange(n, startMonth, startYear);
 
   const statementMonths = months.map((m) => m.statementMonth);
 
@@ -287,5 +296,31 @@ export async function updateTransaction(id: number, data: Partial<Transaction>) 
 
 export async function changeCategory(id: number, category: string) {
   return updateTransaction(id, { category });
+}
+
+export async function meanNMonthSpending( nMonths: number, startMonth: number, startYear: number ): Promise<CategoryAmount[]> {
+  const userId = await getAuthenticatedUserId();
+
+  const months = generateMonthRange(nMonths, startMonth, startYear);
+
+  const statementMonths = months.map((m) => m.statementMonth);
+
+  const sums = await prisma.transaction.groupBy({
+    by: ["category"],
+    where: {
+      userId,
+      statementMonth: { in: statementMonths },
+      amount: { gt: 0 },
+    },
+    _sum: { amount: true },
+  });
+
+  const spending = sums.map((sum) => {
+    const meanOverNMonths = (sum?._sum?.amount ?? 0) / nMonths
+
+    return ({amount: Number.parseFloat((meanOverNMonths).toFixed(2) ?? "0"), category: sum.category})
+  })
+
+  return spending;
 }
 
