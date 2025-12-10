@@ -185,7 +185,7 @@ export async function deleteTransaction(transactionId: number) {
       where: { id: transactionId },
     });
 
-    if (!transaction || transaction.userId !== userId) {
+    if (transaction?.userId !== userId) {
       throw new Error("Transaction not found or user not authorized.");
     }
 
@@ -298,10 +298,10 @@ export async function changeCategory(id: number, category: string) {
   return updateTransaction(id, { category });
 }
 
-export async function meanNMonthSpending( n: number, startMonth: number, startYear: number ): Promise<CategoryAmount[]> {
+export async function meanNMonthSpending( nMonths: number, startMonth: number, startYear: number ): Promise<CategoryAmount[]> {
   const userId = await getAuthenticatedUserId();
 
-  const months = generateMonthRange(n, startMonth, startYear);
+  const months = generateMonthRange(nMonths, startMonth, startYear);
 
   const statementMonths = months.map((m) => m.statementMonth);
 
@@ -316,7 +316,9 @@ export async function meanNMonthSpending( n: number, startMonth: number, startYe
   });
 
   const spending = sums.map((sum) => {
-    return({amount: Number.parseFloat(((sum?._sum?.amount ?? 0)/n).toFixed(2) ?? "0"), category: sum.category})
+    const meanOverNMonths = (sum?._sum?.amount ?? 0) / nMonths
+
+    return ({amount: Number.parseFloat((meanOverNMonths).toFixed(2) ?? "0"), category: sum.category})
   })
 
   return spending;
