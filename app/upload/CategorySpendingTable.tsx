@@ -14,7 +14,7 @@ export function CategorySpendingTable({ data }: Props) {
 
   return (
     <div className="overflow-x-auto">
-      <table className="min-w-[50%] divide-y divide-gray-700">
+      <table className="w-full divide-y divide-gray-700">
         <thead className="">
           <tr>
             <th
