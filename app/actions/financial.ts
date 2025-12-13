@@ -31,7 +31,7 @@ export async function fetchSections(date: Date): Promise<FinancialSectionData[]>
 export async function fetchTableData(): Promise<TableData[]> {
   const session = await auth();
   const now = new Date();
-  const startDate = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() - 10, 1, 0, 0, 0, 0));
+  const startDate = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() - 11, 1, 0, 0, 0, 0));
   const endDate = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth()+1, 0, 23, 59, 59, 999));
   const tableData = await prisma.tableData.findMany({
      where:{
@@ -63,7 +63,7 @@ return formattedData;
 }
 
 function getNext12MonthsWithYears(startDate = new Date()) {
-  const startMonthIndex = startDate.getUTCMonth() - 1;
+  const startMonthIndex = startDate.getUTCMonth();
   const startYear = startDate.getUTCFullYear();  
   const next12Months = [];
   for (let i = 0; i < 12; i++) {
