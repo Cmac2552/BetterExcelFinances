@@ -9,7 +9,7 @@ interface Props {
 export default function UploadLayout({ children }: Readonly<Props>) {
   return (
     <div className="upload h-screen">
-      <main className="h-full">
+      <main className="h-full font-serif">
         <Nav />
         {children}
       </main>

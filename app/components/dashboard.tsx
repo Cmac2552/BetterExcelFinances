@@ -6,48 +6,12 @@ import { MonthDashboard } from "./MonthDashboard";
 import { sortSections } from "../utils/accountUtils";
 import { gatherDataForMonth, generateNewTableData } from "../utils/monthUtils";
 import { updateTableData } from "../actions/financial";
+import { calculateNetWorth, formatCurrency } from "../utils/currencyUtils";
 
 interface Props {
   sections: FinancialSectionData[];
   tableDataInput: TableData[];
   date: Date;
-}
-interface NetWorthCalculation {
-  totalNetWorth: number;
-  totalAssets: number;
-  totalDebts: number;
-}
-
-function calculateNetWorth(
-  sections: FinancialSectionData[]
-): NetWorthCalculation {
-  let totalAssets = 0;
-  let totalDebts = 0;
-
-  sections.forEach((section) => {
-    const sectionTotal = section.values.reduce(
-      (sum, item) => sum + item.value,
-      0
-    );
-    if (section.assetClass?.toLowerCase() === "asset") {
-      totalAssets += sectionTotal;
-    } else if (section.assetClass?.toLowerCase() === "debt") {
-      totalDebts += Math.abs(sectionTotal);
-    }
-  });
-
-  return {
-    totalNetWorth: totalAssets - totalDebts,
-    totalAssets,
-    totalDebts,
-  };
-}
-
-function formatCurrency(value: number): string {
-  return new Intl.NumberFormat("en-US", {
-    style: "currency",
-    currency: "USD",
-  }).format(value);
 }
 
 export default function Dashboard({
@@ -87,15 +51,16 @@ export default function Dashboard({
   return (
     <div className="z-10 w-full h-[80%]">
       <div className="w-full flex items-center justify-center flex-col">
-        <div className="w-full pl-[7rem] pt-8 flex flex-wrap justify-center gap-6">
-          <div className="w-90  flex-shrink-0">
+        <div className="w-full px-8 pt-8 flex flex-wrap justify-center items-start">
+          <div className="w-[30%] min-w-[300px] pr-6">
             <div className="space-y-6">
               <div className="space-y-2">
                 <p className="text-[#f4f0e1] text-md font-medium tracking-wide uppercase">
-                  Total Net Worth
+                  {new Date(date.getFullYear(), date.getMonth() + 1, 1).toLocaleString("default", { month: "long" })} Total Net
+                  Worth
                 </p>
                 <h2
-                  className={`text-6xl font-bold bg-clip-text text-transparent bg-gradient-to-r ${
+                  className={`text-6xl font-bold bg-clip-text text-transparent bg-gradient-to-r text-ellipsis overflow-hidden text h-16 ${
                     netWorth.totalNetWorth >= 0
                       ? "from-[#00A896] to-[#f4f0e1]"
                       : "from-[#7B0323] to-[#f4f0e1]"
@@ -131,7 +96,7 @@ export default function Dashboard({
               </div>
             </div>
           </div>
-          <div className="flex-1 h-[450px] min-w-[800px]">
+          <div className="w-[60%] min-w-[400px] pl-6">
             <LineChart tableData={tableData} />
           </div>
         </div>

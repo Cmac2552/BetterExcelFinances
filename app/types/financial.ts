@@ -18,3 +18,9 @@ export type FinancialSectionItemData = {
     month: string;
     value: number;
   };
+
+export type NetWorthCalculation = {
+  totalNetWorth: number;
+  totalAssets: number;
+  totalDebts: number;
+}
