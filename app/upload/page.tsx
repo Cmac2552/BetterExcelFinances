@@ -77,10 +77,10 @@ export default async function UploadPage({ searchParams }: Props) {
             6 Month History
           </TabsTrigger>
           <TabsTrigger
-            value="median"
+            value="mean"
             className="data-[state=active]:bg-[#f4f0e1] px-2 py-2 text-[#f4f0e1]"
           >
-            6 Month Median
+            6 Month Average
           </TabsTrigger>
         </TabsList>
         <TabsContent value="current">
@@ -149,10 +149,10 @@ export default async function UploadPage({ searchParams }: Props) {
             </div>
           </div>
         </TabsContent>
-        <TabsContent value="median">
+        <TabsContent value="mean">
           <div className="w-full flex justify-center">
             <div className="w-1/2">
-              <h2> Last 6 Month Mean</h2>
+              <h2> Last 6 Month Average</h2>
               <CategorySpendingTable data={last6Mean}></CategorySpendingTable>
             </div>
           </div>
