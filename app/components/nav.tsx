@@ -8,10 +8,10 @@ export function Nav() {
       <h1 className="text-3xl text-[#f4f0e1] ml-4">BetterExcelFinances</h1>
       <div className="flex gap-4 items-center ">
         <Link href="/dashboard" className="text-[#f4f0e1]">
-          Dashboard
+          Net Worth
         </Link>
         <Link href="/upload" className="text-[#f4f0e1]">
-          Upload
+          Spending
         </Link>
         <LogoutButton />
       </div>

@@ -11,6 +11,7 @@ import { type ChartConfig, ChartContainer } from "@/components/ui/chart";
 import { format } from "date-fns";
 import { TableData } from "../types";
 import { Tailspin } from "ldrs/react";
+import { formatCurrency } from "../utils/currencyUtils";
 import "ldrs/react/Tailspin.css";
 
 const chartConfig = {
@@ -33,8 +34,8 @@ export function LineChart({ tableData }: Readonly<Props>) {
     );
   }
   return (
-    <div className="min-h-[450px] max-h-[450px] w-full flex flex-col items-center gap-12">
-      <ChartContainer config={chartConfig} className="max-h-[375px] w-[75%]">
+    <div className="min-h-[450px] max-h-[450px] w-full flex flex-col items-center justify-center">
+      <ChartContainer config={chartConfig} className="max-h-[375px] w-full">
         <AreaChart
           data={tableData}
           margin={{ left: 0, right: 65, bottom: 0 }}
@@ -47,17 +48,25 @@ export function LineChart({ tableData }: Readonly<Props>) {
             axisLine={false}
             tickFormatter={(value) => format(new Date(value), "MMM yyyy")}
           ></XAxis>
-          <YAxis />
+          <YAxis tickFormatter={formatCurrency} />
           <Tooltip
             contentStyle={{
-              color: "#000000", // This changes the font color
+              color: "#000000",
               fontSize: "14px",
+              border: "none",
+              borderRadius: "4px",
+              backgroundColor: "#f4f0e1",
             }}
-            itemStyle={{
-              color: "#000000", // This changes the value color (y-axis values)
-            }}
-            labelStyle={{
-              color: "#000000", // This ensures the label (x-axis value) color is set
+            content={({ active, payload }) => {
+              if (active && payload?.length) {
+                return (
+                  <div className="bg-[#f4f0e1] rounded px-2 py-1">
+                    <div>{payload[0].payload.month}</div>
+                    <div>{formatCurrency(payload[0].value as number)}</div>
+                  </div>
+                );
+              }
+              return null;
             }}
           />
           <defs>

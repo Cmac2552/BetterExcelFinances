@@ -9,7 +9,7 @@ interface Props {
 export default function DashboardLayout({ children }: Readonly<Props>) {
   return (
     <div className="dashboard h-screen">
-      <main className="h-full">
+      <main className="h-full font-serif">
         <Nav />
         {children}
       </main>

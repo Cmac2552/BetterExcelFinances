@@ -38,10 +38,10 @@ export const generateNewTableData = (update: {
   export const parseNewMonth = (monthInput:string) : Date => {
     const parts = monthInput.split("-");
     if (parts.length === 2) {
-      const year = parseInt(parts[0]);
-      const month = parseInt(parts[1]);
+      const year = Number.parseInt(parts[0]);
+      const month = Number.parseInt(parts[1]);
 
-      if (!isNaN(year) && !isNaN(month) && month >= 1 && month <= 12) {
+      if (!Number.isNaN(year) && !Number.isNaN(month) && month >= 1 && month <= 12) {
         const newDateAtUTCMidnight = new Date(Date.UTC(year, month - 1, 1));
           return(newDateAtUTCMidnight);
       } else {

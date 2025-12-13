@@ -27,11 +27,14 @@ async function DashboardPage({ searchParams }: Props) {
     fetchTableData(),
   ]);
 
+  const dashboardDate = parseNewMonth(month);
+
   return (
     <Dashboard
+      key={dashboardDate.toUTCString()}
       tableDataInput={tableData}
       sections={userData}
-      date={parseNewMonth(month)}
+      date={dashboardDate}
     />
   );
 }
