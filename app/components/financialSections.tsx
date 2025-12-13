@@ -45,10 +45,11 @@ export function FinancialSection({
     if (newValue === value.value) {
       return;
     }
+    console.log(newValue, value);
     try {
       const responseData = await updateSectionItem(
         value.id as number,
-        newValue
+        Number.isNaN(newValue) ? 0 : newValue
       );
       const newSectionData = {
         ...sectionData,
