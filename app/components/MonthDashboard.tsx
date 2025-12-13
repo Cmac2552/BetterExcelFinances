@@ -4,52 +4,21 @@ import { Button } from "@/components/ui/button";
 import { FinancialInputs } from "./financialInputs";
 import { SectionModal } from "./SectionModal";
 import { DateInput } from "./dateInput";
-import { gatherDataForMonth, generateNewTableData } from "../utils/monthUtils";
-import { sortSections } from "../utils/accountUtils";
-import { updateTableData } from "../actions/financial";
-import { FinancialSectionData, TableData } from "../types";
+import { FinancialSectionData } from "../types";
 
 interface Props {
   sections: FinancialSectionData[];
-  tableData: TableData[];
-  setTableData: (data: TableData[]) => void;
   date: Date;
+  setSections: (sections: FinancialSectionData[]) => void;
+  addSection: (section: FinancialSectionData) => void;
 }
 export function MonthDashboard({
   sections,
-  tableData,
-  setTableData,
   date,
+  setSections,
+  addSection,
 }: Readonly<Props>) {
-  const [data, setData] = useState<FinancialSectionData[]>(
-    sortSections(sections)
-  );
   const [allSectionsOpen, setAllSectionsOpen] = useState(false);
-
-  const postTableData = async (sections: any[]) => {
-    const update = {
-      date: date,
-      sectionValue: gatherDataForMonth(sections),
-    };
-    try {
-      await updateTableData(update);
-      setTableData(generateNewTableData(update, tableData, date));
-    } catch {
-      console.error("Error posting table data");
-    }
-  };
-
-  const addSection = (newSection: FinancialSectionData) => {
-    const newSections = [...data, newSection];
-    setData(sortSections(newSections));
-    postTableData(newSections);
-  };
-
-  const setSections = (newSections: FinancialSectionData[]) => {
-    const sortedSections = sortSections(newSections);
-    setData(sortedSections);
-    postTableData(sortedSections);
-  };
 
   return (
     <>
@@ -80,7 +49,7 @@ export function MonthDashboard({
 
       <div className="w-full">
         <FinancialInputs
-          sections={data}
+          sections={sections}
           date={date}
           setSections={setSections}
           allSectionsOpen={allSectionsOpen}
