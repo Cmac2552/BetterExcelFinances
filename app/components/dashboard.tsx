@@ -23,7 +23,7 @@ export default function Dashboard({
   const [data, setData] = useState<FinancialSectionData[]>(sections);
   const netWorth = useMemo(() => calculateNetWorth(data), [data]);
 
-  const postTableData = async (sections: any[]) => {
+  const postTableData = async (sections: FinancialSectionData[]) => {
     const update = {
       date: date,
       sectionValue: gatherDataForMonth(sections),
@@ -36,16 +36,16 @@ export default function Dashboard({
     }
   };
 
-  const addSection = (newSection: FinancialSectionData) => {
+  const addSection = async (newSection: FinancialSectionData) => {
     const newSections = [...data, newSection];
     setData(sortSections(newSections));
-    postTableData(newSections);
+    await postTableData(newSections);
   };
 
-  const setSections = (newSections: FinancialSectionData[]) => {
+  const setSections = async (newSections: FinancialSectionData[]) => {
     const sortedSections = sortSections(newSections);
     setData(sortedSections);
-    postTableData(sortedSections);
+    await postTableData(sortedSections);
   };
 
   return (
@@ -56,8 +56,12 @@ export default function Dashboard({
             <div className="space-y-6">
               <div className="space-y-2">
                 <p className="text-[#f4f0e1] text-md font-medium tracking-wide uppercase">
-                  {new Date(date.getFullYear(), date.getMonth() + 1, 1).toLocaleString("default", { month: "long" })} Total Net
-                  Worth
+                  {new Date(
+                    date.getFullYear(),
+                    date.getMonth() + 1,
+                    1
+                  ).toLocaleString("default", { month: "long" })}{" "}
+                  Total Net Worth
                 </p>
                 <h2
                   className={`text-6xl font-bold bg-clip-text text-transparent bg-gradient-to-r text-ellipsis overflow-hidden text h-16 ${
