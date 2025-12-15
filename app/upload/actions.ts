@@ -5,6 +5,7 @@ import { prisma } from "@/app/lib/prisma";
 import { auth } from "@/auth";
 import { revalidatePath } from "next/cache";
 import { Transaction } from "@prisma/client";
+import { StatementRow } from "../types";
 
 type PrismaCreatedValues = "id" | "createdAt" | "updatedAt"
 type UserTransactionDate = Omit<Transaction, PrismaCreatedValues>
@@ -16,7 +17,7 @@ export type CategoryAmount = {
 export type MonthCategorySpending = {
   statementMonth: string;
   label: string;
-  data: CategoryAmount[];
+  spendingAmounts: CategoryAmount[];
 };
 
 async function getAuthenticatedUserId(): Promise<string> {
@@ -39,7 +40,7 @@ function parseCsv(fileText: string): Promise<Papa.ParseResult<any>> {
 }
 
 function transformDataForPrisma(
-  csvData: any[],
+  csvData: StatementRow[],
   userId: string,
   headers: string[],
   statementMonth: string
@@ -50,7 +51,7 @@ function transformDataForPrisma(
   if (isDebitCreditFormat) {
     return csvData
       .map((row) => {
-        const amount = Number.parseFloat(row.Debit) || 0;
+        const amount = Number.parseFloat(row.Debit ?? '0');
 
         if (!row["Posted Date"] || amount === 0) return null;
 
@@ -70,11 +71,11 @@ function transformDataForPrisma(
   } else {
     return csvData
       .map((row) => {
-        if (!row["Post Date"] || !row.Amount || row.Amount < 0) return null;
+        if (!row["Post Date"] || !row.Amount || Number.parseFloat(row.Amount) < 0) return null;
 
         return {
           date: new Date(row["Post Date"]),
-          amount: Number.parseFloat(row.Amount),
+          amount: Number.parseFloat(row?.Amount || '0'),
           description: row.Description,
           category: row.Category,
           userId,
@@ -249,10 +250,10 @@ export async function fetchCategorySpendingLastNMonths(
   }
 
 const result: MonthCategorySpending[] = months.map((m) => {
-  const data = (statementMonthsSpendingMap[m.statementMonth] ?? []).sort((a, b) =>
+  const spendingAmounts = (statementMonthsSpendingMap[m.statementMonth] ?? []).sort((a, b) =>
     a.category.localeCompare(b.category, undefined, { sensitivity: "base" })
   );
-  return { statementMonth: m.statementMonth, label: m.label, data };
+  return { statementMonth: m.statementMonth, label: m.label, spendingAmounts };
 });
 
   return result;

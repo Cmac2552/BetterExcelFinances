@@ -16,7 +16,7 @@ import { Button } from "@/components/ui/button";
 interface Props {
   section: FinancialSectionData;
   open: boolean;
-  onSectionModify: (data: any) => void;
+  onSectionModify: (data: FinancialSectionData) => void;
   sectionDelete: (data: number) => void;
   date: Date;
 }
