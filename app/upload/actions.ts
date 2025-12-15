@@ -99,6 +99,7 @@ async function saveTransactionsToDb(
   try {
     await prisma.transaction.createMany({
       data: transactions,
+      skipDuplicates: true,
     });
   } catch (error) {
     console.error("Error saving to database:", error);
