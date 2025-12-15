@@ -8,7 +8,7 @@ import { FinancialSection } from "./financialSections";
 interface Props {
   sections: FinancialSectionData[];
   date: Date;
-  setSections: (data: any[]) => void;
+  setSections: (data: FinancialSectionData[]) => void;
   allSectionsOpen: boolean;
 }
 
@@ -21,7 +21,7 @@ export function FinancialInputs({
   const importMonth = async () => {
     setSections(await copyMonth(date.toUTCString()));
   };
-  const onSectionModify = (updatedSection: any) => {
+  const onSectionModify = (updatedSection: FinancialSectionData) => {
     const updatedSections = sections.map((section) => {
       return section.id === updatedSection.id ? updatedSection : section;
     });

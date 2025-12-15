@@ -128,20 +128,22 @@ export default async function UploadPage({ searchParams }: Props) {
               Last 6 Months — Category Spending
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {lastSixMonthly.map((m) => {
-                const data = m.data || [];
+              {lastSixMonthly.map((monthInformation) => {
+                const spendingAmounts = monthInformation.spendingAmounts || [];
                 return (
                   <div
-                    key={m.statementMonth}
+                    key={monthInformation.statementMonth}
                     className="p-4 bg-[#121212] rounded"
                   >
-                    <h3 className="font-semibold mb-2">{m.label}</h3>
-                    {data.length === 0 ? (
+                    <h3 className="font-semibold mb-2">
+                      {monthInformation.label}
+                    </h3>
+                    {spendingAmounts.length === 0 ? (
                       <div className="text-sm text-gray-400">
                         No spending recorded
                       </div>
                     ) : (
-                      <CategorySpendingTable data={data} />
+                      <CategorySpendingTable data={spendingAmounts} />
                     )}
                   </div>
                 );

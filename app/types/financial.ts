@@ -24,3 +24,15 @@ export type NetWorthCalculation = {
   totalAssets: number;
   totalDebts: number;
 }
+
+//not follwing camel case due to file categories
+export type StatementRow = {
+  Category: string;
+  Description: string;
+  Debit?: string;
+  Amount?: string;
+  'Post Date' ? : string;
+  'Trans. Date' ? : string;
+  'Transaction Date' ?: string;
+  'Posted Date' ? : string;
+}

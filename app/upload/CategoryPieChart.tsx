@@ -41,7 +41,7 @@ export function CategoryPieChart({ data }: Readonly<Props>) {
   const chartConfig = data.reduce((acc, item) => {
     acc[item.category] = { label: item.category };
     return acc;
-  }, {} as any);
+  }, {} as Record<string, { label: string }>);
 
   return (
     <div className="min-h-[225px] max-h-[225px] w-full">
