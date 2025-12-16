@@ -20,8 +20,13 @@ export default function Dashboard({
   date,
 }: Readonly<Props>) {
   const [tableData, setTableData] = useState<TableData[]>(tableDataInput);
-  const [data, setData] = useState<FinancialSectionData[]>(sections);
-  const netWorth = useMemo(() => calculateNetWorth(data), [data]);
+  const [financialSections, setFinancialSections] = useState<
+    FinancialSectionData[]
+  >(sortSections(sections));
+  const netWorth = useMemo(
+    () => calculateNetWorth(financialSections),
+    [financialSections]
+  );
 
   const postTableData = async (sections: FinancialSectionData[]) => {
     const update = {
@@ -37,14 +42,14 @@ export default function Dashboard({
   };
 
   const addSection = async (newSection: FinancialSectionData) => {
-    const newSections = [...data, newSection];
-    setData(sortSections(newSections));
+    const newSections = [...financialSections, newSection];
+    setFinancialSections(sortSections(newSections));
     await postTableData(newSections);
   };
 
   const setSections = async (newSections: FinancialSectionData[]) => {
     const sortedSections = sortSections(newSections);
-    setData(sortedSections);
+    setFinancialSections(sortedSections);
     await postTableData(sortedSections);
   };
 
@@ -107,7 +112,7 @@ export default function Dashboard({
 
         <MonthDashboard
           key={date.toUTCString()}
-          sections={data}
+          sections={financialSections}
           date={date}
           setSections={setSections}
           addSection={addSection}

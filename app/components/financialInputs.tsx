@@ -50,9 +50,9 @@ export function FinancialInputs({
             </Button>
           </div>
         )}
-        {sections?.map((dataEntry: FinancialSectionData, index: number) => (
+        {sections?.map((section: FinancialSectionData, index: number) => (
           <FinancialSection
-            section={dataEntry}
+            section={section}
             key={index + "Financial Input"}
             open={allSectionsOpen}
             onSectionModify={onSectionModify}
