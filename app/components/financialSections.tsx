@@ -163,14 +163,6 @@ export function FinancialSection({
                         }}
                         className="w-[90%] px-4 py-2 bg-[#1E2228] text-[#f4f0e1] border border-gray-600 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus-visible:ring-[#f4f0e1] placeholder-gray-400 my-1 mx-[10%]"
                       />
-                      {/* <Input
-                        id={value.id}
-                        name={value.label}
-                        value={value.value}
-                        key={index + value.label + "currentyInput"}
-                        onStuff={handleItemValueChange2}
-                      ></Input> */}
-
                       <Button
                         onClick={() => removeSectionItem(value)}
                         className="text-[#f4f0e1] ml-auto justify-self-center self-center invisible group-hover:visible"
