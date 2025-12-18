@@ -39,6 +39,7 @@
     "zod": "^3.25.50"
   },
   "devDependencies": {
+    "@types/lodash": "^4.17.21",
     "@types/node": "^20",
     "@types/papaparse": "^5.3.16",
     "@types/react": "19.1.4",

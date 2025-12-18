@@ -12,6 +12,7 @@ import {
   updateSectionItem,
 } from "../lib/actions";
 import { Button } from "@/components/ui/button";
+import { debounce } from "lodash";
 
 interface Props {
   section: FinancialSectionData;
@@ -62,6 +63,8 @@ export function FinancialSection({
       console.error("somethingbroke", error);
     }
   };
+
+  const debouncedOnChange = debounce(handleItemValueChange, 750);
 
   const onSectionDelete = async () => {
     await deleteSection(sectionData.id);
@@ -156,13 +159,17 @@ export function FinancialSection({
                         allowNegative={false}
                         placeholder="Please enter a number"
                         onValueChange={(values) => {
-                          handleItemValueChange(
-                            Number(values.floatValue),
-                            value
-                          );
+                          debouncedOnChange(Number(values.floatValue), value);
                         }}
                         className="w-[90%] px-4 py-2 bg-[#1E2228] text-[#f4f0e1] border border-gray-600 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus-visible:ring-[#f4f0e1] placeholder-gray-400 my-1 mx-[10%]"
                       />
+                      {/* <Input
+                        id={value.id}
+                        name={value.label}
+                        value={value.value}
+                        key={index + value.label + "currentyInput"}
+                        onStuff={handleItemValueChange2}
+                      ></Input> */}
 
                       <Button
                         onClick={() => removeSectionItem(value)}
