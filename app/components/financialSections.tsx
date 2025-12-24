@@ -43,6 +43,7 @@ export function FinancialSection({
     newValue: number,
     value: FinancialSectionItemData
   ) => {
+    console.log(newValue);
     if (newValue === value.value) {
       return;
     }
@@ -152,7 +153,7 @@ export function FinancialSection({
                         key={index + value.label + "currentyInput"}
                         id={value.label}
                         name={value.label}
-                        value={value.value}
+                        value={value.value === 0 ? Number.NaN : value.value}
                         thousandSeparator={true}
                         prefix="$"
                         fixedDecimalScale={true}

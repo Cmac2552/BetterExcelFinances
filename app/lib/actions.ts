@@ -114,7 +114,7 @@ export async function saveSection(data: {
   } catch (error) {
     console.error('Error saving section:', error);
     if (error instanceof Prisma.PrismaClientKnownRequestError) {
-      // Example: P2002 is unique constraint violation
+      // P2002 is unique constraint violation
       if (error.code === 'P2002') {
         return { error: 'A section with this identifier already exists.', success: false };
       }
