@@ -43,7 +43,6 @@ export function FinancialSection({
     newValue: number,
     value: FinancialSectionItemData
   ) => {
-    console.log(newValue);
     if (newValue === value.value) {
       return;
     }
