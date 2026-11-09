@@ -47,16 +47,38 @@ function transformDataForPrisma(
 ): UserTransactionDate[] {
   const isDebitCreditFormat =
     headers.includes("Debit") && headers.includes("Credit");
+  const isChaseFormat =
+    headers.includes("Memo");
 
   if (isDebitCreditFormat) {
     return csvData
       .map((row) => {
         const amount = Number.parseFloat(row.Debit ?? '0');
 
-        if (!row["Posted Date"] || amount === 0) return null;
+        if (!row["Posted Date"] || isNaN(amount) || amount === 0) return null;
 
         return {
           date: new Date(row["Posted Date"]),
+          amount,
+          description: row.Description,
+          category: row.Category,
+          userId,
+          statementMonth
+        };
+      })
+      .filter(
+        (t): t is UserTransactionDate =>
+          t !== null
+      );
+  } else if (isChaseFormat) {
+    return csvData
+      .map((row) => {
+        const amount = -Number.parseFloat(row.Amount ?? '0');
+
+        if (!row["Post Date"] || isNaN(amount) || amount <= 0) return null;
+
+        return {
+          date: new Date(row["Post Date"]),
           amount,
           description: row.Description,
           category: row.Category,
