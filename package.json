@@ -12,8 +12,8 @@
     "postinstall": "prisma generate"
   },
   "dependencies": {
-    "@auth/prisma-adapter": "^2.9.1",
-    "@prisma/client": "^5.18.0",
+    "@auth/prisma-adapter": "^2.11.3",
+    "@prisma/client": "^5.22.0",
     "@radix-ui/react-dialog": "^1.1.6",
     "@radix-ui/react-popover": "^1.1.15",
     "@radix-ui/react-select": "^2.2.6",
@@ -26,8 +26,8 @@
     "ldrs": "^1.1.7",
     "lodash": "^4.17.21",
     "lucide-react": "^0.475.0",
-    "next": "^15.5.19",
-    "next-auth": "^5.0.0-beta.28",
+    "next": "^15.5.29",
+    "next-auth": "^5.0.0-beta.32",
     "papaparse": "^5.5.3",
     "react": "19.1.0",
     "react-day-picker": "^9.11.1",
@@ -37,7 +37,7 @@
     "recharts": "^2.15.1",
     "tailwind-merge": "^3.0.1",
     "tailwindcss-animate": "^1.0.7",
-    "zod": "^3.25.50"
+    "zod": "^3.25.76"
   },
   "devDependencies": {
     "@types/lodash": "^4.17.21",
@@ -46,14 +46,15 @@
     "@types/react": "19.1.4",
     "@types/react-dom": "19.1.5",
     "eslint": "^8",
-    "eslint-config-next": "^15.5.19",
-    "postcss": "^8",
-    "prisma": "^5.18.0",
+    "eslint-config-next": "^15.5.29",
+    "postcss": "^8.5.32",
+    "prisma": "^5.22.0",
     "tailwindcss": "^3.4.1",
     "typescript": "^5"
   },
   "overrides": {
     "@types/react": "19.1.4",
-    "@types/react-dom": "19.1.5"
+    "@types/react-dom": "19.1.5",
+    "postcss": "^8.5.32"
   }
 }
