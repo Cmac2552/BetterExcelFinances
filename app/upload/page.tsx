@@ -5,9 +5,9 @@ import {
   meanNMonthSpending,
 } from "./actions";
 import { UploadForm } from "./UploadForm";
-import { TransactionViewer } from "./TransactionViewer";
-import { CategoryPieChart } from "./CategoryPieChart";
+import { CurrentMonthView } from "./CurrentMonthView";
 import { CategorySpendingTable } from "./CategorySpendingTable";
+import { CategoryModal } from "./CategoryModal";
 import { Transaction } from "@prisma/client";
 import { DateChange } from "./dateChange";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
@@ -86,60 +86,59 @@ export default async function UploadPage({ searchParams }: Props) {
         <TabsContent value="current">
           <div className="mb-8">
             <h1 className="text-2xl font-bold mb-4">Upload CSV</h1>
-            <div className="flex items-center gap-4">
-              <UploadForm statementMonth={statementMonth} />
-              <DateChange
-                currentMonth={currentMonth}
-                currentYear={currentYear}
-              />
-            </div>
-          </div>
-
-          {chartData.length > 0 && (
-            <div className="mb-8">
-              <h2 className="text-xl font-bold mb-4">Category Spending</h2>
-              <div className="flex justify-center">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8 w-[80%]">
-                  <div className="h-[400px] w-25%">
-                    <CategoryPieChart data={chartData} />
-                  </div>
-                  <div className="h-full w-full flex justify-center">
-                    <CategorySpendingTable data={chartData} />
-                  </div>
-                </div>
+            <UploadForm statementMonth={statementMonth}>
+              <div className="flex items-center gap-3">
+                <DateChange
+                  currentMonth={currentMonth}
+                  currentYear={currentYear}
+                />
+                <CategoryModal />
               </div>
-            </div>
-          )}
-
-          <div>
-            <h2 className="text-xl font-bold mb-4 text-[#f4f0e1]">
-              Transactions
-            </h2>
-            <TransactionViewer
-              transactions={transactions}
-              statementMonth={statementMonth}
-              categoryOptions={statementMonthCategories ?? []}
-            />
+            </UploadForm>
           </div>
+
+          <CurrentMonthView
+            transactions={transactions}
+            statementMonth={statementMonth}
+            categoryOptions={statementMonthCategories ?? []}
+            chartData={chartData}
+          />
         </TabsContent>
         <TabsContent value="history">
-          <div className="mt-8">
-            <h2 className="text-xl font-bold mb-4">
-              Last 6 Months — Category Spending
-            </h2>
+          <div className="mt-8 space-y-6">
+            <div>
+              <h2 className="text-xl font-bold mb-1">
+                Last 6 Months — Category Spending
+              </h2>
+              <p className="text-xs text-gray-400">
+                Monthly categorical spend breakdown across your last 6 recorded statement periods
+              </p>
+            </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {lastSixMonthly.map((monthInformation) => {
                 const spendingAmounts = monthInformation.spendingAmounts || [];
+                const monthTotal = spendingAmounts.reduce(
+                  (sum, item) => sum + (item.amount > 0 ? item.amount : 0),
+                  0
+                );
+
                 return (
                   <div
                     key={monthInformation.statementMonth}
-                    className="p-4 bg-[#121212] rounded"
+                    className="p-5 bg-[#141414] border border-white/10 rounded-lg space-y-3"
                   >
-                    <h3 className="font-semibold mb-2">
-                      {monthInformation.label}
-                    </h3>
+                    <div className="flex items-center justify-between">
+                      <h3 className="font-bold text-base text-[#f4f0e1]">
+                        {monthInformation.label}
+                      </h3>
+                      {spendingAmounts.length > 0 && (
+                        <span className="text-xs font-semibold text-[#00A896] bg-[#00A896]/10 px-2.5 py-0.5 rounded-full border border-[#00A896]/20 font-mono tabular-nums">
+                          ${monthTotal.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                        </span>
+                      )}
+                    </div>
                     {spendingAmounts.length === 0 ? (
-                      <div className="text-sm text-gray-400">
+                      <div className="text-sm text-gray-400 py-6 text-center">
                         No spending recorded
                       </div>
                     ) : (
@@ -152,11 +151,21 @@ export default async function UploadPage({ searchParams }: Props) {
           </div>
         </TabsContent>
         <TabsContent value="mean">
-          <div className="w-full flex justify-center">
-            <div className="w-1/2">
-              <h2> Last 6 Month Average</h2>
-              <CategorySpendingTable data={last6Mean}></CategorySpendingTable>
+          <div className="max-w-2xl mx-auto mt-6 space-y-4">
+            <div className="flex flex-wrap items-center justify-between gap-3 pb-2 border-b border-white/10">
+              <div>
+                <h2 className="text-xl font-bold text-[#f4f0e1]">
+                  6 Month Category Average
+                </h2>
+                <p className="text-xs text-gray-400 mt-0.5">
+                  Normalized monthly average spending by category across the past 6 statement months
+                </p>
+              </div>
+              <span className="text-xs font-semibold text-[#00A896] bg-[#00A896]/10 px-3 py-1 rounded-full border border-[#00A896]/20 font-mono tabular-nums">
+                Avg: ${last6Mean.reduce((sum, item) => sum + (item.amount > 0 ? item.amount : 0), 0).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}/mo
+              </span>
             </div>
+            <CategorySpendingTable data={last6Mean} />
           </div>
         </TabsContent>
       </Tabs>

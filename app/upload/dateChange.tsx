@@ -31,7 +31,7 @@ export function DateChange({ currentMonth, currentYear }: Props) {
     <Popover>
       <PopoverTrigger asChild>
         <Button
-          variant="primary"
+          variant="secondary"
           className={cn(!date && "text-muted-foreground")}
         >
           <CalendarIcon className="mr-2 h-4 w-4" />

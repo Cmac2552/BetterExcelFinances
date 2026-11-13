@@ -1,24 +1,21 @@
 "use server";
 
-import Papa from "papaparse";
-import { prisma } from "@/app/lib/prisma";
+import prisma from "@/app/lib/prisma";
 import { auth } from "@/auth";
 import { revalidatePath } from "next/cache";
 import { Transaction } from "@prisma/client";
-import { StatementRow } from "../types";
-
-type PrismaCreatedValues = "id" | "createdAt" | "updatedAt"
-type UserTransactionDate = Omit<Transaction, PrismaCreatedValues>
-export type CategoryAmount = {
-  category: string;
-  amount: number;
-};
-
-export type MonthCategorySpending = {
-  statementMonth: string;
-  label: string;
-  spendingAmounts: CategoryAmount[];
-};
+import type {
+  CategoryAmount,
+  MonthCategorySpending,
+  UserTransactionInput,
+} from "@/app/utils/uploadUtils";
+import {
+  extractCategorySamples,
+  generateMonthRange,
+  parseCsv,
+  transformDataForPrisma,
+} from "@/app/utils/uploadUtils";
+import { classifyCategoriesWithJev } from "@/app/lib/categorization/jevCategorizer";
 
 async function getAuthenticatedUserId(): Promise<string> {
   const session = await auth();
@@ -28,150 +25,41 @@ async function getAuthenticatedUserId(): Promise<string> {
   return session.user.id;
 }
 
-function parseCsv(fileText: string): Promise<Papa.ParseResult<any>> {
-  return new Promise((resolve, reject) => {
-    Papa.parse(fileText, {
-      header: true,
-      skipEmptyLines: true,
-      complete: (results) => resolve(results),
-      error: (error: Error) => reject(error),
-    });
-  });
-}
-
-function transformDataForPrisma(
-  csvData: StatementRow[],
-  userId: string,
-  headers: string[],
-  statementMonth: string
-): UserTransactionDate[] {
-  const isDebitCreditFormat =
-    headers.includes("Debit") && headers.includes("Credit");
-  const isChaseFormat =
-    headers.includes("Memo");
-
-  if (isDebitCreditFormat) {
-    return csvData
-      .map((row) => {
-        const amount = Number.parseFloat(row.Debit ?? '0');
-
-        if (!row["Posted Date"] || isNaN(amount) || amount === 0) return null;
-
-        return {
-          date: new Date(row["Posted Date"]),
-          amount,
-          description: row.Description,
-          category: row.Category,
-          userId,
-          statementMonth
-        };
-      })
-      .filter(
-        (t): t is UserTransactionDate =>
-          t !== null
-      );
-  } else if (isChaseFormat) {
-    return csvData
-      .map((row) => {
-        const amount = -Number.parseFloat(row.Amount ?? '0');
-
-        if (!row["Post Date"] || isNaN(amount) || amount <= 0) return null;
-
-        return {
-          date: new Date(row["Post Date"]),
-          amount,
-          description: row.Description,
-          category: row.Category,
-          userId,
-          statementMonth
-        };
-      })
-      .filter(
-        (t): t is UserTransactionDate =>
-          t !== null
-      );
-  } else {
-    return csvData
-      .map((row) => {
-        if (!row["Post Date"] || !row.Amount || Number.parseFloat(row.Amount) < 0) return null;
-
-        return {
-          date: new Date(row["Post Date"]),
-          amount: Number.parseFloat(row?.Amount || '0'),
-          description: row.Description,
-          category: row.Category,
-          userId,
-          statementMonth
-        };
-      })
-      .filter(
-        (t): t is UserTransactionDate =>
-          t !== null
-      );
-  }
-}
-
-async function saveTransactionsToDb(
-  transactions: UserTransactionDate[]
-) {
-  if (transactions.length === 0) {
-    console.log("No new transactions to save.");
-    return;
-  }
-  try {
-    await prisma.transaction.createMany({
-      data: transactions,
-      skipDuplicates: true,
-    });
-  } catch (error) {
-    console.error("Error saving to database:", error);
-    throw new Error("Failed to save transactions.");
-  }
-}
-
-export async function getCategoriesForMonth(statementMonth: string) {
+export async function getUserCategories(): Promise<string[]> {
   const userId = await getAuthenticatedUserId();
-  const categories = await prisma.transaction.findMany({
-    where:{userId, statementMonth},
-    distinct:['category'],
-    select: { category: true },
-  })
-
-  return categories.map((item) => {
-    return item.category
-  })
+  const categories = await prisma.category.findMany({
+    where: { userId },
+    orderBy: { name: "asc" },
+    select: { name: true },
+  });
+  return categories.map((c) => c.name);
 }
 
-export async function saveTransactionToDb(
-  transaction: {category:string, amount: number, description: string, date: Date, statementMonth: string}
-) {
-    const userId = await getAuthenticatedUserId();
+export async function getCategoriesForMonth(statementMonth: string): Promise<string[]> {
+  const userId = await getAuthenticatedUserId();
 
-  try {
-    await prisma.transaction.create({
-      data: {...transaction, userId},
-    });
-    revalidatePath("/upload")
-  } catch (error) {
-    console.error("Error saving to database:", error);
-    throw new Error("Failed to save transactions.");
-  }
-}
+  const [txCategories, userCategories] = await Promise.all([
+    prisma.transaction.findMany({
+      where: { userId, statementMonth },
+      distinct: ["category"],
+      select: { category: true },
+    }),
+    prisma.category.findMany({
+      where: { userId },
+      orderBy: { name: "asc" },
+      select: { name: true },
+    }),
+  ]);
 
-export async function updateTransactionInDb(
-  transactions: {category:string, amount: number, description: string, date: Date, statementMonth: string}
-) {
-    const userId = await getAuthenticatedUserId();
+  const categorySet = new Set<string>();
+  userCategories.forEach((c) => categorySet.add(c.name));
+  txCategories.forEach((t) => {
+    if (t.category) categorySet.add(t.category);
+  });
 
-  try {
-    await prisma.transaction.create({
-      data: {...transactions, userId},
-    });
-    revalidatePath("/upload")
-  } catch (error) {
-    console.error("Error saving to database:", error);
-    throw new Error("Failed to save transactions.");
-  }
+  return Array.from(categorySet).sort((a, b) =>
+    a.localeCompare(b, undefined, { sensitivity: "base" })
+  );
 }
 
 export async function uploadCsv(formData: FormData) {
@@ -181,23 +69,119 @@ export async function uploadCsv(formData: FormData) {
       throw new Error("No file uploaded");
     }
 
+    const statementMonth = formData.get("statementMonth") as string;
+    if (!statementMonth) {
+      throw new Error("Statement month is required");
+    }
+
     const userId = await getAuthenticatedUserId();
     const fileText = await file.text();
 
-    const results = await parseCsv(fileText);
-    const parsedData = results.data;
-    const headers = results.meta.fields || [];
-    const statementMonth = formData.get("statementMonth") as string;
+    const parseResult = await parseCsv(fileText);
+    const parsedData = parseResult.data;
+    const headers = parseResult.meta.fields || [];
 
-    const transactions = transformDataForPrisma(parsedData, userId, headers, statementMonth);
-    await saveTransactionsToDb(transactions);
+    const rawTransactions = transformDataForPrisma(
+      parsedData,
+      userId,
+      headers,
+      statementMonth
+    );
+
+    if (rawTransactions.length === 0) {
+      return {
+        success: false,
+        error: "No valid expense transactions found in this statement.",
+      };
+    }
+
+    // Retrieve user-defined categories
+    const userCategories = await prisma.category.findMany({
+      where: { userId },
+      select: { name: true },
+    });
+    const userCategoryNames = userCategories.map((c) => c.name);
+
+    let transactionsToSave = rawTransactions;
+    let mappingsApplied: Record<string, string> = {};
+    let newlyCategorized = 0;
+
+    if (userCategoryNames.length > 0) {
+      const sampleDescriptions = extractCategorySamples(rawTransactions);
+      const uniqueCsvCategories = Object.keys(sampleDescriptions);
+
+      const categorization = await classifyCategoriesWithJev({
+        unmappedCategories: uniqueCsvCategories,
+        userCategories: userCategoryNames,
+        sampleDescriptions,
+      });
+
+      mappingsApplied = categorization.mappings;
+
+      transactionsToSave = rawTransactions.map((tx) => {
+        const mappedCat = mappingsApplied[tx.category];
+        if (
+          mappedCat &&
+          mappedCat !== tx.category &&
+          mappedCat !== "Uncategorized"
+        ) {
+          newlyCategorized++;
+          return { ...tx, category: mappedCat };
+        }
+        return mappedCat ? { ...tx, category: mappedCat } : tx;
+      });
+    }
+
+    const saveResult = await prisma.transaction.createMany({
+      data: transactionsToSave,
+      skipDuplicates: true,
+    });
 
     revalidatePath("/upload");
-    return { success: true };
+    revalidatePath("/dashboard");
+
+    return {
+      success: true,
+      count: saveResult.count,
+      totalParsed: transactionsToSave.length,
+      newlyCategorized,
+      mappingsApplied,
+    };
   } catch (error) {
     console.error("Upload failed:", error);
     return { success: false, error: (error as Error).message };
   }
+}
+
+export async function saveTransactionToDb(transaction: {
+  category: string;
+  amount: number;
+  description: string;
+  date: Date;
+  statementMonth: string;
+}) {
+  const userId = await getAuthenticatedUserId();
+
+  try {
+    await prisma.transaction.create({
+      data: { ...transaction, userId },
+    });
+    revalidatePath("/upload");
+    return { success: true };
+  } catch (error) {
+    console.error("Error saving transaction:", error);
+    throw new Error("Failed to save transaction.");
+  }
+}
+
+export async function updateTransactionInDb(transaction: {
+  category: string;
+  amount: number;
+  description: string;
+  date: Date;
+  statementMonth: string;
+}) {
+  return saveTransactionToDb(transaction);
 }
 
 export async function deleteTransaction(transactionId: number) {
@@ -208,8 +192,8 @@ export async function deleteTransaction(transactionId: number) {
       where: { id: transactionId },
     });
 
-    if (transaction?.userId !== userId) {
-      throw new Error("Transaction not found or user not authorized.");
+    if (!transaction || transaction.userId !== userId) {
+      throw new Error("Transaction not found or unauthorized.");
     }
 
     await prisma.transaction.delete({
@@ -224,22 +208,62 @@ export async function deleteTransaction(transactionId: number) {
   }
 }
 
-function generateMonthRange(
-  n: number,
-  startMonth: number,
-  startYear: number
-): { statementMonth: string; label: string }[] {
-  const months: { statementMonth: string; label: string }[] = [];
-  for (let i = 0; i < n; i++) {
-    const d = new Date(Date.UTC(startYear, startMonth, 1));
-    d.setUTCMonth(d.getUTCMonth() - i);
-    const month = d.getUTCMonth() === 0 ? 12: d.getUTCMonth();
-    const year = d.getUTCFullYear();
-    const statementMonthStr = `${month}-${year}`;
-    const label = d.toLocaleString("en-US", { month: "short", year: "numeric" });
-    months.push({ statementMonth: statementMonthStr, label });
+type UpdatableTransactionFields = {
+  category?: string;
+  amount?: number;
+  description?: string;
+  date?: Date;
+  statementMonth?: string;
+};
+
+export async function updateTransaction(
+  id: number,
+  data: UpdatableTransactionFields
+) {
+  try {
+    const userId = await getAuthenticatedUserId();
+
+    const transaction = await prisma.transaction.findUnique({ where: { id } });
+
+    if (!transaction || transaction.userId !== userId) {
+      throw new Error("Transaction not found or unauthorized.");
+    }
+
+    const sanitizedData: UpdatableTransactionFields = {};
+    if (data.category !== undefined) sanitizedData.category = data.category;
+    if (data.amount !== undefined) sanitizedData.amount = data.amount;
+    if (data.description !== undefined)
+      sanitizedData.description = data.description;
+    if (data.date !== undefined) sanitizedData.date = data.date;
+    if (data.statementMonth !== undefined)
+      sanitizedData.statementMonth = data.statementMonth;
+
+    const updated = await prisma.transaction.update({
+      where: { id },
+      data: sanitizedData,
+    });
+
+    revalidatePath("/upload");
+    return updated;
+  } catch (error) {
+    console.error("Update failed:", error);
+    throw error;
   }
-  return months;
+}
+
+export async function changeCategory(id: number, category: string) {
+  return updateTransaction(id, { category });
+}
+
+export async function fetchTransactionsForStatementMonth(
+  statementMonth: string
+): Promise<Transaction[]> {
+  const userId = await getAuthenticatedUserId();
+
+  return prisma.transaction.findMany({
+    where: { userId, statementMonth },
+    orderBy: [{ date: "desc" }, { amount: "desc" }],
+  });
 }
 
 export async function fetchCategorySpendingLastNMonths(
@@ -250,7 +274,6 @@ export async function fetchCategorySpendingLastNMonths(
   const userId = await getAuthenticatedUserId();
 
   const months = generateMonthRange(n, startMonth, startYear);
-
   const statementMonths = months.map((m) => m.statementMonth);
 
   const groups = await prisma.transaction.groupBy({
@@ -263,69 +286,33 @@ export async function fetchCategorySpendingLastNMonths(
     _sum: { amount: true },
   });
 
-  const statementMonthsSpendingMap: Record<string, CategoryAmount[]> = {};
+  const spendingMap: Record<string, CategoryAmount[]> = {};
   for (const g of groups) {
-    const statementMonth = g.statementMonth;
+    const sMonth = g.statementMonth;
     const amt = g._sum?.amount ?? 0;
-    statementMonthsSpendingMap[statementMonth] = statementMonthsSpendingMap[statementMonth] ?? [];
-    statementMonthsSpendingMap[statementMonth].push({ category: g.category ?? "Uncategorized", amount: Number.parseFloat(amt.toFixed(2)) });
+    spendingMap[sMonth] = spendingMap[sMonth] ?? [];
+    spendingMap[sMonth].push({
+      category: g.category || "Uncategorized",
+      amount: Number.parseFloat(amt.toFixed(2)),
+    });
   }
 
-const result: MonthCategorySpending[] = months.map((m) => {
-  const spendingAmounts = (statementMonthsSpendingMap[m.statementMonth] ?? []).sort((a, b) =>
-    a.category.localeCompare(b.category, undefined, { sensitivity: "base" })
-  );
-  return { statementMonth: m.statementMonth, label: m.label, spendingAmounts };
-});
-
-  return result;
-}
-
-export async function fetchTransactionsForStatementMonth(
-  statementMonth: string
-): Promise<Transaction[]> {
-  const userId = await getAuthenticatedUserId();
-
-  const txs = await prisma.transaction.findMany({
-    where: { userId, statementMonth },
-    orderBy: [{ date: "desc"} ,{amount: "desc" }],
+  return months.map((m) => {
+    const spendingAmounts = (spendingMap[m.statementMonth] ?? []).sort((a, b) =>
+      a.category.localeCompare(b.category, undefined, { sensitivity: "base" })
+    );
+    return { statementMonth: m.statementMonth, label: m.label, spendingAmounts };
   });
-
-  return txs;
 }
 
-export async function updateTransaction(id: number, data: Partial<Transaction>) {
-  try {
-    const userId = await getAuthenticatedUserId();
-
-    const transaction = await prisma.transaction.findUnique({ where: { id } });
-
-    if (!transaction) {
-      throw new Error("Transaction not found.");
-    }
-
-    if (transaction.userId !== userId) {
-      throw new Error("Transaction not found or user not authorized.");
-    }
-
-    const updatedValue = await prisma.transaction.update({ where: { id }, data });
-    revalidatePath("/upload");
-    return updatedValue;
-  } catch (error) {
-    console.error("Update failed:", error);
-    throw error;
-  }
-}
-
-export async function changeCategory(id: number, category: string) {
-  return updateTransaction(id, { category });
-}
-
-export async function meanNMonthSpending( nMonths: number, startMonth: number, startYear: number ): Promise<CategoryAmount[]> {
+export async function meanNMonthSpending(
+  nMonths: number,
+  startMonth: number,
+  startYear: number
+): Promise<CategoryAmount[]> {
   const userId = await getAuthenticatedUserId();
 
   const months = generateMonthRange(nMonths, startMonth, startYear);
-
   const statementMonths = months.map((m) => m.statementMonth);
 
   const sums = await prisma.transaction.groupBy({
@@ -338,12 +325,10 @@ export async function meanNMonthSpending( nMonths: number, startMonth: number, s
     _sum: { amount: true },
   });
 
-  const spending = sums.map((sum) => {
-    const meanOverNMonths = (sum?._sum?.amount ?? 0) / nMonths
-
-    return ({amount: Number.parseFloat((meanOverNMonths).toFixed(2) ?? "0"), category: sum.category})
-  })
-
-  return spending;
+  return sums
+    .map((sum) => ({
+      category: sum.category || "Uncategorized",
+      amount: Number.parseFloat(((sum._sum?.amount ?? 0) / nMonths).toFixed(2)),
+    }))
+    .sort((a, b) => b.amount - a.amount);
 }
-
