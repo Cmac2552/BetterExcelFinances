@@ -1,10 +1,14 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { Transaction } from "@prisma/client";
-import { changeCategory, deleteTransaction } from "./actions";
+import { changeCategory, deleteTransaction, updateTransaction } from "./actions";
 import { Button } from "@/components/ui/button";
 import { NewTransactionRow } from "./NewTransactionRow";
+import { CategoryCombobox } from "./CategoryCombobox";
+import { NumericFormat } from "react-number-format";
+import { Check, Pencil, X } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -44,8 +48,79 @@ export function TransactionViewer({
   selectedCategory: controlledCategory,
   onSelectCategory,
 }: Readonly<Props>) {
+  const router = useRouter();
   const [internalCategory, setInternalCategory] = useState<string>("ALL");
   const selectedCategory = controlledCategory ?? internalCategory;
+
+  // Inline amount editing state
+  const [editingAmountId, setEditingAmountId] = useState<number | null>(null);
+  const [editAmountValue, setEditAmountValue] = useState<number | undefined>(
+    undefined
+  );
+  const [isSavingAmount, setIsSavingAmount] = useState(false);
+
+  // Optimistic edits so updated values show immediately while router.refresh() completes
+  const [optimisticEdits, setOptimisticEdits] = useState<
+    Record<number, { amount?: number; category?: string }>
+  >({});
+
+  useEffect(() => {
+    setOptimisticEdits({});
+  }, [transactions]);
+
+  const startEditingAmount = (t: Transaction) => {
+    const currentAmount = optimisticEdits[t.id]?.amount ?? t.amount;
+    setEditingAmountId(t.id);
+    setEditAmountValue(currentAmount);
+  };
+
+  const cancelEditingAmount = () => {
+    setEditingAmountId(null);
+    setEditAmountValue(undefined);
+  };
+
+  const saveAmount = async (t: Transaction) => {
+    if (isSavingAmount) return;
+    if (
+      editAmountValue === undefined ||
+      !Number.isFinite(editAmountValue) ||
+      editAmountValue < 0
+    ) {
+      cancelEditingAmount();
+      return;
+    }
+
+    const rounded = Number.parseFloat(editAmountValue.toFixed(2));
+    const currentAmount = optimisticEdits[t.id]?.amount ?? t.amount;
+    if (rounded === currentAmount) {
+      cancelEditingAmount();
+      return;
+    }
+
+    setOptimisticEdits((prev) => ({
+      ...prev,
+      [t.id]: { ...prev[t.id], amount: rounded },
+    }));
+    cancelEditingAmount();
+    setIsSavingAmount(true);
+
+    try {
+      await updateTransaction(t.id, { amount: rounded });
+      router.refresh();
+    } catch (error) {
+      console.error("Failed to update transaction amount:", error);
+      setOptimisticEdits((prev) => {
+        const next = { ...prev };
+        if (next[t.id]) {
+          const { amount: _, ...rest } = next[t.id];
+          next[t.id] = rest;
+        }
+        return next;
+      });
+    } finally {
+      setIsSavingAmount(false);
+    }
+  };
 
   const handleSelectCategory = (cat: string) => {
     if (onSelectCategory) {
@@ -147,59 +222,127 @@ export function TransactionViewer({
             </tr>
           </thead>
           <tbody>
-            <NewTransactionRow statementMonth={statementMonth} />
-            {filteredTransactions.map((t) => (
-              <tr key={t.id}>
-                <td className="py-2 px-4 border-b" suppressHydrationWarning>
-                  {formatDate(t.date)}
-                </td>
-                <td className="py-2 px-4 border-b">{t.description}</td>
-                <td className="py-2 px-4 border-b">
-                  {formatCurrency(t.amount)}
-                </td>
-                <td className="py-2 px-4 border-b w-[15rem]">
-                  <Select
-                    value={t.category}
-                    onValueChange={async (value) => {
-                      await changeCategory(t.id, value);
-                    }}
-                  >
-                    <SelectTrigger className="w-full">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent className="bg-[#f4f0e1]">
-                      {availableCategories.map((value) => {
-                        return (
-                          <SelectItem
-                            className="focus:bg-transparent focus:border-black focus:border-2"
-                            key={`${t.id}-${value}`}
-                            value={value}
-                          >
-                            {value}
-                          </SelectItem>
-                        );
-                      })}
-                    </SelectContent>
-                  </Select>
-                </td>
-                <td className="py-2 px-4 border-b">
-                  <form
-                    action={async () => {
-                      await deleteTransaction(t.id);
-                    }}
-                  >
-                    <Button
-                      type="submit"
-                      variant="secondary"
-                      size="sm"
-                      className="w-[4rem]"
+            <NewTransactionRow
+              statementMonth={statementMonth}
+              categoryOptions={availableCategories}
+            />
+            {filteredTransactions.map((t) => {
+              const isEditingAmount = editingAmountId === t.id;
+              const displayAmount = optimisticEdits[t.id]?.amount ?? t.amount;
+              const displayCategory =
+                optimisticEdits[t.id]?.category ?? t.category;
+
+              return (
+                <tr key={t.id}>
+                  <td className="py-2 px-4 border-b" suppressHydrationWarning>
+                    {formatDate(t.date)}
+                  </td>
+                  <td className="py-2 px-4 border-b">{t.description}</td>
+                  <td className="py-2 px-4 border-b">
+                    {isEditingAmount ? (
+                      <div className="flex items-center gap-1.5">
+                        <NumericFormat
+                          value={editAmountValue ?? ""}
+                          thousandSeparator={true}
+                          prefix="$"
+                          fixedDecimalScale={false}
+                          decimalScale={2}
+                          allowNegative={false}
+                          autoFocus
+                          disabled={isSavingAmount}
+                          onValueChange={(vals) => {
+                            setEditAmountValue(vals.floatValue);
+                          }}
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter") {
+                              e.preventDefault();
+                              saveAmount(t);
+                            } else if (e.key === "Escape") {
+                              e.preventDefault();
+                              cancelEditingAmount();
+                            }
+                          }}
+                          className="h-8 w-28 rounded-md border border-gray-600 bg-[#1E2228] px-2.5 py-1 text-sm text-[#f4f0e1] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#f4f0e1]"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => saveAmount(t)}
+                          disabled={isSavingAmount}
+                          title="Save amount"
+                          className="p-1 rounded text-emerald-400 hover:bg-emerald-950/50 transition-colors disabled:opacity-50"
+                        >
+                          <Check className="w-4 h-4" />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={cancelEditingAmount}
+                          disabled={isSavingAmount}
+                          title="Cancel"
+                          className="p-1 rounded text-gray-400 hover:text-white hover:bg-gray-800 transition-colors disabled:opacity-50"
+                        >
+                          <X className="w-4 h-4" />
+                        </button>
+                      </div>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => startEditingAmount(t)}
+                        title="Click to edit amount"
+                        className="group inline-flex items-center gap-1.5 rounded px-1.5 py-0.5 -ml-1.5 hover:bg-white/10 transition-colors text-left"
+                      >
+                        <span className="tabular-nums font-mono">
+                          {formatCurrency(displayAmount)}
+                        </span>
+                        <Pencil className="w-3 h-3 text-gray-500 opacity-0 group-hover:opacity-100 transition-opacity" />
+                      </button>
+                    )}
+                  </td>
+                  <td className="py-2 px-4 border-b w-[15rem]">
+                    <CategoryCombobox
+                      value={displayCategory}
+                      options={availableCategories}
+                      onChange={async (value) => {
+                        setOptimisticEdits((prev) => ({
+                          ...prev,
+                          [t.id]: { ...prev[t.id], category: value },
+                        }));
+                        try {
+                          await changeCategory(t.id, value);
+                          router.refresh();
+                        } catch (error) {
+                          console.error("Failed to update category:", error);
+                          setOptimisticEdits((prev) => {
+                            const next = { ...prev };
+                            if (next[t.id]) {
+                              const { category: _, ...rest } = next[t.id];
+                              next[t.id] = rest;
+                            }
+                            return next;
+                          });
+                        }
+                      }}
+                    />
+                  </td>
+                  <td className="py-2 px-4 border-b">
+                    <form
+                      action={async () => {
+                        await deleteTransaction(t.id);
+                        router.refresh();
+                      }}
                     >
-                      Delete
-                    </Button>
-                  </form>
-                </td>
-              </tr>
-            ))}
+                      <Button
+                        type="submit"
+                        variant="secondary"
+                        size="sm"
+                        className="w-[4rem]"
+                      >
+                        Delete
+                      </Button>
+                    </form>
+                  </td>
+                </tr>
+              );
+            })}
           </tbody>
         </table>
       </div>

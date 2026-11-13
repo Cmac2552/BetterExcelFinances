@@ -230,8 +230,23 @@ export async function updateTransaction(
     }
 
     const sanitizedData: UpdatableTransactionFields = {};
-    if (data.category !== undefined) sanitizedData.category = data.category;
-    if (data.amount !== undefined) sanitizedData.amount = data.amount;
+    if (data.category !== undefined) {
+      const trimmedCategory = data.category.trim();
+      if (!trimmedCategory) {
+        throw new Error("Category cannot be empty.");
+      }
+      sanitizedData.category = trimmedCategory;
+    }
+    if (data.amount !== undefined) {
+      if (
+        typeof data.amount !== "number" ||
+        !Number.isFinite(data.amount) ||
+        data.amount < 0
+      ) {
+        throw new Error("Amount must be a valid non-negative number.");
+      }
+      sanitizedData.amount = Number.parseFloat(data.amount.toFixed(2));
+    }
     if (data.description !== undefined)
       sanitizedData.description = data.description;
     if (data.date !== undefined) sanitizedData.date = data.date;
@@ -244,6 +259,7 @@ export async function updateTransaction(
     });
 
     revalidatePath("/upload");
+    revalidatePath("/dashboard");
     return updated;
   } catch (error) {
     console.error("Update failed:", error);

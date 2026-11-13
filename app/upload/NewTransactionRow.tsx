@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useRef, useState } from "react";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { format } from "date-fns";
 import {
@@ -12,15 +13,21 @@ import { CalendarIcon } from "lucide-react";
 import { Calendar } from "@/components/ui/calendar";
 import { NumericFormat } from "react-number-format";
 import { saveTransactionToDb } from "./actions";
+import { CategoryCombobox } from "./CategoryCombobox";
 
 type Props = {
   statementMonth: string;
+  categoryOptions: string[];
 };
 
-export function NewTransactionRow({ statementMonth }: Readonly<Props>) {
+export function NewTransactionRow({
+  statementMonth,
+  categoryOptions,
+}: Readonly<Props>) {
+  const router = useRouter();
   const descriptionRef = useRef<HTMLInputElement | null>(null);
   const [amount, setAmount] = useState<number>(0);
-  const categoryRef = useRef<HTMLInputElement | null>(null);
+  const [category, setCategory] = useState<string>("");
   const [date, setDate] = useState<Date | undefined>(undefined);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -31,12 +38,11 @@ export function NewTransactionRow({ statementMonth }: Readonly<Props>) {
     setIsLoading(true);
 
     const description = descriptionRef.current?.value ?? "";
-    const category = categoryRef.current?.value ?? "";
 
     try {
       if (date) {
         await saveTransactionToDb({
-          category,
+          category: category.trim() || "Uncategorized",
           amount,
           description,
           date,
@@ -50,7 +56,8 @@ export function NewTransactionRow({ statementMonth }: Readonly<Props>) {
       setDate(undefined);
       if (descriptionRef.current) descriptionRef.current.value = "";
       setAmount(0);
-      if (categoryRef.current) categoryRef.current.value = "";
+      setCategory("");
+      router.refresh();
     } catch (error) {
       console.error("Failed to save transaction:", error);
     } finally {
@@ -105,11 +112,13 @@ export function NewTransactionRow({ statementMonth }: Readonly<Props>) {
           className="flex h-10 rounded-md border border-gray-700 bg-[#1E2228] px-3 py-2 text-sm text-[#f4f0e1] ring-offset-gray-900 file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-gray-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#f4f0e1] focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 w-4/5"
         />
       </td>
-      <td className="py-2 px-4 border-b">
-        <input
-          className="flex h-10 w-full rounded-md border border-gray-700 bg-[#1E2228] px-3 py-2 text-sm text-[#f4f0e1] ring-offset-gray-900 file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-gray-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#f4f0e1] focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+      <td className="py-2 px-4 border-b w-[15rem]">
+        <CategoryCombobox
+          value={category}
+          onChange={setCategory}
+          options={categoryOptions}
           placeholder="Category"
-          ref={categoryRef}
+          disabled={isLoading}
         />
       </td>
       <td className="py-2 px-4 border-b">
