@@ -7,6 +7,19 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
   providers: [ Google],
   adapter: PrismaAdapter(prisma),
   callbacks:{
+    async signIn({ user }) {
+      if (!user?.email) {
+        return "/landing?error=SignupsClosed";
+      }
+      const existingUser = await prisma.user.findUnique({
+        where: { email: user.email },
+        select: { id: true },
+      });
+      if (!existingUser) {
+        return "/landing?error=SignupsClosed";
+      }
+      return true;
+    },
     async session({session, user}) {
         if(user) {
             session.user.id = user.id

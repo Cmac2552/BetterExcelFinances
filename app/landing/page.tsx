@@ -1,7 +1,16 @@
 import Link from "next/link";
 import Image from "next/image";
 
-export default async function LandingPage() {
+interface Props {
+  readonly searchParams: Promise<{
+    error?: string;
+  }>;
+}
+
+export default async function LandingPage({ searchParams }: Props) {
+  const { error } = await searchParams;
+  const isSignupsClosed = error === "SignupsClosed";
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-950 to-slate-900 text-white">
       <nav className="fixed w-full top-0 z-50 backdrop-blur-md bg-slate-900/80 border-b border-white/10">
@@ -27,6 +36,16 @@ export default async function LandingPage() {
       </nav>
 
       <section className="pt-32 pb-20 px-6">
+        {isSignupsClosed && (
+          <div className="max-w-3xl mx-auto mb-8 rounded-xl border border-amber-500/40 bg-amber-950/50 px-5 py-4 text-center text-amber-200 shadow-lg">
+            <p className="text-sm font-semibold">
+              We are not currently accepting any more users.
+            </p>
+            <p className="text-xs text-amber-300/80 mt-1">
+              Existing users can still sign in with their registered Google account.
+            </p>
+          </div>
+        )}
         <div className="max-w-7xl mx-auto grid lg:grid-cols-2 gap-12 items-center">
           <div className="space-y-8">
             <div className="space-y-4">

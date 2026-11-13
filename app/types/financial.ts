@@ -35,4 +35,15 @@ export type StatementRow = {
   'Trans. Date' ? : string;
   'Transaction Date' ?: string;
   'Posted Date' ? : string;
-}
+};
+
+export type CategoryAmount = {
+  category: string;
+  amount: number;
+};
+
+export type MonthCategorySpending = {
+  statementMonth: string;
+  label: string;
+  spendingAmounts: CategoryAmount[];
+};
