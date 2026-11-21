@@ -33,7 +33,17 @@ export async function fetchUserCategories() {
   });
 }
 
-export async function createCategory(name: string) {
+function normalizeDescription(description?: string | null): string | null {
+  if (!description) return null;
+  const trimmed = description.trim();
+  if (!trimmed) return null;
+  if (trimmed.length > 300) {
+    throw new Error("Category notes must be 300 characters or fewer");
+  }
+  return trimmed;
+}
+
+export async function createCategory(name: string, description?: string) {
   const userId = await requireAuthUserId();
   const trimmedName = name.trim();
 
@@ -45,10 +55,13 @@ export async function createCategory(name: string) {
     throw new Error("Category name must be 50 characters or fewer");
   }
 
+  const normalizedDescription = normalizeDescription(description);
+
   try {
     const category = await prisma.category.create({
       data: {
         name: trimmedName,
+        description: normalizedDescription,
         userId,
       },
     });
@@ -97,7 +110,11 @@ export async function createDefaultCategories() {
   return { success: true, count: toCreate.length };
 }
 
-export async function updateCategory(id: number, name: string) {
+export async function updateCategory(
+  id: number,
+  name: string,
+  description?: string | null
+) {
   const userId = await requireAuthUserId();
   const trimmedName = name.trim();
 
@@ -108,6 +125,8 @@ export async function updateCategory(id: number, name: string) {
   if (trimmedName.length > 50) {
     throw new Error("Category name must be 50 characters or fewer");
   }
+
+  const normalizedDescription = normalizeDescription(description);
 
   const existing = await prisma.category.findUnique({
     where: { id },
@@ -121,7 +140,10 @@ export async function updateCategory(id: number, name: string) {
     const category = await prisma.$transaction(async (tx) => {
       const updated = await tx.category.update({
         where: { id },
-        data: { name: trimmedName },
+        data: {
+          name: trimmedName,
+          description: normalizedDescription,
+        },
       });
 
       if (existing.name !== trimmedName) {

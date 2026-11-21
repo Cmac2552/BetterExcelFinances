@@ -10,12 +10,12 @@ import type {
   UserTransactionInput,
 } from "@/app/utils/uploadUtils";
 import {
-  extractCategorySamples,
+  extractUniqueMerchants,
   generateMonthRange,
   parseCsv,
   transformDataForPrisma,
 } from "@/app/utils/uploadUtils";
-import { classifyCategoriesWithJev } from "@/app/lib/categorization/jevCategorizer";
+import { classifyMerchantsWithJev } from "@/app/lib/categorization/jevCategorizer";
 
 async function getAuthenticatedUserId(): Promise<string> {
   const session = await auth();
@@ -95,31 +95,28 @@ export async function uploadCsv(formData: FormData) {
       };
     }
 
-    // Retrieve user-defined categories
+    // Retrieve user-defined categories and custom Jev AI notes
     const userCategories = await prisma.category.findMany({
       where: { userId },
-      select: { name: true },
+      select: { name: true, description: true },
     });
-    const userCategoryNames = userCategories.map((c) => c.name);
 
     let transactionsToSave = rawTransactions;
     let mappingsApplied: Record<string, string> = {};
     let newlyCategorized = 0;
 
-    if (userCategoryNames.length > 0) {
-      const sampleDescriptions = extractCategorySamples(rawTransactions);
-      const uniqueCsvCategories = Object.keys(sampleDescriptions);
+    if (userCategories.length > 0) {
+      const uniqueMerchants = extractUniqueMerchants(rawTransactions);
 
-      const categorization = await classifyCategoriesWithJev({
-        unmappedCategories: uniqueCsvCategories,
-        userCategories: userCategoryNames,
-        sampleDescriptions,
+      const categorization = await classifyMerchantsWithJev({
+        merchants: uniqueMerchants,
+        userCategories,
       });
 
       mappingsApplied = categorization.mappings;
 
       transactionsToSave = rawTransactions.map((tx) => {
-        const mappedCat = mappingsApplied[tx.category];
+        const mappedCat = mappingsApplied[tx.description];
         if (
           mappedCat &&
           mappedCat !== tx.category &&
