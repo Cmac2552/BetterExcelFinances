@@ -26,6 +26,7 @@ import {
 interface Category {
   id: number;
   name: string;
+  description: string | null;
   userId: string;
   createdAt: Date;
   updatedAt: Date;
@@ -37,12 +38,14 @@ export function CategoryModal() {
   const [categories, setCategories] = useState<Category[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [newCategoryName, setNewCategoryName] = useState("");
+  const [newCategoryDescription, setNewCategoryDescription] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   // Edit state
   const [editingId, setEditingId] = useState<number | null>(null);
   const [editName, setEditName] = useState("");
+  const [editDescription, setEditDescription] = useState("");
 
   // Delete confirm state
   const [deletingId, setDeletingId] = useState<number | null>(null);
@@ -89,7 +92,7 @@ export function CategoryModal() {
     setErrorMessage(null);
     startTransition(async () => {
       try {
-        const res = await createCategory(trimmed);
+        const res = await createCategory(trimmed, newCategoryDescription);
         if (res.category) {
           setCategories((prev) =>
             [...prev, res.category].sort((a, b) =>
@@ -97,6 +100,7 @@ export function CategoryModal() {
             )
           );
           setNewCategoryName("");
+          setNewCategoryDescription("");
           router.refresh();
         }
       } catch (err: any) {
@@ -125,7 +129,7 @@ export function CategoryModal() {
     setErrorMessage(null);
     startTransition(async () => {
       try {
-        const res = await updateCategory(id, trimmed);
+        const res = await updateCategory(id, trimmed, editDescription);
         if (res.category) {
           setCategories((prev) =>
             prev
@@ -136,6 +140,7 @@ export function CategoryModal() {
           );
           setEditingId(null);
           setEditName("");
+          setEditDescription("");
           router.refresh();
         }
       } catch (err: any) {
@@ -161,7 +166,11 @@ export function CategoryModal() {
   const filteredCategories = useMemo(() => {
     if (!searchQuery.trim()) return categories;
     const q = searchQuery.toLowerCase().trim();
-    return categories.filter((c) => c.name.toLowerCase().includes(q));
+    return categories.filter(
+      (c) =>
+        c.name.toLowerCase().includes(q) ||
+        (c.description && c.description.toLowerCase().includes(q))
+    );
   }, [categories, searchQuery]);
 
   return (
@@ -190,13 +199,13 @@ export function CategoryModal() {
             </span>
           </div>
           <p className="text-xs text-gray-400 mt-1">
-            Define your budget categories. Statements uploaded via CSV will be automatically categorized to these with Jev AI.
+            Define your budget categories. Statements uploaded via CSV will be automatically categorized to these with AI.
           </p>
         </DialogHeader>
 
         <div className="space-y-4 pt-3">
           {/* Create Input */}
-          <div className="flex flex-col gap-1.5">
+          <div className="flex flex-col gap-2">
             <label className="text-xs font-semibold uppercase tracking-wider text-gray-400">
               Add New Category
             </label>
@@ -205,7 +214,7 @@ export function CategoryModal() {
                 type="text"
                 value={newCategoryName}
                 onChange={(e) => setNewCategoryName(e.target.value)}
-                placeholder="e.g. Groceries, Dining Out, Utilities..."
+                placeholder="Category name (e.g. Groceries, Vacation, Transportation)..."
                 className="flex-1 px-4 py-2 bg-[#1E2228] text-[#f4f0e1] border border-gray-700 rounded-lg focus:ring-2 focus-visible:ring-[#f4f0e1] focus-visible:outline-none placeholder-gray-500 text-sm shadow-sm"
                 onKeyDown={(e) => {
                   if (e.key === "Enter") {
@@ -231,6 +240,21 @@ export function CategoryModal() {
                 )}
               </Button>
             </div>
+            <input
+              type="text"
+              value={newCategoryDescription}
+              onChange={(e) => setNewCategoryDescription(e.target.value)}
+              placeholder="Notes for AI (optional) — e.g. Costco, Trader Joe's, supermarkets..."
+              maxLength={300}
+              className="w-full px-4 py-1.5 bg-[#1E2228]/80 text-[#f4f0e1] border border-gray-800 rounded-lg focus:ring-1 focus-visible:ring-[#f4f0e1] focus-visible:outline-none placeholder-gray-500 text-xs"
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  e.preventDefault();
+                  handleAddCategory();
+                }
+              }}
+              disabled={isPending}
+            />
           </div>
 
           {/* Error Message */}
@@ -358,24 +382,44 @@ export function CategoryModal() {
                       return (
                         <tr key={category.id} className="bg-[#141414]">
                           <td className="px-5 py-2.5">
-                            <input
-                              ref={editInputRef}
-                              type="text"
-                              value={editName}
-                              onChange={(e) => setEditName(e.target.value)}
-                              className="w-full px-3 py-1 bg-[#1E2228] text-[#f4f0e1] border border-gray-700 rounded focus:ring-1 focus-visible:ring-[#f4f0e1] text-sm"
-                              onKeyDown={(e) => {
-                                if (e.key === "Enter") {
-                                  e.preventDefault();
-                                  handleSaveEdit(category.id);
-                                } else if (e.key === "Escape") {
-                                  e.preventDefault();
-                                  setEditingId(null);
-                                }
-                              }}
-                            />
+                            <div className="flex flex-col gap-1.5">
+                              <input
+                                ref={editInputRef}
+                                type="text"
+                                value={editName}
+                                onChange={(e) => setEditName(e.target.value)}
+                                placeholder="Category name"
+                                className="w-full px-3 py-1 bg-[#1E2228] text-[#f4f0e1] border border-gray-700 rounded focus:ring-1 focus-visible:ring-[#f4f0e1] text-sm"
+                                onKeyDown={(e) => {
+                                  if (e.key === "Enter") {
+                                    e.preventDefault();
+                                    handleSaveEdit(category.id);
+                                  } else if (e.key === "Escape") {
+                                    e.preventDefault();
+                                    setEditingId(null);
+                                  }
+                                }}
+                              />
+                              <input
+                                type="text"
+                                value={editDescription}
+                                onChange={(e) => setEditDescription(e.target.value)}
+                                placeholder="Notes for AI (e.g. Costco, gas, tolls, Ubers, flights)..."
+                                maxLength={300}
+                                className="w-full px-3 py-1 bg-[#1E2228]/80 text-[#f4f0e1] border border-gray-800 rounded focus:ring-1 focus-visible:ring-[#f4f0e1] text-xs placeholder-gray-500"
+                                onKeyDown={(e) => {
+                                  if (e.key === "Enter") {
+                                    e.preventDefault();
+                                    handleSaveEdit(category.id);
+                                  } else if (e.key === "Escape") {
+                                    e.preventDefault();
+                                    setEditingId(null);
+                                  }
+                                }}
+                              />
+                            </div>
                           </td>
-                          <td className="px-5 py-2.5 text-right">
+                          <td className="px-5 py-2.5 text-right align-top">
                             <div className="flex justify-end gap-2">
                               <Button
                                 variant="secondary"
@@ -406,18 +450,26 @@ export function CategoryModal() {
                         key={category.id}
                         className="hover:bg-gray-800/30 transition-colors"
                       >
-                        <td className="px-5 py-3 text-[#f4f0e1] text-sm font-medium">
-                          {category.name}
+                        <td className="px-5 py-3">
+                          <div className="text-[#f4f0e1] text-sm font-medium">
+                            {category.name}
+                          </div>
+                          {category.description && (
+                            <div className="text-xs text-gray-400 mt-0.5 leading-snug">
+                              {category.description}
+                            </div>
+                          )}
                         </td>
-                        <td className="px-5 py-3 text-right">
+                        <td className="px-5 py-3 text-right align-top">
                           <div className="flex justify-end items-center gap-1">
                             <button
                               type="button"
                               onClick={() => {
                                 setEditingId(category.id);
                                 setEditName(category.name);
+                                setEditDescription(category.description ?? "");
                               }}
-                              title="Edit category name"
+                              title="Edit category & AI notes"
                               className="p-1.5 text-gray-400 hover:text-[#f4f0e1] hover:bg-gray-700/50 rounded transition-colors"
                             >
                               <TiPencil className="w-4 h-4" />

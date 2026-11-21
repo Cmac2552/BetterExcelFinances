@@ -4,17 +4,26 @@
  * via the Decisions API (POST https://openrouter.ai/api/alpha/decisions).
  */
 
-export interface CategorizeOptions {
-  unmappedCategories: string[];
-  userCategories: string[];
-  sampleDescriptions?: Record<string, string[]>;
+export interface UserCategoryInput {
+  name: string;
+  description?: string | null;
+}
+
+export interface MerchantToClassify {
+  description: string;
+  csvCategories: string[];
+}
+
+export interface CategorizeMerchantsOptions {
+  merchants: MerchantToClassify[];
+  userCategories: UserCategoryInput[];
 }
 
 export interface CategorizationResult {
-  mappings: Record<string, string>; // csvCategory -> userCategory
+  mappings: Record<string, string>; // merchant description -> userCategory
   confidenceScores: Record<string, number>;
   categorizedCount: number;
-  method: "fast-path" | "jev" | "hybrid" | "fallback";
+  method: "jev" | "fallback";
 }
 
 // Built-in criteria descriptors to give Jev clear semantic boundaries for common categories
@@ -27,6 +36,7 @@ const DEFAULT_CRITERIA_DESCRIPTORS: Record<string, string> = {
   merchandise: "Retail goods, electronics, department stores, merchandise",
   transportation: "Public transit, rideshare, gas stations, tolls, parking, automotive",
   travel: "Airlines, hotels, car rentals, flights, vacation bookings",
+  vacation: "Flights, hotels, resorts, vacation bookings, trip expenses",
   utilities: "Electric, gas, water, internet, trash, home utilities",
   housing: "Rent, mortgage, HOA fees, property taxes, home insurance",
   entertainment: "Movies, concerts, streaming services, games, events, recreation",
@@ -38,100 +48,52 @@ const DEFAULT_CRITERIA_DESCRIPTORS: Record<string, string> = {
   services: "Professional services, repairs, subscriptions, maintenance",
 };
 
+const BATCH_SIZE = 25;
+
 /**
- * Normalizes a string for loose comparison (lowercase, trimmed, collapsed whitespace).
+ * Normalizes a string into an identifier-safe lowercase alphanumeric token.
  */
 function normalizeString(str: string): string {
   return str.toLowerCase().replace(/[^a-z0-9]/g, "");
 }
 
-function tokenizeString(str: string): string[] {
-  return str
-    .toLowerCase()
-    .split(/[^a-z0-9]+/)
-    .filter(Boolean);
-}
-
 /**
- * Attempts fast-path matching using exact, case-insensitive, or synonym heuristics.
+ * Generates descriptive criteria for user categories to guide Jev's choice decisions,
+ * incorporating any user-provided personal notes.
  */
-function tryFastPathMatch(
-  csvCategory: string,
-  userCategories: string[]
-): string | null {
-  const normalizedCsv = normalizeString(csvCategory);
-
-  // 1. Direct case-insensitive match
-  for (const userCat of userCategories) {
-    if (normalizeString(userCat) === normalizedCsv) {
-      return userCat;
-    }
-  }
-
-  // 2. Common financial synonym lookup (token-based to avoid false substring matches like "gas" in "Gas & Electric")
-  const csvTokens = tokenizeString(csvCategory);
-  if (csvTokens.length > 2) {
-    // Let Jev handle multi-word composite categories like "Gas & Electric"
-    return null;
-  }
-
-  const synonymGroups: string[][] = [
-    ["groceries", "grocery", "supermarkets", "supermarket"],
-    ["dining", "diningout", "restaurants", "restaurant", "foodanddrink", "fooddrink"],
-    ["transportation", "transport", "gas", "gasoline", "automotive", "auto"],
-    ["utilities", "utility", "electric", "water", "internet"],
-    ["travel", "flights", "hotels", "lodging", "airline"],
-    ["shopping", "merchandise", "retail"],
-    ["healthcare", "health", "medical", "healthwellness"],
-    ["entertainment", "recreation", "movies"],
-  ];
-
-  for (const group of synonymGroups) {
-    const csvMatchesGroup =
-      group.includes(normalizedCsv) ||
-      csvTokens.some((token) => group.includes(token));
-
-    if (csvMatchesGroup) {
-      const matchedUserCat = userCategories.find((userCat) => {
-        const normUser = normalizeString(userCat);
-        const userTokens = tokenizeString(userCat);
-        return (
-          group.includes(normUser) ||
-          userTokens.some((token) => group.includes(token))
-        );
-      });
-      if (matchedUserCat) {
-        return matchedUserCat;
-      }
-    }
-  }
-
-  return null;
-}
-
-/**
- * Generates descriptive criteria for user categories to guide Jev's choice decisions.
- */
-function buildCriteriaForCategories(userCategories: string[]): Record<string, string> {
+function buildCriteriaForCategories(
+  userCategories: UserCategoryInput[]
+): Record<string, string> {
   const criteria: Record<string, string> = {};
+  const categoryNames = userCategories.map((c) => c.name);
 
   for (const cat of userCategories) {
-    const key = cat.toLowerCase().trim();
-    if (DEFAULT_CRITERIA_DESCRIPTORS[key]) {
-      criteria[cat] = DEFAULT_CRITERIA_DESCRIPTORS[key];
-    } else {
-      // Find partial matches or provide descriptive fallback
-      const matchingKey = Object.keys(DEFAULT_CRITERIA_DESCRIPTORS).find((k) =>
-        key.includes(k) || k.includes(key)
+    const key = cat.name.toLowerCase().trim();
+    const customNotes = cat.description?.trim();
+
+    let defaultDescriptor = DEFAULT_CRITERIA_DESCRIPTORS[key];
+    if (!defaultDescriptor) {
+      const matchingKey = Object.keys(DEFAULT_CRITERIA_DESCRIPTORS).find(
+        (k) => key.includes(k) || k.includes(key)
       );
-      criteria[cat] = matchingKey
-        ? DEFAULT_CRITERIA_DESCRIPTORS[matchingKey]
-        : `Expenses related to ${cat}`;
+      if (matchingKey) {
+        defaultDescriptor = DEFAULT_CRITERIA_DESCRIPTORS[matchingKey];
+      }
+    }
+
+    if (customNotes && defaultDescriptor) {
+      criteria[cat.name] = `${defaultDescriptor}. User notes: ${customNotes}`;
+    } else if (customNotes) {
+      criteria[cat.name] = customNotes;
+    } else if (defaultDescriptor) {
+      criteria[cat.name] = defaultDescriptor;
+    } else {
+      criteria[cat.name] = `Expenses related to ${cat.name}`;
     }
   }
 
   // Always include Uncategorized as an explicit fallback choice
-  if (!userCategories.includes("Uncategorized")) {
+  if (!categoryNames.includes("Uncategorized")) {
     criteria["Uncategorized"] = "Does not clearly fit any of the above categories";
   }
 
@@ -139,17 +101,16 @@ function buildCriteriaForCategories(userCategories: string[]): Record<string, st
 }
 
 /**
- * Classifies unmapped CSV categories against user categories using TypeSafe Jev on OpenRouter.
+ * Classifies unique transaction merchants against user categories using TypeSafe Jev on OpenRouter.
  */
-export async function classifyCategoriesWithJev({
-  unmappedCategories,
+export async function classifyMerchantsWithJev({
+  merchants,
   userCategories,
-  sampleDescriptions = {},
-}: CategorizeOptions): Promise<CategorizationResult> {
+}: CategorizeMerchantsOptions): Promise<CategorizationResult> {
   const mappings: Record<string, string> = {};
   const confidenceScores: Record<string, number> = {};
 
-  if (!unmappedCategories.length || !userCategories.length) {
+  if (!merchants.length || !userCategories.length) {
     return {
       mappings,
       confidenceScores,
@@ -158,39 +119,22 @@ export async function classifyCategoriesWithJev({
     };
   }
 
-  // 1. Fast-Path Pre-filter
-  const remainingToMap: string[] = [];
-  for (const cat of unmappedCategories) {
-    const fastMatch = tryFastPathMatch(cat, userCategories);
-    if (fastMatch) {
-      mappings[cat] = fastMatch;
-      confidenceScores[cat] = 1.0;
-    } else {
-      remainingToMap.push(cat);
-    }
-  }
-
-  if (remainingToMap.length === 0) {
-    return {
-      mappings,
-      confidenceScores,
-      categorizedCount: Object.keys(mappings).length,
-      method: "fast-path",
-    };
-  }
-
+  const userCategoryNames = userCategories.map((c) => c.name);
   const apiKey = process.env.OPENROUTER_API_KEY;
+
   if (!apiKey) {
-    console.warn("[JevCategorizer] OPENROUTER_API_KEY is not set. Falling back for unmapped categories.");
-    for (const cat of remainingToMap) {
-      mappings[cat] = cat; // retain raw category
-      confidenceScores[cat] = 0.0;
+    console.warn(
+      "[JevCategorizer] OPENROUTER_API_KEY is not set. Falling back to bank CSV categories."
+    );
+    for (const merchant of merchants) {
+      mappings[merchant.description] = merchant.csvCategories[0] || "Uncategorized";
+      confidenceScores[merchant.description] = 0.0;
     }
     return {
       mappings,
       confidenceScores,
       categorizedCount: Object.keys(mappings).length,
-      method: Object.keys(mappings).length > remainingToMap.length ? "hybrid" : "fallback",
+      method: "fallback",
     };
   }
 
@@ -202,127 +146,144 @@ export async function classifyCategoriesWithJev({
       : "typesafe/jev-1.14";
 
   const criteria = buildCriteriaForCategories(userCategories);
+  let anySucceeded = false;
 
-  // Prepare questions for Jev Decision API
-  // Jev questions keys should be valid identifier tokens
-  const questionMap: Record<string, { type: "choice"; instructions: string; criteria: Record<string, string> }> = {};
-  const keyToCsvCategoryMap: Record<string, string> = {};
+  // Process merchants in batches to keep payload size and latency bounded
+  for (let start = 0; start < merchants.length; start += BATCH_SIZE) {
+    const batch = merchants.slice(start, start + BATCH_SIZE);
 
-  remainingToMap.forEach((cat, idx) => {
-    const questionKey = `q_${idx}_${normalizeString(cat).slice(0, 16) || "cat"}`;
-    keyToCsvCategoryMap[questionKey] = cat;
+    const questionMap: Record<
+      string,
+      { type: "choice"; instructions: string; criteria: Record<string, string> }
+    > = {};
+    const keyToMerchantMap: Record<string, MerchantToClassify> = {};
 
-    const samples = sampleDescriptions[cat]?.slice(0, 5) || [];
-    const sampleContext = samples.length ? ` (e.g. ${samples.join(", ")})` : "";
+    batch.forEach((merchant, idx) => {
+      const questionKey = `q_${idx}_${normalizeString(merchant.description).slice(0, 16) || "tx"}`;
+      keyToMerchantMap[questionKey] = merchant;
 
-    questionMap[questionKey] = {
-      type: "choice",
-      instructions: `Which budget category best fits statement category '${cat}'${sampleContext}?`,
-      criteria,
-    };
-  });
+      const bankCats = merchant.csvCategories.filter(
+        (c) => c && c.toLowerCase() !== "uncategorized"
+      );
+      const bankContext = bankCats.length
+        ? ` (bank category: ${bankCats.join(", ")})`
+        : "";
 
-  const statePayload = {
-    statement_categories: remainingToMap.map((cat) => ({
-      category: cat,
-      sample_merchants: sampleDescriptions[cat]?.slice(0, 5) || [],
-    })),
-  };
-
-  try {
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 15000); // 15s timeout
-
-    const response = await fetch("https://openrouter.ai/api/alpha/decisions", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${apiKey}`,
-        "Content-Type": "application/json",
-        "HTTP-Referer": "https://betterexcelfinances.com",
-        "X-Title": "Better Excel Finances",
-      },
-      body: JSON.stringify({
-        model: modelId,
-        state: statePayload,
-        questions: questionMap,
-      }),
-      signal: controller.signal,
+      questionMap[questionKey] = {
+        type: "choice",
+        instructions: `Which budget category best fits merchant '${merchant.description}'${bankContext}?`,
+        criteria,
+      };
     });
 
-    clearTimeout(timeout);
+    const statePayload = {
+      merchants: batch.map((merchant) => ({
+        merchant: merchant.description,
+        bank_categories: merchant.csvCategories,
+      })),
+    };
 
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error(`[JevCategorizer] OpenRouter Decisions API error (${response.status}):`, errorText);
-      throw new Error(`OpenRouter Decisions API failed with status ${response.status}`);
-    }
+    try {
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 20000); // 20s timeout per batch
 
-    const data = await response.json();
-    const answers = data?.answers;
+      const response = await fetch("https://openrouter.ai/api/alpha/decisions", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${apiKey}`,
+          "Content-Type": "application/json",
+          "HTTP-Referer": "https://betterexcelfinances.com",
+          "X-Title": "Better Excel Finances",
+        },
+        body: JSON.stringify({
+          model: modelId,
+          state: statePayload,
+          questions: questionMap,
+        }),
+        signal: controller.signal,
+      });
 
-    if (answers && typeof answers === "object") {
-      // Handles answers as an object: { [questionKey]: { type: "choice", choice: string, confidence: number } }
-      if (!Array.isArray(answers)) {
-        for (const [qKey, answerObj] of Object.entries(answers)) {
-          const csvCat = keyToCsvCategoryMap[qKey];
-          if (!csvCat) continue;
+      clearTimeout(timeout);
 
-          const anyAns = answerObj as { choice?: string; confidence?: number };
-          const chosenCategory = anyAns?.choice;
-          const confidence = anyAns?.confidence ?? 0.8;
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error(
+          `[JevCategorizer] OpenRouter Decisions API error (${response.status}):`,
+          errorText
+        );
+        throw new Error(`OpenRouter Decisions API failed with status ${response.status}`);
+      }
 
-          if (chosenCategory && chosenCategory !== "Uncategorized" && userCategories.includes(chosenCategory)) {
-            mappings[csvCat] = chosenCategory;
-            confidenceScores[csvCat] = confidence;
-          } else {
-            mappings[csvCat] = "Uncategorized";
-            confidenceScores[csvCat] = confidence;
+      const data = await response.json();
+      const answers = data?.answers;
+      anySucceeded = true;
+
+      if (answers && typeof answers === "object") {
+        // Handles answers as an object: { [questionKey]: { type: "choice", choice: string, confidence: number } }
+        if (!Array.isArray(answers)) {
+          for (const [qKey, answerObj] of Object.entries(answers)) {
+            const merchant = keyToMerchantMap[qKey];
+            if (!merchant) continue;
+
+            const anyAns = answerObj as { choice?: string; confidence?: number };
+            const chosenCategory = anyAns?.choice;
+            const confidence = anyAns?.confidence ?? 0.8;
+
+            if (
+              chosenCategory &&
+              chosenCategory !== "Uncategorized" &&
+              userCategoryNames.includes(chosenCategory)
+            ) {
+              mappings[merchant.description] = chosenCategory;
+              confidenceScores[merchant.description] = confidence;
+            } else {
+              mappings[merchant.description] = "Uncategorized";
+              confidenceScores[merchant.description] = confidence;
+            }
+          }
+        } else {
+          // Handles answers as an array: [ { name: string, choice: string, confidence: number } ]
+          for (const item of answers) {
+            const merchant = keyToMerchantMap[item.name];
+            if (!merchant) continue;
+
+            if (
+              item.choice &&
+              item.choice !== "Uncategorized" &&
+              userCategoryNames.includes(item.choice)
+            ) {
+              mappings[merchant.description] = item.choice;
+              confidenceScores[merchant.description] = item.confidence ?? 0.8;
+            } else {
+              mappings[merchant.description] = "Uncategorized";
+              confidenceScores[merchant.description] = item.confidence ?? 0.8;
+            }
           }
         }
-      } else {
-        // Handles answers as an array: [ { name: string, choice: string, confidence: number } ]
-        for (const item of answers) {
-          const csvCat = keyToCsvCategoryMap[item.name];
-          if (!csvCat) continue;
+      }
 
-          if (item.choice && item.choice !== "Uncategorized" && userCategories.includes(item.choice)) {
-            mappings[csvCat] = item.choice;
-            confidenceScores[csvCat] = item.confidence ?? 0.8;
-          } else {
-            mappings[csvCat] = "Uncategorized";
-            confidenceScores[csvCat] = item.confidence ?? 0.8;
-          }
+      // Fill in any merchants not returned by Jev (retain original CSV category)
+      for (const merchant of batch) {
+        if (!mappings[merchant.description]) {
+          mappings[merchant.description] = merchant.csvCategories[0] || "Uncategorized";
+          confidenceScores[merchant.description] = 0.0;
+        }
+      }
+    } catch (err) {
+      console.error("[JevCategorizer] Error during batch classification, using fallback:", err);
+      for (const merchant of batch) {
+        if (!mappings[merchant.description]) {
+          mappings[merchant.description] = merchant.csvCategories[0] || "Uncategorized";
+          confidenceScores[merchant.description] = 0.0;
         }
       }
     }
-
-    // Fill in any that weren't returned by Jev (retain original CSV category)
-    for (const cat of remainingToMap) {
-      if (!mappings[cat]) {
-        mappings[cat] = cat;
-        confidenceScores[cat] = 0.0;
-      }
-    }
-
-    return {
-      mappings,
-      confidenceScores,
-      categorizedCount: Object.keys(mappings).length,
-      method: "hybrid",
-    };
-  } catch (err) {
-    console.error("[JevCategorizer] Error during classification, using fallback:", err);
-    for (const cat of remainingToMap) {
-      if (!mappings[cat]) {
-        mappings[cat] = cat;
-        confidenceScores[cat] = 0.0;
-      }
-    }
-    return {
-      mappings,
-      confidenceScores,
-      categorizedCount: Object.keys(mappings).length,
-      method: "fallback",
-    };
   }
+
+  return {
+    mappings,
+    confidenceScores,
+    categorizedCount: Object.keys(mappings).length,
+    method: anySucceeded ? "jev" : "fallback",
+  };
 }

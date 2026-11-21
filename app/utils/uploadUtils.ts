@@ -95,29 +95,29 @@ export function transformDataForPrisma(
 }
 
 /**
- * Extracts unique categories and a set of sample merchant descriptions for each category.
+ * Extracts unique merchant descriptions and the bank CSV categories associated with each.
  */
-export function extractCategorySamples(
+export function extractUniqueMerchants(
   transactions: UserTransactionInput[]
-): Record<string, string[]> {
-  const categorySamples: Record<string, Set<string>> = {};
+): { description: string; csvCategories: string[] }[] {
+  const merchantCategories = new Map<string, Set<string>>();
 
   for (const tx of transactions) {
-    const cat = tx.category || "Uncategorized";
-    if (!categorySamples[cat]) {
-      categorySamples[cat] = new Set();
+    const desc = tx.description || "Unknown Transaction";
+    let categories = merchantCategories.get(desc);
+    if (!categories) {
+      categories = new Set<string>();
+      merchantCategories.set(desc, categories);
     }
-    if (tx.description && categorySamples[cat].size < 6) {
-      categorySamples[cat].add(tx.description);
+    if (tx.category) {
+      categories.add(tx.category);
     }
   }
 
-  const result: Record<string, string[]> = {};
-  for (const [cat, set] of Object.entries(categorySamples)) {
-    result[cat] = Array.from(set);
-  }
-
-  return result;
+  return Array.from(merchantCategories.entries()).map(([description, cats]) => ({
+    description,
+    csvCategories: Array.from(cats),
+  }));
 }
 
 export function generateMonthRange(

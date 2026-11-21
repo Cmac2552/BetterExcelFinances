@@ -81,8 +81,7 @@ This is a Next.js 15 app using the App Router, written in TypeScript with React 
 4. Normalizes transactions to UTC date, positive spending amounts, and `statementMonth` (format: `M-YYYY`)
 5. Fetches user-defined categories (`Category` model in Prisma)
 6. Categorization Engine (`app/lib/categorization/jevCategorizer.ts`):
-   - Fast-path matching: checks exact and case-insensitive matches as well as common financial synonyms
-   - AI Decision Classification: invokes TypeSafe's Jev model (`typesafe/jev-1.14`) via OpenRouter's Decisions API (`POST https://openrouter.ai/api/alpha/decisions`) using structured `choice` questions and sample merchant descriptions
+   - AI Decision Classification: invokes TypeSafe's Jev model (`typesafe/jev-1.14`) via OpenRouter's Decisions API (`POST https://openrouter.ai/api/alpha/decisions`) using structured `choice` questions per unique merchant description (with bank CSV category context and user-defined per-category notes in `criteria`), batched in groups of 25
    - Fallback protection: if API is offline or unconfigured, preserves original category or sets to "Uncategorized" without failing upload
 7. Saves transactions using `prisma.transaction.createMany({ skipDuplicates: true })` to prevent duplicates
 8. Returns structured feedback to `UploadForm.tsx` (total imported, count auto-categorized, category mappings applied)

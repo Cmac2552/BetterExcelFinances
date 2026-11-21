@@ -56,7 +56,7 @@ export function UploadForm({ statementMonth, children }: Props) {
         } else {
           msg = `Successfully imported ${count} transactions into ${statementMonth}.`;
           if (res.newlyCategorized && res.newlyCategorized > 0) {
-            msg += ` Auto-categorized ${res.newlyCategorized} with Jev AI.`;
+            msg += ` Auto-categorized ${res.newlyCategorized} with AI.`;
           }
         }
 
@@ -150,14 +150,24 @@ export function UploadForm({ statementMonth, children }: Props) {
           )}
           <div className="flex-1">
             <div className="font-semibold">{feedback.message}</div>
-            {feedback.details && Object.keys(feedback.details).length > 0 && (
-              <div className="mt-1 text-[11px] text-gray-300 leading-relaxed font-normal">
-                <span className="font-medium text-gray-400">Mapped:</span>{" "}
-                {Object.entries(feedback.details)
-                  .map(([from, to]) => `"${from}" → "${to}"`)
-                  .join(", ")}
-              </div>
-            )}
+            {feedback.details && Object.keys(feedback.details).length > 0 && (() => {
+              const entries = Object.entries(feedback.details);
+              const preview = entries.slice(0, 12);
+              const remaining = entries.length - preview.length;
+              return (
+                <div className="mt-1 text-[11px] text-gray-300 leading-relaxed font-normal">
+                  <span className="font-medium text-gray-400">Mapped:</span>{" "}
+                  {preview
+                    .map(([from, to]) => `"${from}" → "${to}"`)
+                    .join(", ")}
+                  {remaining > 0 && (
+                    <span className="text-gray-400">
+                      {" "}and {remaining} more
+                    </span>
+                  )}
+                </div>
+              );
+            })()}
           </div>
           <button
             type="button"

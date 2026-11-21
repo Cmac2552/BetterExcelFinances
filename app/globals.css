@@ -34,6 +34,61 @@ body {
   .text-balance {
     text-wrap: balance;
   }
+
+  .landing-grid {
+    background-image:
+      linear-gradient(to right, rgba(244, 240, 225, 0.035) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(244, 240, 225, 0.035) 1px, transparent 1px);
+    background-size: 56px 56px;
+  }
+}
+
+@keyframes landing-dash {
+  to {
+    stroke-dashoffset: -24;
+  }
+}
+
+@keyframes landing-fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes landing-pulse-ring {
+  0%, 100% {
+    opacity: 0.45;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.15);
+  }
+}
+
+.animate-landing-dash {
+  animation: landing-dash 1.4s linear infinite;
+}
+
+.animate-landing-fade-up {
+  animation: landing-fade-up 0.55s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.animate-landing-pulse-ring {
+  animation: landing-pulse-ring 2.4s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-landing-dash,
+  .animate-landing-fade-up,
+  .animate-landing-pulse-ring {
+    animation: none;
+  }
 }
 
 @layer base {
