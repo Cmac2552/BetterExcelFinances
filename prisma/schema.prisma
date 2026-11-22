@@ -31,9 +31,10 @@ model User {
   Authenticator Authenticator[]
   Section       Section[]
   sessions      Session[]
-  TableData     TableData[]
-  Transaction   Transaction[]
-  categories    Category[]
+  TableData             TableData[]
+  Transaction           Transaction[]
+  categories            Category[]
+  financialHealthReports FinancialHealthReport[]
 }
 
 model Account {
@@ -134,5 +135,25 @@ model Category {
 
   @@unique([userId, name])
   @@index([userId])
+}
+
+model FinancialHealthReport {
+  id              Int      @id @default(autoincrement())
+  userId          String
+  monthKey        String
+  version         Int
+  tone            String
+  reportData      Json
+  metricsSnapshot Json
+  dataHash        String
+  model           String
+  provider        String
+  inputTokens     Int?
+  outputTokens    Int?
+  createdAt       DateTime @default(now())
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, monthKey, version])
+  @@index([userId, monthKey])
 }
 

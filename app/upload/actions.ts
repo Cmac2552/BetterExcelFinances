@@ -16,11 +16,12 @@ import {
   transformDataForPrisma,
 } from "@/app/utils/uploadUtils";
 import { classifyMerchantsWithJev } from "@/app/lib/categorization/jevCategorizer";
+import { logSafeAIError, SafeUserError } from "@/app/lib/ai/errors";
 
 async function getAuthenticatedUserId(): Promise<string> {
   const session = await auth();
   if (!session?.user?.id) {
-    throw new Error("User not authenticated");
+    throw new SafeUserError("User not authenticated.");
   }
   return session.user.id;
 }
@@ -66,12 +67,12 @@ export async function uploadCsv(formData: FormData) {
   try {
     const file = formData.get("file") as File;
     if (!file) {
-      throw new Error("No file uploaded");
+      throw new SafeUserError("No file uploaded.");
     }
 
     const statementMonth = formData.get("statementMonth") as string;
     if (!statementMonth) {
-      throw new Error("Statement month is required");
+      throw new SafeUserError("Statement month is required.");
     }
 
     const userId = await getAuthenticatedUserId();
@@ -145,8 +146,14 @@ export async function uploadCsv(formData: FormData) {
       mappingsApplied,
     };
   } catch (error) {
-    console.error("Upload failed:", error);
-    return { success: false, error: (error as Error).message };
+    if (error instanceof SafeUserError) {
+      return { success: false, error: error.message };
+    }
+    logSafeAIError("CSV upload failed", error);
+    return {
+      success: false,
+      error: "Failed to process statement CSV. Please try again.",
+    };
   }
 }
 

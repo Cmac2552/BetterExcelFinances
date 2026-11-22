@@ -13,6 +13,9 @@ export function Nav() {
         <Link href="/upload" className="text-[#f4f0e1]">
           Spending
         </Link>
+        <Link href="/insights" className="text-[#f4f0e1]">
+          Insights
+        </Link>
         <LogoutButton />
       </div>
     </div>

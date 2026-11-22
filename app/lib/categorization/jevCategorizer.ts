@@ -4,6 +4,9 @@
  * via the Decisions API (POST https://openrouter.ai/api/alpha/decisions).
  */
 
+import { logSafeAIError } from "../ai/errors";
+import { scrubOptionalTextForAI, scrubTextForAI } from "../ai/scrub";
+
 export interface UserCategoryInput {
   name: string;
   description?: string | null;
@@ -69,7 +72,7 @@ function buildCriteriaForCategories(
 
   for (const cat of userCategories) {
     const key = cat.name.toLowerCase().trim();
-    const customNotes = cat.description?.trim();
+    const customNotes = scrubOptionalTextForAI(cat.description, 300);
 
     let defaultDescriptor = DEFAULT_CRITERIA_DESCRIPTORS[key];
     if (!defaultDescriptor) {
@@ -88,7 +91,7 @@ function buildCriteriaForCategories(
     } else if (defaultDescriptor) {
       criteria[cat.name] = defaultDescriptor;
     } else {
-      criteria[cat.name] = `Expenses related to ${cat.name}`;
+      criteria[cat.name] = `Expenses related to ${scrubTextForAI(cat.name, 50) || cat.name}`;
     }
   }
 
@@ -124,7 +127,7 @@ export async function classifyMerchantsWithJev({
 
   if (!apiKey) {
     console.warn(
-      "[JevCategorizer] OPENROUTER_API_KEY is not set. Falling back to bank CSV categories."
+      "[JevCategorizer] Categorization provider is not configured. Falling back to bank CSV categories."
     );
     for (const merchant of merchants) {
       mappings[merchant.description] = merchant.csvCategories[0] || "Uncategorized";
@@ -158,29 +161,39 @@ export async function classifyMerchantsWithJev({
     > = {};
     const keyToMerchantMap: Record<string, MerchantToClassify> = {};
 
+    const scrubbedBatch: {
+      merchant: string;
+      bank_categories: string[];
+    }[] = [];
+
     batch.forEach((merchant, idx) => {
-      const questionKey = `q_${idx}_${normalizeString(merchant.description).slice(0, 16) || "tx"}`;
+      const scrubbedDescription =
+        scrubTextForAI(merchant.description, 100) || "Unknown Merchant";
+      const questionKey = `q_${idx}_${normalizeString(scrubbedDescription).slice(0, 16) || "tx"}`;
       keyToMerchantMap[questionKey] = merchant;
 
-      const bankCats = merchant.csvCategories.filter(
-        (c) => c && c.toLowerCase() !== "uncategorized"
-      );
+      const bankCats = merchant.csvCategories
+        .filter((c) => c && c.toLowerCase() !== "uncategorized")
+        .map((c) => scrubTextForAI(c, 50))
+        .filter(Boolean);
       const bankContext = bankCats.length
         ? ` (bank category: ${bankCats.join(", ")})`
         : "";
 
+      scrubbedBatch.push({
+        merchant: scrubbedDescription,
+        bank_categories: bankCats,
+      });
+
       questionMap[questionKey] = {
         type: "choice",
-        instructions: `Which budget category best fits merchant '${merchant.description}'${bankContext}?`,
+        instructions: `Which budget category best fits merchant '${scrubbedDescription}'${bankContext}?`,
         criteria,
       };
     });
 
     const statePayload = {
-      merchants: batch.map((merchant) => ({
-        merchant: merchant.description,
-        bank_categories: merchant.csvCategories,
-      })),
+      merchants: scrubbedBatch,
     };
 
     try {
@@ -206,12 +219,11 @@ export async function classifyMerchantsWithJev({
       clearTimeout(timeout);
 
       if (!response.ok) {
-        const errorText = await response.text();
-        console.error(
-          `[JevCategorizer] OpenRouter Decisions API error (${response.status}):`,
-          errorText
+        const apiError = Object.assign(
+          new Error(`Decisions API request failed with status ${response.status}`),
+          { statusCode: response.status }
         );
-        throw new Error(`OpenRouter Decisions API failed with status ${response.status}`);
+        throw apiError;
       }
 
       const data = await response.json();
@@ -270,7 +282,11 @@ export async function classifyMerchantsWithJev({
         }
       }
     } catch (err) {
-      console.error("[JevCategorizer] Error during batch classification, using fallback:", err);
+      logSafeAIError(
+        "[JevCategorizer] Batch classification failed, using fallback",
+        err,
+        { batchSize: batch.length, model: modelId }
+      );
       for (const merchant of batch) {
         if (!mappings[merchant.description]) {
           mappings[merchant.description] = merchant.csvCategories[0] || "Uncategorized";
